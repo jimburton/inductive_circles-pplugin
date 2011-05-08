@@ -20,7 +20,7 @@ public class TestData {
     public static final int FAIL_VIEW_PANEL_SIZE = 180;
     public static final int GRID_WIDTH = 7;
     public static int[] test_list = {
-        224
+        3//,224
     };  // a set of tests of particular interest
     //public static int TASK = RUN_TEST_LIST;
     //public static int TASK = VIEW_TEST_LIST;

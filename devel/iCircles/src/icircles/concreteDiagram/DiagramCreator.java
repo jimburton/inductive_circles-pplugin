@@ -47,7 +47,38 @@ public class DiagramCreator {
         }
         circles = new ArrayList<CircleContour>();
         boolean ok = createCircles(box);
+        /*
+         * 
+         Some temp code to add seven spider feet in each zone
+         
+        RecompositionStep last_step = r_steps.get(r_steps.size() - 1);
+        AbstractDescription last_diag = last_step.to();
+        Iterator<AbstractBasicRegion> it = last_diag.getZoneIterator();
+                
+        while(it.hasNext())
+	        {
+	        AbstractBasicRegion abr  = it.next();
+	        
+	        ArrayList<CurveLabel> labels = new ArrayList<CurveLabel>();
+	        labels.add(null);
+	        labels.add(null);
+	        labels.add(null);
+	        labels.add(null);
+	        labels.add(null);
+	        labels.add(null);
+	        labels.add(null);
 
+            ArrayList<CircleContour> cs = findCircleContours(box, smallest_rad, 3,
+                    abr, last_diag, labels);
+
+            for(CircleContour cc : cs)
+	            {
+	    		cc.radius = 1;
+	    		circles.add(cc);
+		        }
+	        }
+
+		*/
         if (!ok) {
             circles = null;
             return null;
@@ -877,7 +908,10 @@ public class DiagramCreator {
         }
         }
          */
-        DEB.out(2, "putting contour " + labels.get(0).getLabel() + " inside a zone - grid-style");
+        if(labels.get(0) == null)
+        	DEB.out(2, "putting unlabelled contour inside a zone - grid-style");
+        else
+        	DEB.out(2, "putting contour " + labels.get(0).getLabel() + " inside a zone - grid-style");
 
         // Use a grid approach to search for a space for the contour(s)
         int ni = (int) (bounds.getWidth() / smallest_rad) + 1;

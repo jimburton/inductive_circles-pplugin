@@ -156,6 +156,8 @@ public class CirclesPanel extends JPanel {
                 ((Graphics2D) g).draw(cc.getCircle());
             }
             for (CircleContour cc : circles) {
+            	if( cc.l == null )
+            		continue;
                 if (useColors) {
                     Color col = labelsToColours.get(cc.l);
                     if (col == null) {
@@ -165,7 +167,6 @@ public class CirclesPanel extends JPanel {
                 } else {
                     g.setColor(Color.black);
                 }
-                ;
                 ((Graphics2D) g).drawString(cc.l.getLabel(),
                         (int) cc.getLabelXPosition(),
                         (int) cc.getLabelYPosition());
