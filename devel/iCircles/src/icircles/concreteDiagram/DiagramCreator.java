@@ -47,10 +47,9 @@ public class DiagramCreator {
         }
         circles = new ArrayList<CircleContour>();
         boolean ok = createCircles(box);
-        /*
-         * 
-         Some temp code to add seven spider feet in each zone
-         
+        
+        // Some temp code to add seven spider feet in each zone
+        /* 
         RecompositionStep last_step = r_steps.get(r_steps.size() - 1);
         AbstractDescription last_diag = last_step.to();
         Iterator<AbstractBasicRegion> it = last_diag.getZoneIterator();
@@ -77,8 +76,8 @@ public class DiagramCreator {
 	    		circles.add(cc);
 		        }
 	        }
-
 		*/
+		
         if (!ok) {
             circles = null;
             return null;
