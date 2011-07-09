@@ -71,7 +71,7 @@ public class TestCode {
     }
 
     public static ArrayList<Integer> viewAllTests() {
-        int num_tests = TestData.test_data.length;
+//        int num_tests = TestData.test_data.length;
 //		int[] testlist = new int[num_tests];
 //		for(int i = 0; i<num_tests; i++)
 //			testlist[i] = i;
