@@ -8,10 +8,28 @@ import java.util.TreeSet;
 
 import icircles.util.DEB;
 
+/**
+ * An AbstractDescription encapsulates the elements of a diagram, with no drawn information.
+ * A diagram comprises a set of AbstractCurves (the contours).
+ * A set of AbstractBasicRegions is given (zones which must be present.
+ * <p>
+ * An AbstractDiagram is consistent if 
+ * <p>1. the contours in each of the AbstractBasicRegions match those
+ * in m_contours. 
+ * <p>2. every valid diagram includes the "outside" zone. 
+ * TODO add a coherence check on these internal checks.
+ */
 public class AbstractDescription {
 
     TreeSet<AbstractCurve> m_contours;
     TreeSet<AbstractBasicRegion> m_zones;
+    
+    //TreeSet<AbstractBasicRegion> m_shaded_zones;
+    //TreeSet<AbstractSpider> m_spiders;
+    
+    //class AbstractSpider{
+    //	TreeSet<AbstractBasicRegion> m_feet;
+    //}
 
     public AbstractDescription(Set<AbstractCurve> contours, Set<AbstractBasicRegion> zones) {
         m_contours = new TreeSet<AbstractCurve>(contours);
