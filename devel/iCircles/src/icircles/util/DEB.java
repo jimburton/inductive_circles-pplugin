@@ -3,7 +3,6 @@ package icircles.util;
 import icircles.gui.CirclesPanel;
 
 import java.awt.Dimension;
-import java.awt.FlowLayout;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
 import java.awt.Shape;

@@ -9,7 +9,6 @@ import java.util.ArrayList;
 import icircles.util.DEB;
 
 import icircles.abstractDescription.AbstractCurve;
-import icircles.abstractDescription.CurveLabel;
 
 public class CircleContour {
 
