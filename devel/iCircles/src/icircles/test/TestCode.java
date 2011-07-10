@@ -71,18 +71,29 @@ public class TestCode {
     }
 
     public static ArrayList<Integer> viewAllTests() {
-//      int num_tests = TestData.test_data.length;
-//		int[] testlist = new int[num_tests];
-//		for(int i = 0; i<num_tests; i++)
-//			testlist[i] = i;
-
-//		int[] testlist = new int[num_tests/3];
-//		for(int i = 0; i<num_tests/3; i++)
-//			testlist[i] = i*3+2;
-
-        int[] testlist = new int[39];
-        for (int i = 0; i < 39; i++) {
-            testlist[i] = i * 3 + 2;
+    	/*
+    	 * this block draws all the test data (many diagrams!)
+    	 */
+    	int[] testlist = {};
+    	if(TestData.GENERATE_ALL_TEST_DATA)
+    	{
+	        int num_tests = TestData.test_data.length;
+			testlist = new int[num_tests];
+			for(int i = 0; i<num_tests; i++)
+				testlist[i] = i;
+    	}
+    	else if(TestData.TEST_BEST_STRATEGIES)
+    	{
+	        int num_tests = TestData.test_data.length;
+			testlist = new int[num_tests/3];
+			for(int i = 0; i<num_tests/3; i++)
+				testlist[i] = i * 3 + 2;
+    	}
+    	else if(TestData.TEST_EULER_THREE)
+    	{
+	        testlist = new int[39];
+	        for (int i = 0; i < 39; i++) 
+	            testlist[i] = i * 3 + 2;
         }
 
         return do_testlist(testlist,
@@ -161,7 +172,7 @@ public class TestCode {
             JScrollPane scrollpane = new JScrollPane(gridPanel);
             jf.getContentPane().add(scrollpane, BorderLayout.CENTER);
             scrollpane.getViewport().add(gridPanel);
-            jf.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
+            jf.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
             jf.pack();
             jf.setVisible(true);
         }
@@ -289,9 +300,14 @@ public class TestCode {
         } catch (CannotDrawException x) {
             failureMessage = x.message;
         }
-        String description = "" + (test_num - 2) / 3 + "." + desc;
-        if (description.length() > 24) {
-            description = "" + test_num + ".description..";
+        int number_for_display = 0;
+        if(TestData.TEST_EULER_THREE)
+        	number_for_display = (test_num - 2) / 3;
+        else
+        	number_for_display = test_num;
+        String description = "" + number_for_display + "." + desc;
+        if (description.length() > 36) {
+            description = "" + number_for_display + ".description..";
         }
 
         JPanel jp = new CirclesPanel(description, failureMessage, cd, size,
@@ -354,7 +370,7 @@ public class TestCode {
         ConcreteDiagram cd = dc.createDiagram(size);
         return cd;
     }
-
+    
     private static void printFreshTestData(int test_num, double checksum_found) {
         int decomp_strategy = TestData.test_data[test_num].decomp_strategy;
         int recomp_strategy = TestData.test_data[test_num].recomp_strategy;

@@ -12,14 +12,19 @@ import java.awt.RenderingHints;
 import java.util.ArrayList;
 import java.util.HashMap;
 
+import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
+import javax.swing.JScrollPane;
 
+import icircles.abstractDescription.AbstractDescription;
 import icircles.abstractDescription.CurveLabel;
 
 import icircles.concreteDiagram.CircleContour;
 import icircles.concreteDiagram.ConcreteDiagram;
 import icircles.concreteDiagram.ConcreteZone;
+import icircles.util.CannotDrawException;
+import icircles.util.DEB;
 
 public class CirclesPanel extends JPanel {
 
@@ -31,7 +36,8 @@ public class CirclesPanel extends JPanel {
             new HashMap<CurveLabel, Color>();
 
     public CirclesPanel(String desc, String failureMessage, ConcreteDiagram cd, int size,
-            boolean useColors) {
+            boolean useColors) 
+    	{
         labelsToColours.put(CurveLabel.get("a"), new Color(0, 100, 0)); // dark green
         labelsToColours.put(CurveLabel.get("b"), Color.red);
         labelsToColours.put(CurveLabel.get("c"), Color.blue);
@@ -143,7 +149,7 @@ public class CirclesPanel extends JPanel {
             ArrayList<CircleContour> circles = diagram.getCircles();
             for (CircleContour cc : circles) {
                 if (useColors) {
-                    Color col = labelsToColours.get(cc.l);
+                    Color col = labelsToColours.get(cc.ac.getLabel());
                     if (col == null) {
                         col = Color.black;
                     }
@@ -156,10 +162,10 @@ public class CirclesPanel extends JPanel {
                 ((Graphics2D) g).draw(cc.getCircle());
             }
             for (CircleContour cc : circles) {
-            	if( cc.l == null )
+            	if( cc.ac.getLabel() == null )
             		continue;
                 if (useColors) {
-                    Color col = labelsToColours.get(cc.l);
+                    Color col = labelsToColours.get(cc.ac.getLabel());
                     if (col == null) {
                         col = Color.black;
                     }
@@ -167,10 +173,61 @@ public class CirclesPanel extends JPanel {
                 } else {
                     g.setColor(Color.black);
                 }
-                ((Graphics2D) g).drawString(cc.l.getLabel(),
+                ((Graphics2D) g).drawString(cc.ac.getLabel().getLabel(),
                         (int) cc.getLabelXPosition(),
                         (int) cc.getLabelYPosition());
             }
         }
     }
+    /**
+     * This can be used to obtain a drawing of an abstract diagram.
+     * @param ad the description to be drawn
+     * @param size the size of the drawing panel
+     * @return
+     * @throws CannotDrawException
+     */
+    public static CirclesPanel makeCirclesPanel(AbstractDescription ad, 
+    		                                    String diagText,
+    		                                    int size)
+    {
+    	String failuremessage = "no failure";
+    	ConcreteDiagram cd = null;
+    	try
+    	{
+    	cd = ConcreteDiagram.makeConcreteDiagram(ad, size);
+    	}
+    	catch(CannotDrawException ex)
+    	{
+    		failuremessage = ex.message;
+    	}
+
+    	CirclesPanel cp = new CirclesPanel(diagText, failuremessage, cd, size, 
+    			true); // do use colors
+    	
+    	return cp;
+    }
+    public static void main(String[] args)
+    {
+    	// See the implementation of makeForTesting to see how to make an 
+    	// AbstractDescription from scratch.
+    	AbstractDescription ad = AbstractDescription.makeForTesting(
+    			//"qh h fh ih ik kh b ab ac de bd  abc bfg fc bj l lc al m mn nc bc bco bo boj bp bop cq cqb rs ra s t");
+    			"qh h fh ih ik kh b ab ac de bd  abc bfg fc bj l lc al m mn nc bc bco bo boj bp bop cq cqb rs ra s");
+    			//"a ab b c");
+
+    	DEB.level = 3; // generates intermediate frames
+    	
+    	int size = 600;
+    	
+    	CirclesPanel cp = CirclesPanel.makeCirclesPanel(ad, "a sample diagram", size);
+    	
+    	JFrame viewingFrame = new JFrame("frame to hold a CirclesPanel");
+    	JScrollPane scrollPane = new JScrollPane(cp);
+    	viewingFrame.getContentPane().setPreferredSize(new Dimension(Math.min(size,  800), Math.min(size,  800)));
+    	viewingFrame.getContentPane().add(scrollPane);
+    	viewingFrame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+    	viewingFrame.pack();
+    	viewingFrame.setVisible(true);
+    }
+
 }
