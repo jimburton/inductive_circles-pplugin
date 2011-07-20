@@ -2,6 +2,7 @@ package icircles.abstractDescription;
 
 import java.util.HashMap;
 import java.util.Iterator;
+import java.util.Random;
 import java.util.Set;
 import java.util.StringTokenizer;
 import java.util.TreeSet;
@@ -17,24 +18,35 @@ import icircles.util.DEB;
  * <p>1. the contours in each of the AbstractBasicRegions match those
  * in m_contours. 
  * <p>2. every valid diagram includes the "outside" zone. 
+ * <p>3. every shaded zone is also a zone
  * TODO add a coherence check on these internal checks.
  */
 public class AbstractDescription {
 
     TreeSet<AbstractCurve> m_contours;
     TreeSet<AbstractBasicRegion> m_zones;
+    TreeSet<AbstractBasicRegion> m_shaded_zones;
     
-    //TreeSet<AbstractBasicRegion> m_shaded_zones;
-    //TreeSet<AbstractSpider> m_spiders;
+        //TreeSet<AbstractSpider> m_spiders;
     
     //class AbstractSpider{
     //	TreeSet<AbstractBasicRegion> m_feet;
     //}
 
-    public AbstractDescription(Set<AbstractCurve> contours, Set<AbstractBasicRegion> zones) {
+    public AbstractDescription(Set<AbstractCurve> contours, 
+    		                   Set<AbstractBasicRegion> zones,
+    		                   Set<AbstractBasicRegion> shaded_zones) {
         m_contours = new TreeSet<AbstractCurve>(contours);
         m_zones = new TreeSet<AbstractBasicRegion>(zones);
+        m_shaded_zones = new TreeSet<AbstractBasicRegion>(shaded_zones);        
     }
+
+    public AbstractDescription(Set<AbstractCurve> contours, 
+            Set<AbstractBasicRegion> zones) {
+		m_contours = new TreeSet<AbstractCurve>(contours);
+		m_zones = new TreeSet<AbstractBasicRegion>(zones);
+		m_shaded_zones = new TreeSet<AbstractBasicRegion>();        
+	}
 
     public AbstractCurve getFirstContour() {
         if (m_contours.size() == 0) {
@@ -72,9 +84,17 @@ public class AbstractDescription {
         return new TreeSet<AbstractBasicRegion>(m_zones);
     }
 
-    public static AbstractDescription makeForTesting(String s) {
+    public static AbstractDescription makeForTesting(String s, boolean random_shaded_zones) {
         TreeSet<AbstractBasicRegion> ad_zones = new TreeSet<AbstractBasicRegion>();
-        ad_zones.add(AbstractBasicRegion.get(new TreeSet<AbstractCurve>()));
+        TreeSet<AbstractBasicRegion> ad_shaded_zones = new TreeSet<AbstractBasicRegion>();
+        Random r = null;
+        if(random_shaded_zones)
+        	r = new Random();
+        AbstractBasicRegion outsideZone = AbstractBasicRegion.get(new TreeSet<AbstractCurve>());
+        ad_zones.add(outsideZone);
+        if(random_shaded_zones && r.nextBoolean())
+        	ad_shaded_zones.add(outsideZone);
+        
         StringTokenizer st = new StringTokenizer(s);
         HashMap<CurveLabel, AbstractCurve> contours = new HashMap<CurveLabel, AbstractCurve>();
         while (st.hasMoreTokens()) {
@@ -88,11 +108,58 @@ public class AbstractDescription {
                 }
                 zoneContours.add(contours.get(cl));
             }
-            ad_zones.add(AbstractBasicRegion.get(zoneContours));
+            AbstractBasicRegion thisZone = AbstractBasicRegion.get(zoneContours);
+            ad_zones.add(thisZone);
+            if(random_shaded_zones && r.nextBoolean())
+            	ad_shaded_zones.add(thisZone);
         }
         TreeSet<AbstractCurve> ad_contours = new TreeSet<AbstractCurve>(contours.values());
-        return new AbstractDescription(ad_contours, ad_zones);
+        return new AbstractDescription(ad_contours, ad_zones, ad_shaded_zones);
     }
+    public static AbstractDescription makeForTesting(String s, String shaded_zones) {
+        TreeSet<AbstractBasicRegion> ad_zones = new TreeSet<AbstractBasicRegion>();
+        TreeSet<AbstractBasicRegion> ad_shaded_zones = new TreeSet<AbstractBasicRegion>();
+        AbstractBasicRegion outsideZone = AbstractBasicRegion.get(new TreeSet<AbstractCurve>());
+        ad_zones.add(outsideZone);
+        
+        StringTokenizer st = new StringTokenizer(s);
+        HashMap<CurveLabel, AbstractCurve> contours = new HashMap<CurveLabel, AbstractCurve>();
+        while (st.hasMoreTokens()) {
+            String word = st.nextToken();
+            TreeSet<AbstractCurve> zoneContours = new TreeSet<AbstractCurve>();
+            for (int i = 0; i < word.length(); i++) {
+                String character = "" + word.charAt(i);
+                CurveLabel cl = CurveLabel.get(character);
+                if (!contours.containsKey(cl)) {
+                    contours.put(cl, new AbstractCurve(cl));
+                }
+                zoneContours.add(contours.get(cl));
+            }
+            AbstractBasicRegion thisZone = AbstractBasicRegion.get(zoneContours);
+            ad_zones.add(thisZone);
+        }
+        st = new StringTokenizer(shaded_zones);
+        while (st.hasMoreTokens()) {
+            String word = st.nextToken();
+            if(word.equalsIgnoreCase("-")){
+            	ad_shaded_zones.add(outsideZone);
+            } else {
+                TreeSet<AbstractCurve> zoneContours = new TreeSet<AbstractCurve>();
+                for (int i = 0; i < word.length(); i++) {
+                    String character = "" + word.charAt(i);
+                    CurveLabel cl = CurveLabel.get(character);
+                    if (!contours.containsKey(cl)) {
+                        contours.put(cl, new AbstractCurve(cl));
+                    }
+                    zoneContours.add(contours.get(cl));
+                }
+                AbstractBasicRegion thisZone = AbstractBasicRegion.get(zoneContours);
+                ad_shaded_zones.add(thisZone);            	
+            }
+        }
+        TreeSet<AbstractCurve> ad_contours = new TreeSet<AbstractCurve>(contours.values());
+        return new AbstractDescription(ad_contours, ad_zones, ad_shaded_zones);
+    }    
     /*
     public static void main(String args[])
     {
@@ -231,6 +298,21 @@ public class AbstractDescription {
         if (DEB.level > 1) {
             b.append("}");
         }
+        b.append(" shading:");
+        first = true;
+        for (AbstractBasicRegion z : m_shaded_zones) {
+            if (!first) {
+                b.append(",");
+            }
+            if (DEB.level > 1) {
+                b.append("\n");
+            }
+            b.append(z.debug());
+            first = false;
+        }
+        if (DEB.level > 1) {
+            b.append("}");
+        }
         b.append("\n");
 
         return b.toString();
@@ -309,13 +391,17 @@ public class AbstractDescription {
         return false;
     }
 
-    public boolean hasLabelEquivalentZone(AbstractBasicRegion z) {
+    public AbstractBasicRegion hasLabelEquivalentZone(AbstractBasicRegion z) {
         for (AbstractBasicRegion zone : m_zones) {
             if (zone.isLabelEquivalent(z)) {
-                return true;
+                return zone;
             }
         }
-        return false;
+        return null;
+    }
+    
+    public boolean hasShadedZone(AbstractBasicRegion z){
+    	return m_shaded_zones.contains(z);
     }
 }
 

@@ -164,6 +164,7 @@ public class DiagramCreator {
         }
         AbstractDescription initial_diagram = d_steps.get(0).from();
         AbstractDescription final_diagram = r_steps.get(r_steps.size() - 1).to();
+        // which zones in final_diagram were shaded in initial_diagram?
         // which zones in final_diagram were not in initial_diagram?
 
         if (DEB.level > 2) {
@@ -180,8 +181,8 @@ public class DiagramCreator {
         Iterator<AbstractBasicRegion> it = final_diagram.getZoneIterator();
         while (it.hasNext()) {
             AbstractBasicRegion z = it.next();
-            if (!initial_diagram.hasLabelEquivalentZone(z)) {
-                // we have an extra zone
+            AbstractBasicRegion matched_z = initial_diagram.hasLabelEquivalentZone(z);
+            if (matched_z == null || initial_diagram.hasShadedZone(matched_z)) {
                 if (DEB.level > 2) {
                     System.out.println("extra zone " + z.debug());
                 }

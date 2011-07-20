@@ -362,7 +362,8 @@ public class TestCode {
         int decomp_strategy = TestData.test_data[test_num].decomp_strategy;
         int recomp_strategy = TestData.test_data[test_num].recomp_strategy;
         Decomposer d = new Decomposer(decomp_strategy);
-        d_steps.addAll(d.decompose(AbstractDescription.makeForTesting(TestData.test_data[test_num].description)));
+        d_steps.addAll(d.decompose(AbstractDescription.makeForTesting(TestData.test_data[test_num].description,
+        		true))); // randomised shading
 
         Recomposer r = new Recomposer(recomp_strategy);
         r_steps.addAll(r.recompose(d_steps));

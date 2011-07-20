@@ -212,7 +212,8 @@ public class CirclesPanel extends JPanel {
     	// AbstractDescription from scratch.
     	AbstractDescription ad = AbstractDescription.makeForTesting(
     			//"qh h fh ih ik kh b ab ac de bd  abc bfg fc bj l lc al m mn nc bc bco bo boj bp bop cq cqb rs ra s t");
-    			"qh h fh ih ik kh b ab ac de bd  abc bfg fc bj l lc al m mn nc bc bco bo boj bp bop cq cqb rs ra s");
+    			"qh h fh ih ik kh b ab ac de bd  abc bfg fc bj l lc al m mn nc bc bco bo boj bp bop cq cqb rs ra s",
+    			true); // randomised shading
     			//"a ab b c");
 
     	DEB.level = 3; // generates intermediate frames

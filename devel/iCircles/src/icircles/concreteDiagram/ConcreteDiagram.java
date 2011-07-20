@@ -81,7 +81,8 @@ public class ConcreteDiagram {
     
     public static void main(String[] args)
     {
-    	AbstractDescription ad = AbstractDescription.makeForTesting("a ab b c");
+    	AbstractDescription ad = AbstractDescription.makeForTesting("a ab b c", 
+    			true); // randomised shading
 
     	String failuremessage = "no failure";
     	ConcreteDiagram cd = null;
