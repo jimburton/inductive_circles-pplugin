@@ -49,6 +49,9 @@ public class DiagramCreator {
     HashMap<AbstractCurve, Double> guide_sizes;
     HashMap<AbstractCurve, CircleContour> map;
     ArrayList<CircleContour> circles;
+    
+    int debug_image_number = 0;
+    int debug_size = 50;
 
     public DiagramCreator(ArrayList<DecompositionStep> d_steps,
             ArrayList<RecompositionStep> r_steps,
@@ -71,35 +74,48 @@ public class DiagramCreator {
         circles = new ArrayList<CircleContour>();
         boolean ok = createCircles(/*box, */size);
         
+        // draw the first spider
+//        if(spiders.size() > 0)
+//        {
+//        	spiders[0].feet;
+//        }
+        
         // Some temp code to add seven spider feet in each zone
-        /* 
+        
         RecompositionStep last_step = r_steps.get(r_steps.size() - 1);
         AbstractDescription last_diag = last_step.to();
+        
         Iterator<AbstractBasicRegion> it = last_diag.getZoneIterator();
                 
         while(it.hasNext())
 	        {
 	        AbstractBasicRegion abr  = it.next();
+	        ArrayList<AbstractCurve> acs = new ArrayList<AbstractCurve>();
+	        acs.add(new AbstractCurve(null));
+	        acs.add(new AbstractCurve(null));
+
 	        
-	        ArrayList<CurveLabel> labels = new ArrayList<CurveLabel>();
-	        labels.add(null);
-	        labels.add(null);
-	        labels.add(null);
-	        labels.add(null);
-	        labels.add(null);
-	        labels.add(null);
-	        labels.add(null);
-
+	        Rectangle2D.Double box = CircleContour.makeBigOuterBox(circles);
             ArrayList<CircleContour> cs = findCircleContours(box, smallest_rad, 3,
-                    abr, last_diag, labels);
-
+                    abr, last_diag, acs, 3);            	            	
             for(CircleContour cc : cs)
 	            {
 	    		cc.radius = 1;
+	    		
+	    		cc.shift(10.0, 10.0);
+	    		
+	    		//check - is the spider in the abstract basic region
+                ConcreteZone cz = makeConcreteZone(abr);
+                Area a = new Area(cz.getShape(box));
+                if(!containedIn(cc, a))
+                {
+                	System.out.println("XXXX");
+                }
+	    		
 	    		circles.add(cc);
 		        }
 	        }
-		*/
+		
 		
         if (!ok) {
             circles = null;
@@ -207,10 +223,11 @@ public class DiagramCreator {
         return cz;
     }
 
-    private boolean createCircles(int debug_size) throws CannotDrawException {
+    private boolean createCircles(int deb_size) throws CannotDrawException {
+    	debug_size = deb_size;
+    	debug_image_number = 0;
         BuildStep bs = null;
         BuildStep tail = null;
-        int debug_image_number = 0;
         for (RecompositionStep rs : r_steps) {
             // we need to add the new curves with regard to their placement
             // relative to the existing ones in the map
@@ -235,10 +252,7 @@ public class DiagramCreator {
         while (step != null) {
             DEB.out(2, "new build step");
             Rectangle2D.Double outerBox = CircleContour.makeBigOuterBox(circles);
-            
-            DEB_show_frame(3, debug_image_number, debug_size);
-            debug_image_number++;
-            
+                        
             // we need to add the new curves with regard to their placement
             // relative to the existing ones in the map
             if (step.recomp_data.size() > 1) {
@@ -403,6 +417,7 @@ public class DiagramCreator {
                     }
                 }
             }
+            
             for (RecompData rd : step.recomp_data) {
                 AbstractCurve ac = rd.added_curve;
                 double suggested_rad = guide_sizes.get(ac);
@@ -716,6 +731,9 @@ public class DiagramCreator {
             System.out.println("adding " + c.debug());
         }
         circles.add(c);
+        
+        DEB_show_frame(3, debug_image_number, debug_size);
+        debug_image_number++;
     }
 
     private CircleContour growCircleContour(Area a, AbstractCurve ac,

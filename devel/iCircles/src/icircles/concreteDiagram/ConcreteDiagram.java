@@ -9,6 +9,7 @@ import icircles.recomposition.Recomposer;
 import icircles.recomposition.RecompositionStep;
 import icircles.recomposition.RecompositionStrategy;
 import icircles.util.CannotDrawException;
+import icircles.util.DEB;
 
 import java.awt.geom.Rectangle2D;
 import java.util.ArrayList;
@@ -67,6 +68,13 @@ public class ConcreteDiagram {
      */
     public static ConcreteDiagram makeConcreteDiagram(AbstractDescription ad, int size) throws CannotDrawException
     {
+    	// TODO
+    	if(!ad.checks_ok())
+    	{
+    		// not drawable
+    		throw new CannotDrawException("badly formed diagram spec");
+    	}
+    	
         ArrayList<DecompositionStep> d_steps = new ArrayList<DecompositionStep>();
         ArrayList<RecompositionStep> r_steps = new ArrayList<RecompositionStep>();
         Decomposer d = new Decomposer(DecompositionStrategy.PIERCEDFIRST);
@@ -81,6 +89,7 @@ public class ConcreteDiagram {
     
     public static void main(String[] args)
     {
+    	DEB.level = 3;
     	AbstractDescription ad = AbstractDescription.makeForTesting("a ab b c", 
     			true); // randomised shading
 
@@ -88,7 +97,7 @@ public class ConcreteDiagram {
     	ConcreteDiagram cd = null;
     	try
     	{
-    	cd = ConcreteDiagram.makeConcreteDiagram(ad, 100);
+    	cd = ConcreteDiagram.makeConcreteDiagram(ad, 300);
     	}
     	catch(CannotDrawException ex)
     	{

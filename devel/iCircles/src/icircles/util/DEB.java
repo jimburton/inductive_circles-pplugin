@@ -3,6 +3,7 @@ package icircles.util;
 import icircles.gui.CirclesPanel;
 
 import java.awt.Dimension;
+import java.awt.FlowLayout;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
 import java.awt.Shape;
@@ -26,17 +27,17 @@ public class DEB {
     	if(filmStripShots.size()==0)
     		return;
     	
-    	JFrame viewingFrame = new JFrame("frame to hold a CirclesPanel");
-    	JScrollPane scrollPane = new JScrollPane();
+    	JFrame viewingFrame = new JFrame("filmstrip");
     	JPanel filmPanel = new JPanel();
+    	filmPanel.setLayout(new FlowLayout());
     	for(CirclesPanel cp : filmStripShots)
     	{
     		filmPanel.add(cp);
     	}
-    	scrollPane.add(filmPanel);
-    			
-    	viewingFrame.getContentPane().setPreferredSize(new Dimension(200, 200));
+
+    	JScrollPane scrollPane = new JScrollPane(filmPanel);
     	viewingFrame.getContentPane().add(scrollPane);
+    	
     	viewingFrame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
     	viewingFrame.pack();
     	viewingFrame.setVisible(true);    	

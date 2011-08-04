@@ -13,6 +13,7 @@ public class Cluster {
     public Cluster(AbstractBasicRegion z) {
         m_zones = new ArrayList<AbstractBasicRegion>();
         m_zones.add(z);
+        
     }
 
     public Cluster(AbstractBasicRegion z1,

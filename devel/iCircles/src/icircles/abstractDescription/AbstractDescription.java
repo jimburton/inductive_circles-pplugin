@@ -19,6 +19,7 @@ import icircles.util.DEB;
  * in m_contours. 
  * <p>2. every valid diagram includes the "outside" zone. 
  * <p>3. every shaded zone is also a zone
+ * <p>4. every contour must have a zone inside it
  * TODO add a coherence check on these internal checks.
  */
 public class AbstractDescription {
@@ -27,12 +28,8 @@ public class AbstractDescription {
     TreeSet<AbstractBasicRegion> m_zones;
     TreeSet<AbstractBasicRegion> m_shaded_zones;
     
-        //TreeSet<AbstractSpider> m_spiders;
+//    TreeSet<AbstractSpider> m_spiders;
     
-    //class AbstractSpider{
-    //	TreeSet<AbstractBasicRegion> m_feet;
-    //}
-
     public AbstractDescription(Set<AbstractCurve> contours, 
     		                   Set<AbstractBasicRegion> zones,
     		                   Set<AbstractBasicRegion> shaded_zones) {
@@ -42,11 +39,25 @@ public class AbstractDescription {
     }
 
     public AbstractDescription(Set<AbstractCurve> contours, 
-            Set<AbstractBasicRegion> zones) {
+            				   Set<AbstractBasicRegion> zones) {
 		m_contours = new TreeSet<AbstractCurve>(contours);
 		m_zones = new TreeSet<AbstractBasicRegion>(zones);
 		m_shaded_zones = new TreeSet<AbstractBasicRegion>();        
 	}
+    
+    //TODO
+    public boolean checks_ok()
+    {
+    	// do some validity checks
+    	// is every contour in a zone? etc.
+    	return true;
+    }
+    
+//    public void addSpider(TreeSet<AbstractBasicRegion> feet){
+//    	// TODO : check that feet are indeed AbstractBasicRegions of the diagram
+//    	m_spiders.add(new AbstractSpider(feet));
+//    }
+    
 
     public AbstractCurve getFirstContour() {
         if (m_contours.size() == 0) {

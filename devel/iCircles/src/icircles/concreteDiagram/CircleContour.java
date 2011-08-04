@@ -42,7 +42,7 @@ public class CircleContour {
 		circle = makeEllipse(cx, cy, radius);
 	}
 
-	private void shift(double x, double y) {
+	public void shift(double x, double y) {
         cx += x;
         cy += y;
         circle = makeEllipse(cx, cy, radius);
