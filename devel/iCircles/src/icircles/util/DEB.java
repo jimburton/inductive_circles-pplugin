@@ -20,7 +20,8 @@ public class DEB {
     private static ArrayList<CirclesPanel> filmStripShots = new ArrayList<CirclesPanel>();
     public static void addFilmStripShot(CirclesPanel cp)
     {
-    	filmStripShots.add(cp);
+    	if(level > 3)
+    		filmStripShots.add(cp);
     }
     public static void showFilmStrip()
     {
@@ -60,8 +61,8 @@ public class DEB {
         }
     }
 
-    public static void show(int deb_level, Shape s, String desc) {
-    	if(deb_level > DEB.level)
+    public static void show(int this_level, Shape s, String desc) {
+    	if(this_level > level)
     		return;
     	
         JFrame jf = new JFrame(desc);

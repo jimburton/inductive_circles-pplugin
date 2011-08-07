@@ -19,7 +19,7 @@ public class CircleContour {
     double nudge = 0.1;
 //    Area bigInterior;
 //    Area smallInterior; 
-    // TODO this caching of the smallInterior somehow became out of date (for the second 1-piercing in test 206)
+    // TODO this caching of the smallInterior somehow became out of date.
     // I have just suppressed it, which slow things down. but we need to understand why and reinstate the cache.
 
     public AbstractCurve ac;

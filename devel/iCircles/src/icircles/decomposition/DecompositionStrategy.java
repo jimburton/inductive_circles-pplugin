@@ -18,15 +18,15 @@ public abstract class DecompositionStrategy {
         "decompose in reverse alphabetic order",
         "decompose using fewest-zone contours first",
         "decompose using piercing curves first"};
-    public static int strategy = INNERMOST;
+    public static int strategy = PIERCEDFIRST;
 
     abstract void getContoursToRemove(AbstractDescription ad, ArrayList<AbstractCurve> toRemove);
 
-    public static DecompositionStrategy getDecompositionStrategy() {
-        return getDecompositionStrategy(strategy);
+    public static DecompositionStrategy getStrategy() {
+        return getStrategy(strategy);
     }
 
-    public static DecompositionStrategy getDecompositionStrategy(
+    public static DecompositionStrategy getStrategy(
             int decompStrategy) {
         if (decompStrategy == SORT_ORDER) {
             return new DecompositionStrategyUseSortOrder(true);

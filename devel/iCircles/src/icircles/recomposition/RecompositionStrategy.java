@@ -13,7 +13,7 @@ public abstract class RecompositionStrategy {
     public static final int RECOMPOSE_DOUBLY_PIERCED = 2;
 
     public static RecompositionStrategy getStrategy() {
-        return new RecompositionStrategySinglyPierced();
+        return new RecompositionStrategyDoublyPierced();
     }
 
     public static RecompositionStrategy getStrategy(int strategy) {

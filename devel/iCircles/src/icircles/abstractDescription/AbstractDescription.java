@@ -1,5 +1,6 @@
 package icircles.abstractDescription;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Random;
@@ -28,14 +29,15 @@ public class AbstractDescription {
     TreeSet<AbstractBasicRegion> m_zones;
     TreeSet<AbstractBasicRegion> m_shaded_zones;
     
-//    TreeSet<AbstractSpider> m_spiders;
+    TreeSet<AbstractSpider> m_spiders;
     
     public AbstractDescription(Set<AbstractCurve> contours, 
     		                   Set<AbstractBasicRegion> zones,
     		                   Set<AbstractBasicRegion> shaded_zones) {
         m_contours = new TreeSet<AbstractCurve>(contours);
         m_zones = new TreeSet<AbstractBasicRegion>(zones);
-        m_shaded_zones = new TreeSet<AbstractBasicRegion>(shaded_zones);        
+        m_shaded_zones = new TreeSet<AbstractBasicRegion>(shaded_zones);  
+        m_spiders = new TreeSet<AbstractSpider>();
     }
 
     public AbstractDescription(Set<AbstractCurve> contours, 
@@ -43,6 +45,7 @@ public class AbstractDescription {
 		m_contours = new TreeSet<AbstractCurve>(contours);
 		m_zones = new TreeSet<AbstractBasicRegion>(zones);
 		m_shaded_zones = new TreeSet<AbstractBasicRegion>();        
+        m_spiders = new TreeSet<AbstractSpider>();
 	}
     
     //TODO
@@ -53,10 +56,10 @@ public class AbstractDescription {
     	return true;
     }
     
-//    public void addSpider(TreeSet<AbstractBasicRegion> feet){
-//    	// TODO : check that feet are indeed AbstractBasicRegions of the diagram
-//    	m_spiders.add(new AbstractSpider(feet));
-//    }
+    public void addSpider(AbstractSpider s){
+    	// TODO : check that feet are indeed AbstractBasicRegions of the diagram
+    	m_spiders.add(s);
+    }
     
 
     public AbstractCurve getFirstContour() {
@@ -85,92 +88,153 @@ public class AbstractDescription {
         return m_zones.iterator();
     }
     // expensive - do not use just for querying
-
     public TreeSet<AbstractCurve> getCopyOfContours() {
         return new TreeSet<AbstractCurve>(m_contours);
     }
     // expensive - do not use just for querying
-
     public TreeSet<AbstractBasicRegion> getCopyOfZones() {
         return new TreeSet<AbstractBasicRegion>(m_zones);
     }
+    
+    public Iterator<AbstractSpider> getSpiderIterator() {
+        return m_spiders.iterator();
+    }
+
+    public static AbstractDescription makeForTesting(String s) {
+    	return makeForTesting(s, false);
+    }
 
     public static AbstractDescription makeForTesting(String s, boolean random_shaded_zones) {
+        StringTokenizer sc = new StringTokenizer(s, ","); // for commas
+        String diagString = null;
+        String shadingString = null;
+        ArrayList<String> spiderStrings = new ArrayList<String>();
+        if(s.length() == 0)
+    	{
+        	diagString = "";
+    	}
+        else if(s.charAt(0)!=',' && sc.hasMoreTokens())
+        {
+        	diagString = sc.nextToken(); // what are the zones in the diag
+        }
+        if(sc.hasMoreTokens())
+        {
+        	shadingString = sc.nextToken(); // which zones are shaded
+        }
+        while(sc.hasMoreTokens())
+        {
+        	spiderStrings.add(sc.nextToken());
+        }
+    	
         TreeSet<AbstractBasicRegion> ad_zones = new TreeSet<AbstractBasicRegion>();
+        AbstractBasicRegion outsideZone = AbstractBasicRegion.get(new TreeSet<AbstractCurve>());
+        ad_zones.add(outsideZone);
+        HashMap<CurveLabel, AbstractCurve> contours = new HashMap<CurveLabel, AbstractCurve>();
+        if(diagString != null)
+        {
+	        StringTokenizer st = new StringTokenizer(diagString); // for spaces
+	        while (st.hasMoreTokens()) {
+	            String word = st.nextToken();
+	            TreeSet<AbstractCurve> zoneContours = new TreeSet<AbstractCurve>();
+	            for (int i = 0; i < word.length(); i++) {
+	                String character = "" + word.charAt(i);
+	                CurveLabel cl = CurveLabel.get(character);
+	                if (!contours.containsKey(cl)) {
+	                    contours.put(cl, new AbstractCurve(cl));
+	                }
+	                zoneContours.add(contours.get(cl));
+	            }
+	            AbstractBasicRegion thisZone = AbstractBasicRegion.get(zoneContours);
+	            ad_zones.add(thisZone);
+	        }
+        }
+        TreeSet<AbstractCurve> ad_contours = new TreeSet<AbstractCurve>(contours.values());
+        
+        // set some shaded zones
         TreeSet<AbstractBasicRegion> ad_shaded_zones = new TreeSet<AbstractBasicRegion>();
-        Random r = null;
         if(random_shaded_zones)
-        	r = new Random();
-        AbstractBasicRegion outsideZone = AbstractBasicRegion.get(new TreeSet<AbstractCurve>());
-        ad_zones.add(outsideZone);
-        if(random_shaded_zones && r.nextBoolean())
-        	ad_shaded_zones.add(outsideZone);
-        
-        StringTokenizer st = new StringTokenizer(s);
-        HashMap<CurveLabel, AbstractCurve> contours = new HashMap<CurveLabel, AbstractCurve>();
-        while (st.hasMoreTokens()) {
-            String word = st.nextToken();
-            TreeSet<AbstractCurve> zoneContours = new TreeSet<AbstractCurve>();
-            for (int i = 0; i < word.length(); i++) {
-                String character = "" + word.charAt(i);
-                CurveLabel cl = CurveLabel.get(character);
-                if (!contours.containsKey(cl)) {
-                    contours.put(cl, new AbstractCurve(cl));
-                }
-                zoneContours.add(contours.get(cl));
-            }
-            AbstractBasicRegion thisZone = AbstractBasicRegion.get(zoneContours);
-            ad_zones.add(thisZone);
-            if(random_shaded_zones && r.nextBoolean())
-            	ad_shaded_zones.add(thisZone);
+        {
+        	Random r = new Random();
+	        for(AbstractBasicRegion abr: ad_zones)
+	        {
+	        	if(random_shaded_zones)
+	        	{
+	        		if(r.nextBoolean())
+	        			ad_shaded_zones.add(abr);
+	        	}
+	        }
         }
-        TreeSet<AbstractCurve> ad_contours = new TreeSet<AbstractCurve>(contours.values());
-        return new AbstractDescription(ad_contours, ad_zones, ad_shaded_zones);
+        else if(shadingString != null)
+        {
+        	StringTokenizer st = new StringTokenizer(shadingString); // for spaces
+            while (st.hasMoreTokens()) {
+                String word = st.nextToken();
+                AbstractBasicRegion thisZone = null;
+                if(word.equals("."))
+                {
+                	// this means the outside zone
+                	thisZone = outsideZone;
+                }
+                else
+                {
+	                TreeSet<AbstractCurve> zoneContours = new TreeSet<AbstractCurve>();
+	                for (int i = 0; i < word.length(); i++) {
+	                    String character = "" + word.charAt(i);
+	                    CurveLabel cl = CurveLabel.get(character);
+	                    AbstractCurve ac = contours.get(cl);
+	                    if(ac == null)
+	                    	throw new RuntimeException("malformed diagram spec : contour "+ac+"\n");
+	                    zoneContours.add(ac);
+	                }
+	                thisZone = AbstractBasicRegion.get(zoneContours);
+                }
+                if(!ad_zones.contains(thisZone))
+                {
+                	throw new RuntimeException("malformed diagram spec : zone "+thisZone+"\n");
+                }
+                ad_shaded_zones.add(thisZone);
+            }        	
+        }
+        AbstractDescription result = new AbstractDescription(ad_contours, ad_zones, ad_shaded_zones);
+        
+        // add some Spiders
+        for(String spiderString: spiderStrings)
+        {
+        	StringTokenizer st = new StringTokenizer(spiderString); // for spaces
+        	TreeSet<AbstractBasicRegion> habitat = new TreeSet<AbstractBasicRegion>();
+            while (st.hasMoreTokens()) {
+                String word = st.nextToken();
+                AbstractBasicRegion thisZone = null;
+                if(word.equals("."))
+                {
+                	// this means the outside zone
+                	thisZone = outsideZone;
+                }
+                else
+                {
+	                TreeSet<AbstractCurve> zoneContours = new TreeSet<AbstractCurve>();
+	                for (int i = 0; i < word.length(); i++) {
+	                    String character = "" + word.charAt(i);
+	                    CurveLabel cl = CurveLabel.get(character);
+	                    AbstractCurve ac = contours.get(cl);
+	                    if(ac == null)
+	                    	throw new RuntimeException("malformed diagram spec : contour "+ac+"\n");
+	                    zoneContours.add(ac);
+	                }
+	                thisZone = AbstractBasicRegion.get(zoneContours);
+                }
+                if(!ad_zones.contains(thisZone))
+                {
+                	throw new RuntimeException("malformed diagram spec : zone "+thisZone+"\n");
+                }
+                habitat.add(thisZone);
+            }        	
+            AbstractSpider spider = new AbstractSpider(habitat, "s");
+            result.addSpider(spider);        	
+        }
+                
+        return result;
     }
-    public static AbstractDescription makeForTesting(String s, String shaded_zones) {
-        TreeSet<AbstractBasicRegion> ad_zones = new TreeSet<AbstractBasicRegion>();
-        TreeSet<AbstractBasicRegion> ad_shaded_zones = new TreeSet<AbstractBasicRegion>();
-        AbstractBasicRegion outsideZone = AbstractBasicRegion.get(new TreeSet<AbstractCurve>());
-        ad_zones.add(outsideZone);
-        
-        StringTokenizer st = new StringTokenizer(s);
-        HashMap<CurveLabel, AbstractCurve> contours = new HashMap<CurveLabel, AbstractCurve>();
-        while (st.hasMoreTokens()) {
-            String word = st.nextToken();
-            TreeSet<AbstractCurve> zoneContours = new TreeSet<AbstractCurve>();
-            for (int i = 0; i < word.length(); i++) {
-                String character = "" + word.charAt(i);
-                CurveLabel cl = CurveLabel.get(character);
-                if (!contours.containsKey(cl)) {
-                    contours.put(cl, new AbstractCurve(cl));
-                }
-                zoneContours.add(contours.get(cl));
-            }
-            AbstractBasicRegion thisZone = AbstractBasicRegion.get(zoneContours);
-            ad_zones.add(thisZone);
-        }
-        st = new StringTokenizer(shaded_zones);
-        while (st.hasMoreTokens()) {
-            String word = st.nextToken();
-            if(word.equalsIgnoreCase("-")){
-            	ad_shaded_zones.add(outsideZone);
-            } else {
-                TreeSet<AbstractCurve> zoneContours = new TreeSet<AbstractCurve>();
-                for (int i = 0; i < word.length(); i++) {
-                    String character = "" + word.charAt(i);
-                    CurveLabel cl = CurveLabel.get(character);
-                    if (!contours.containsKey(cl)) {
-                        contours.put(cl, new AbstractCurve(cl));
-                    }
-                    zoneContours.add(contours.get(cl));
-                }
-                AbstractBasicRegion thisZone = AbstractBasicRegion.get(zoneContours);
-                ad_shaded_zones.add(thisZone);            	
-            }
-        }
-        TreeSet<AbstractCurve> ad_contours = new TreeSet<AbstractCurve>(contours.values());
-        return new AbstractDescription(ad_contours, ad_zones, ad_shaded_zones);
-    }    
     /*
     public static void main(String args[])
     {
@@ -402,7 +466,7 @@ public class AbstractDescription {
         return false;
     }
 
-    public AbstractBasicRegion hasLabelEquivalentZone(AbstractBasicRegion z) {
+    public AbstractBasicRegion getLabelEquivalentZone(AbstractBasicRegion z) {
         for (AbstractBasicRegion zone : m_zones) {
             if (zone.isLabelEquivalent(z)) {
                 return zone;

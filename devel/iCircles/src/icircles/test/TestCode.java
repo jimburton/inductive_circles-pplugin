@@ -16,10 +16,6 @@ import icircles.concreteDiagram.CircleContour;
 import icircles.concreteDiagram.ConcreteDiagram;
 import icircles.concreteDiagram.DiagramCreator;
 
-import icircles.recomposition.Recomposer;
-import icircles.recomposition.RecompositionStep;
-import icircles.recomposition.RecompositionStrategy;
-
 import icircles.util.CannotDrawException;
 import icircles.util.DEB;
 
@@ -27,10 +23,6 @@ import icircles.abstractDescription.AbstractBasicRegion;
 import icircles.abstractDescription.AbstractCurve;
 import icircles.abstractDescription.AbstractDescription;
 import icircles.abstractDescription.CurveLabel;
-
-import icircles.decomposition.Decomposer;
-import icircles.decomposition.DecompositionStep;
-import icircles.decomposition.DecompositionStrategy;
 
 public class TestCode {
 
@@ -75,26 +67,18 @@ public class TestCode {
     	 * this block draws all the test data (many diagrams!)
     	 */
     	int[] testlist = {};
-    	if(TestData.GENERATE_ALL_TEST_DATA)
+		int num_tests = 0;
+    	if(TestData.TEST_EULER_THREE)
     	{
-	        int num_tests = TestData.test_data.length;
-			testlist = new int[num_tests];
-			for(int i = 0; i<num_tests; i++)
-				testlist[i] = i;
-    	}
-    	else if(TestData.TEST_BEST_STRATEGIES)
-    	{
-	        int num_tests = TestData.test_data.length;
-			testlist = new int[num_tests/3];
-			for(int i = 0; i<num_tests/3; i++)
-				testlist[i] = i * 3 + 2;
-    	}
-    	else if(TestData.TEST_EULER_THREE)
-    	{
-	        testlist = new int[39];
-	        for (int i = 0; i < 39; i++) 
-	            testlist[i] = i * 3 + 2;
+    		num_tests = 39;
+        } 
+    	else
+        {
+    		num_tests = TestData.test_data.length;
         }
+        testlist = new int[num_tests];
+        for (int i = 0; i < num_tests; i++) 
+            testlist[i] = i;
 
         return do_testlist(testlist,
                 false, // run
@@ -145,8 +129,14 @@ public class TestCode {
                 return result;
             } else {
                 if (do_run) {
-                    if (!run_test(test_num, false, false,
-                            TestData.VIEW_PANEL_SIZE)) {
+                	int size = 0;
+                	if(TestData.GENERATE_ALL_TEST_DATA)
+                		size = TestData.TEST_PANEL_SIZE;
+                	else
+                		size = TestData.VIEW_PANEL_SIZE;
+                	
+                    if (!run_test(test_num, false, false,size))
+                        {
                         result.add(new Integer(test_num));
                         num_failures++;
                         if (TestData.DO_VIEW_FAILURES) {
@@ -244,19 +234,15 @@ public class TestCode {
         if (DEB.level > 0) {
             System.out.println("test desc:" + desc);
         }
-        ArrayList<DecompositionStep> d_steps = new ArrayList<DecompositionStep>();
-        ArrayList<RecompositionStep> r_steps = new ArrayList<RecompositionStep>();
         ArrayList<CircleContour> circles = null;
         try {
-            ConcreteDiagram cd = getDiagram(test_num, d_steps, r_steps, 100); // fixed size for checksumming
+            ConcreteDiagram cd = getDiagram(test_num, 100); // fixed size for checksumming
             circles = cd.getCircles();
         } catch (CannotDrawException x) {
             // suppress
         }
 
-        double checksum_found = DecompositionStep.checksum(d_steps)
-                + RecompositionStep.checksum(r_steps)
-                + ConcreteDiagram.checksum(circles);
+        double checksum_found = ConcreteDiagram.checksum(circles);
 
         double baseline = TestData.test_data[test_num].expected_checksum;
 
@@ -291,23 +277,17 @@ public class TestCode {
         String desc = TestData.test_data[test_num].description;
         System.out.println("drawing test " + test_num + " description " + desc);
 
-        ArrayList<DecompositionStep> d_steps = new ArrayList<DecompositionStep>();
-        ArrayList<RecompositionStep> r_steps = new ArrayList<RecompositionStep>();
         ConcreteDiagram cd = null;
         String failureMessage = null;
-        try {
-            cd = getDiagram(test_num, d_steps, r_steps, size);
+        try 
+        {
+            cd = getDiagram(test_num, size);
         } catch (CannotDrawException x) {
             failureMessage = x.message;
         }
-        int number_for_display = 0;
-        if(TestData.TEST_EULER_THREE)
-        	number_for_display = (test_num - 2) / 3;
-        else
-        	number_for_display = test_num;
-        String description = "" + number_for_display + "." + desc;
+        String description = "" + test_num + "." + desc;
         if (description.length() > 36) {
-            description = "" + number_for_display + ".description..";
+            description = "" + test_num + ".description..";
         }
 
         JPanel jp = new CirclesPanel(description, failureMessage, cd, size,
@@ -356,34 +336,26 @@ public class TestCode {
 //	}
 
     private static ConcreteDiagram getDiagram(int test_num,
-            ArrayList<DecompositionStep> d_steps,
-            ArrayList<RecompositionStep> r_steps,
             int size) throws CannotDrawException {
-        int decomp_strategy = TestData.test_data[test_num].decomp_strategy;
-        int recomp_strategy = TestData.test_data[test_num].recomp_strategy;
-        Decomposer d = new Decomposer(decomp_strategy);
-        d_steps.addAll(d.decompose(AbstractDescription.makeForTesting(TestData.test_data[test_num].description,
-        		true))); // randomised shading
-
-        Recomposer r = new Recomposer(recomp_strategy);
-        r_steps.addAll(r.recompose(d_steps));
-        DiagramCreator dc = new DiagramCreator(d_steps, r_steps, size);
+        AbstractDescription ad = AbstractDescription.makeForTesting(TestData.test_data[test_num].description,
+        		TestData.RANDOM_SHADING);
+        DiagramCreator dc = new DiagramCreator(ad);
         ConcreteDiagram cd = dc.createDiagram(size);
         return cd;
     }
     
     private static void printFreshTestData(int test_num, double checksum_found) {
-        int decomp_strategy = TestData.test_data[test_num].decomp_strategy;
-        int recomp_strategy = TestData.test_data[test_num].recomp_strategy;
+        //int decomp_strategy = TestData.test_data[test_num].decomp_strategy;
+        //int recomp_strategy = TestData.test_data[test_num].recomp_strategy;
         String desc = TestData.test_data[test_num].description;
 
         System.out.println("/*" + test_num
                 + "*/new TestDatum( \""
                 + desc + "\", "
-                + "DecompositionStrategy."
-                + DecompositionStrategy.text_for(decomp_strategy) + ", "
-                + "RecompositionStrategy."
-                + RecompositionStrategy.text_for(recomp_strategy) + ", "
+                //+ "DecompositionStrategy."
+                //+ DecompositionStrategy.text_for(decomp_strategy) + ", "
+                //+ "RecompositionStrategy."
+                //+ RecompositionStrategy.text_for(recomp_strategy) + ", "
                 + (isNaN(checksum_found) ? 111 : checksum_found) + "),");
 
     }

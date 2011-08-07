@@ -1,15 +1,8 @@
 package icircles.concreteDiagram;
 
 import icircles.abstractDescription.AbstractDescription;
-import icircles.decomposition.Decomposer;
-import icircles.decomposition.DecompositionStep;
-import icircles.decomposition.DecompositionStrategy;
 import icircles.gui.CirclesPanel;
-import icircles.recomposition.Recomposer;
-import icircles.recomposition.RecompositionStep;
-import icircles.recomposition.RecompositionStrategy;
 import icircles.util.CannotDrawException;
-import icircles.util.DEB;
 
 import java.awt.geom.Rectangle2D;
 import java.util.ArrayList;
@@ -22,13 +15,16 @@ public class ConcreteDiagram {
     Rectangle2D.Double box;
     ArrayList<CircleContour> circles;
     ArrayList<ConcreteZone> shadedZones;
+    ArrayList<ConcreteSpider> spiders;
 
     public ConcreteDiagram(Rectangle2D.Double box,
             ArrayList<CircleContour> circles,
-            ArrayList<ConcreteZone> shadedZones) {
+            ArrayList<ConcreteZone> shadedZones,
+            ArrayList<ConcreteSpider> spiders) {
         this.box = box;
         this.circles = circles;
         this.shadedZones = shadedZones;
+        this.spiders = spiders;
     }
 
     public ArrayList<CircleContour> getCircles() {
@@ -74,22 +70,14 @@ public class ConcreteDiagram {
     		// not drawable
     		throw new CannotDrawException("badly formed diagram spec");
     	}
-    	
-        ArrayList<DecompositionStep> d_steps = new ArrayList<DecompositionStep>();
-        ArrayList<RecompositionStep> r_steps = new ArrayList<RecompositionStep>();
-        Decomposer d = new Decomposer(DecompositionStrategy.PIERCEDFIRST);
-        d_steps.addAll(d.decompose(ad));
-
-        Recomposer r = new Recomposer(RecompositionStrategy.RECOMPOSE_DOUBLY_PIERCED);
-        r_steps.addAll(r.recompose(d_steps));
-        DiagramCreator dc = new DiagramCreator(d_steps, r_steps, size);
+        DiagramCreator dc = new DiagramCreator(ad);
         ConcreteDiagram cd = dc.createDiagram(size);
         return cd;
     }
     
     public static void main(String[] args)
     {
-    	DEB.level = 3;
+    	//DEB.level = 3;
     	AbstractDescription ad = AbstractDescription.makeForTesting("a ab b c", 
     			true); // randomised shading
 
@@ -113,5 +101,9 @@ public class ConcreteDiagram {
     	viewingFrame.pack();
     	viewingFrame.setVisible(true);
     }
+
+	public ArrayList<ConcreteSpider> getSpiders() {
+		return spiders;
+	}
 
 }

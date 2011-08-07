@@ -22,6 +22,9 @@ import icircles.abstractDescription.CurveLabel;
 
 import icircles.concreteDiagram.CircleContour;
 import icircles.concreteDiagram.ConcreteDiagram;
+import icircles.concreteDiagram.ConcreteSpider;
+import icircles.concreteDiagram.ConcreteSpiderFoot;
+import icircles.concreteDiagram.ConcreteSpiderLeg;
 import icircles.concreteDiagram.ConcreteZone;
 import icircles.util.CannotDrawException;
 import icircles.util.DEB;
@@ -38,6 +41,7 @@ public class CirclesPanel extends JPanel {
     public CirclesPanel(String desc, String failureMessage, ConcreteDiagram cd, int size,
             boolean useColors) 
     	{
+    	// TODO a proper map from curve labels to colors
         labelsToColours.put(CurveLabel.get("a"), new Color(0, 100, 0)); // dark green
         labelsToColours.put(CurveLabel.get("b"), Color.red);
         labelsToColours.put(CurveLabel.get("c"), Color.blue);
@@ -157,8 +161,6 @@ public class CirclesPanel extends JPanel {
                 } else {
                     g.setColor(Color.black);
                 }
-                ;
-
                 ((Graphics2D) g).draw(cc.getCircle());
             }
             for (CircleContour cc : circles) {
@@ -173,9 +175,22 @@ public class CirclesPanel extends JPanel {
                 } else {
                     g.setColor(Color.black);
                 }
+                // TODO a proper way to place labels - it can't be a method in CircleContour,
+                // we need the context in the ConcreteDiagram
                 ((Graphics2D) g).drawString(cc.ac.getLabel().getLabel(),
                         (int) cc.getLabelXPosition(),
                         (int) cc.getLabelYPosition());
+            }
+            for (ConcreteSpider s : diagram.getSpiders())
+            {
+            	for (ConcreteSpiderFoot foot : s.feet)
+            	{
+                    ((Graphics2D) g).draw(foot.getBlob());
+            	}
+            	for (ConcreteSpiderLeg leg : s.legs)
+            	{
+                    ((Graphics2D) g).drawLine((int)leg.from.x, (int)leg.from.y, (int)leg.to.x, (int)leg.to.y );
+            	}
             }
         }
     }

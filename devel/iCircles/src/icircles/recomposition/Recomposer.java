@@ -19,11 +19,11 @@ public class Recomposer {
 
     RecompositionStrategy strategy;
 
-    public Recomposer(int recompStrategy) {
-        strategy = RecompositionStrategy.getStrategy(recompStrategy);
+    public Recomposer(RecompositionStrategy recompStrategy) {
+        strategy = recompStrategy;
     }
-
-    Recomposer() {
+    
+    public Recomposer() {
         strategy = RecompositionStrategy.getStrategy();
     }
 

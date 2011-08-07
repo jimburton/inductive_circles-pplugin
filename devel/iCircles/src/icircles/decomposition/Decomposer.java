@@ -16,12 +16,12 @@ public class Decomposer {
     DecompositionStrategy s;
     ArrayList<AbstractCurve> toRemove = new ArrayList<AbstractCurve>(); // some utility data
 
-    public Decomposer(int decompStrategy) {
-        s = DecompositionStrategy.getDecompositionStrategy(decompStrategy);
+    public Decomposer(DecompositionStrategy decompStrategy) {
+        s = decompStrategy;
     }
 
     public Decomposer() {
-        s = DecompositionStrategy.getDecompositionStrategy();
+        s = DecompositionStrategy.getStrategy();
     }
 
     private DecompositionStep take_step(AbstractDescription ad, AbstractCurve c) {

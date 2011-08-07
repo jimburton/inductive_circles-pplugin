@@ -8,14 +8,19 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Set;
 
+import icircles.decomposition.Decomposer;
 import icircles.decomposition.DecompositionStep;
+import icircles.decomposition.DecompositionStrategy;
 import icircles.gui.CirclesPanel;
 
 import icircles.abstractDescription.AbstractBasicRegion;
 import icircles.abstractDescription.AbstractCurve;
 import icircles.abstractDescription.AbstractDescription;
+import icircles.abstractDescription.AbstractSpider;
 import icircles.recomposition.RecompData;
+import icircles.recomposition.Recomposer;
 import icircles.recomposition.RecompositionStep;
+import icircles.recomposition.RecompositionStrategy;
 import icircles.util.CannotDrawException;
 import icircles.util.DEB;
 
@@ -41,6 +46,8 @@ class AngleIterator
 
 public class DiagramCreator {
 
+	AbstractDescription m_initial_diagram;
+	
     final static int smallest_rad = 3;
     ArrayList<DecompositionStep> d_steps;
     ArrayList<RecompositionStep> r_steps;
@@ -53,14 +60,32 @@ public class DiagramCreator {
     int debug_image_number = 0;
     int debug_size = 50;
 
-    public DiagramCreator(ArrayList<DecompositionStep> d_steps,
-            ArrayList<RecompositionStep> r_steps,
-            int size) {
-        this.d_steps = d_steps;
-        this.r_steps = r_steps;
+    public DiagramCreator( AbstractDescription ad )
+    {
+    	m_initial_diagram = ad;
+        d_steps = new ArrayList<DecompositionStep>();
+        r_steps = new ArrayList<RecompositionStep>();
+        Decomposer d = new Decomposer();
+        d_steps.addAll(d.decompose(ad)); 
+        Recomposer r = new Recomposer();
+        r_steps.addAll(r.recompose(d_steps));
         map = new HashMap<AbstractCurve, CircleContour>();
     }
 
+    public DiagramCreator( AbstractDescription ad, 
+    		DecompositionStrategy decomp_strategy,
+    		RecompositionStrategy recomp_strategy )
+    {
+    	m_initial_diagram = ad;
+        d_steps = new ArrayList<DecompositionStep>();
+        r_steps = new ArrayList<RecompositionStep>();
+        Decomposer d = new Decomposer(decomp_strategy);
+        d_steps.addAll(d.decompose(ad)); 
+        Recomposer r = new Recomposer(recomp_strategy);
+        r_steps.addAll(r.recompose(d_steps));
+        map = new HashMap<AbstractCurve, CircleContour>();
+    }
+    
     public ConcreteDiagram createDiagram(int size) throws CannotDrawException {
         make_guide_sizes(); // scores zones too
         /*
@@ -73,50 +98,7 @@ public class DiagramCreator {
         */
         circles = new ArrayList<CircleContour>();
         boolean ok = createCircles(/*box, */size);
-        
-        // draw the first spider
-//        if(spiders.size() > 0)
-//        {
-//        	spiders[0].feet;
-//        }
-        
-        // Some temp code to add seven spider feet in each zone
-        
-        RecompositionStep last_step = r_steps.get(r_steps.size() - 1);
-        AbstractDescription last_diag = last_step.to();
-        
-        Iterator<AbstractBasicRegion> it = last_diag.getZoneIterator();
-                
-        while(it.hasNext())
-	        {
-	        AbstractBasicRegion abr  = it.next();
-	        ArrayList<AbstractCurve> acs = new ArrayList<AbstractCurve>();
-	        acs.add(new AbstractCurve(null));
-	        acs.add(new AbstractCurve(null));
-
-	        
-	        Rectangle2D.Double box = CircleContour.makeBigOuterBox(circles);
-            ArrayList<CircleContour> cs = findCircleContours(box, smallest_rad, 3,
-                    abr, last_diag, acs, 3);            	            	
-            for(CircleContour cc : cs)
-	            {
-	    		cc.radius = 1;
-	    		
-	    		cc.shift(10.0, 10.0);
-	    		
-	    		//check - is the spider in the abstract basic region
-                ConcreteZone cz = makeConcreteZone(abr);
-                Area a = new Area(cz.getShape(box));
-                if(!containedIn(cc, a))
-                {
-                	System.out.println("XXXX");
-                }
-	    		
-	    		circles.add(cc);
-		        }
-	        }
-		
-		
+        		
         if (!ok) {
             circles = null;
             return null;
@@ -125,12 +107,141 @@ public class DiagramCreator {
         CircleContour.fitCirclesToSize(circles, size);
 
         ArrayList<ConcreteZone> shadedZones = createShadedZones();
+        
+        ArrayList<ConcreteSpider> spiders = createSpiders();
+        
         ConcreteDiagram result = new ConcreteDiagram(new Rectangle2D.Double(0, 0, size, size),
-                circles, shadedZones);
+                circles, shadedZones, spiders);
         return result;
     }
 
-    private void make_guide_sizes() {
+    private ArrayList<ConcreteSpider> createSpiders() throws CannotDrawException{
+    	ArrayList<ConcreteSpider> result = new ArrayList<ConcreteSpider>();
+
+    	HashMap<AbstractBasicRegion, Integer> footCount = new HashMap<AbstractBasicRegion, Integer>();    	
+    	Iterator<AbstractSpider> it = m_initial_diagram.getSpiderIterator();
+    	while(it.hasNext())
+    	{
+    		AbstractSpider as = it.next();
+    		for(AbstractBasicRegion abr : as.get_feet())
+    		{
+    			Integer oldCount = footCount.get(abr);
+    			Integer newCount = null;
+    			if(oldCount != null)
+    			{
+    				newCount = new Integer(oldCount.intValue() + 1);
+    			}
+    			else
+    			{
+    				newCount = new Integer(1);
+    			}
+				footCount.put(abr, newCount);
+    		}
+    	}
+    	// now, for each zone, I know how may feet are in that zone
+    	// build some feet
+    	HashMap<AbstractBasicRegion, ArrayList<ConcreteSpiderFoot>> drawnFeet = 
+    			new HashMap<AbstractBasicRegion, ArrayList<ConcreteSpiderFoot>>();
+		for(AbstractBasicRegion abr : footCount.keySet())
+		{
+			ArrayList<ConcreteSpiderFoot> footList = new ArrayList<ConcreteSpiderFoot>();
+			drawnFeet.put(abr, footList);
+			Integer num_required = footCount.get(abr);
+	        ArrayList<AbstractCurve> acs = new ArrayList<AbstractCurve>();
+	        for(int i = 0; i < num_required.intValue(); i++)
+	        {
+	        acs.add(new AbstractCurve(null));
+	        }
+	        Rectangle2D.Double box = CircleContour.makeBigOuterBox(circles);
+	        RecompositionStep last_step = r_steps.get(r_steps.size() - 1);
+	        AbstractDescription last_diag = last_step.to();
+	        
+	        AbstractBasicRegion zone_in_last_diag = last_diag.getLabelEquivalentZone(abr);
+	        if(zone_in_last_diag == null)
+	        	throw new CannotDrawException("problem with spider habitat");
+	        
+            ArrayList<CircleContour> cs = findCircleContours(box, smallest_rad, 3,
+            		zone_in_last_diag, last_diag, acs, 3);
+            for(CircleContour cc : cs)
+            {
+            	ConcreteSpiderFoot foot = new ConcreteSpiderFoot();
+            	foot.x = cc.cx;
+            	foot.y = cc.cy;
+            	footList.add(foot);
+            }
+		}
+		
+		// TODO draw legs
+		// TODO collect good choices of feet into spiders
+		// for now, we just pick feet which are in the right zones.
+		
+		it = m_initial_diagram.getSpiderIterator();
+    	while(it.hasNext())
+    	{
+    		AbstractSpider as = it.next();
+    		ConcreteSpider cs = new ConcreteSpider();
+    		for(AbstractBasicRegion abr : as.get_feet())
+    		{
+    			ArrayList<ConcreteSpiderFoot> footList = drawnFeet.get(abr);
+    			if(footList == null || footList.size() == 0)
+    				throw new CannotDrawException("spider foot problem");
+    			
+    			ConcreteSpiderFoot foot = footList.get(0);
+    			footList.remove(0);
+    			cs.feet.add(foot);
+    			if(cs.feet.size() > 1)
+    			{
+    				ConcreteSpiderLeg leg = new ConcreteSpiderLeg();
+    				leg.from = cs.feet.get(cs.feet.size() - 2);
+    				leg.to = cs.feet.get(cs.feet.size() - 1);
+    				cs.legs.add(leg);
+    			}
+    		}
+    		result.add(cs);
+    	}
+    	
+        // Some temp code to add spiders feet in each zone
+/*      
+        Iterator<AbstractBasicRegion> it = last_diag.getZoneIterator();
+        while(it.hasNext())
+	        {
+	        AbstractBasicRegion abr  = it.next();
+	        ArrayList<AbstractCurve> acs = new ArrayList<AbstractCurve>();
+	        acs.add(new AbstractCurve(null));
+	        acs.add(new AbstractCurve(null));
+        
+	        Rectangle2D.Double box = CircleContour.makeBigOuterBox(circles);
+            ArrayList<CircleContour> cs = findCircleContours(box, smallest_rad, 3,
+	              abr, last_diag, acs, 3);
+            for(CircleContour cc : cs)
+	            {
+	    		cc.radius = 1;
+	    		
+	    		cc.shift(10.0, 10.0);
+	    		
+	    		//check - is the spider in the abstract basic region
+	    		ConcreteZone cz = makeConcreteZone(abr);
+	    		Area a = new Area(cz.getShape(box));
+	    		if(!containedIn(cc, a))
+	    			{
+	    			System.out.println("XXXX");
+	    			}
+	    		else
+	    			{
+	    			ConcreteSpider cspider = new ConcreteSpider();
+	    			ConcreteSpider.SpiderFoot foot = cspider.new SpiderFoot();
+	    			foot.x = cc.cx;
+	    			foot.y = cc.cy;
+	    			cspider.feet.add(foot);
+	    			result.add(cspider);
+	    			}
+	            }
+	        }
+*/
+    	return result;
+	}
+
+	private void make_guide_sizes() {
         guide_sizes = new HashMap<AbstractCurve, Double>();
         if (r_steps.size() == 0) {
             return;
@@ -175,16 +286,19 @@ public class DiagramCreator {
 
     private ArrayList<ConcreteZone> createShadedZones() {
         ArrayList<ConcreteZone> result = new ArrayList<ConcreteZone>();
+        AbstractDescription final_diagram = null;
         if (d_steps.size() == 0) {
-            return result;
+            final_diagram = m_initial_diagram;
         }
-        AbstractDescription initial_diagram = d_steps.get(0).from();
-        AbstractDescription final_diagram = r_steps.get(r_steps.size() - 1).to();
+        else
+        {
+        	final_diagram = r_steps.get(r_steps.size() - 1).to();
+        }
         // which zones in final_diagram were shaded in initial_diagram?
-        // which zones in final_diagram were not in initial_diagram?
+        // which zones in final_diagram were not in initial_diagram, or specified shaded in initial_diagram?
 
         if (DEB.level > 2) {
-            Iterator<AbstractBasicRegion> it = initial_diagram.getZoneIterator();
+            Iterator<AbstractBasicRegion> it = m_initial_diagram.getZoneIterator();
             while (it.hasNext()) {
                 System.out.println("initial zone " + it.next().debug());
             }
@@ -197,8 +311,8 @@ public class DiagramCreator {
         Iterator<AbstractBasicRegion> it = final_diagram.getZoneIterator();
         while (it.hasNext()) {
             AbstractBasicRegion z = it.next();
-            AbstractBasicRegion matched_z = initial_diagram.hasLabelEquivalentZone(z);
-            if (matched_z == null || initial_diagram.hasShadedZone(matched_z)) {
+            AbstractBasicRegion matched_z = m_initial_diagram.getLabelEquivalentZone(z);
+            if (matched_z == null || m_initial_diagram.hasShadedZone(matched_z)) {
                 if (DEB.level > 2) {
                     System.out.println("extra zone " + z.debug());
                 }
@@ -1223,11 +1337,12 @@ public class DiagramCreator {
     		int debug_frame_index,
     		int size)
     {
-		if(DEB.level<deb_level)
+		if(deb_level < DEB.level)
 			return;
 		
 		// build a ConcreteDiagram for the current collection of circles
 		ArrayList<ConcreteZone> shadedZones = new ArrayList<ConcreteZone>();
+		ArrayList<ConcreteSpider> spiders = new ArrayList<ConcreteSpider>();
 		
 		ArrayList<CircleContour> circles_copy = new ArrayList<CircleContour>();
 		for(CircleContour c : circles)
@@ -1236,7 +1351,7 @@ public class DiagramCreator {
 		}
         CircleContour.fitCirclesToSize(circles_copy, size);
 		ConcreteDiagram cd = new ConcreteDiagram(new Rectangle2D.Double(0, 0, size, size),
-	            circles_copy, shadedZones);
+	            circles_copy, shadedZones, spiders );
 	    CirclesPanel cp = new CirclesPanel("debug frame "+debug_frame_index, "no failure",
 	    		cd, size, true);
 	    DEB.addFilmStripShot(cp);
