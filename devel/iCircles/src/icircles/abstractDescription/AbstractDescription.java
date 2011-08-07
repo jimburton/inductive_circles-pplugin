@@ -29,7 +29,7 @@ public class AbstractDescription {
     TreeSet<AbstractBasicRegion> m_zones;
     TreeSet<AbstractBasicRegion> m_shaded_zones;
     
-    TreeSet<AbstractSpider> m_spiders;
+    ArrayList<AbstractSpider> m_spiders;
     
     public AbstractDescription(Set<AbstractCurve> contours, 
     		                   Set<AbstractBasicRegion> zones,
@@ -37,7 +37,7 @@ public class AbstractDescription {
         m_contours = new TreeSet<AbstractCurve>(contours);
         m_zones = new TreeSet<AbstractBasicRegion>(zones);
         m_shaded_zones = new TreeSet<AbstractBasicRegion>(shaded_zones);  
-        m_spiders = new TreeSet<AbstractSpider>();
+        m_spiders = new ArrayList<AbstractSpider>();
     }
 
     public AbstractDescription(Set<AbstractCurve> contours, 
@@ -45,7 +45,7 @@ public class AbstractDescription {
 		m_contours = new TreeSet<AbstractCurve>(contours);
 		m_zones = new TreeSet<AbstractBasicRegion>(zones);
 		m_shaded_zones = new TreeSet<AbstractBasicRegion>();        
-        m_spiders = new TreeSet<AbstractSpider>();
+        m_spiders = new ArrayList<AbstractSpider>();
 	}
     
     //TODO
