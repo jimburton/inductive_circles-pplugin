@@ -220,6 +220,11 @@ public class DiagramCreator {
     		result.add(cs);
     	}
     	
+    	// Now we want to avoid spiders that overlap - especially 
+    	// those with a leg passing through the foot of another spider.
+    	// For now, just nudge the spider foot off the offending leg.
+    	// Check that the new foot is still in its relevant abstract basic region.
+    	
     	return result;
 	}
 
