@@ -138,7 +138,7 @@ public class DiagramCreator {
 				footCount.put(abr, newCount);
     		}
     	}
-    	// now, for each zone, I know how may feet are in that zone
+    	// now, for each zone, I know how many feet are in that zone
     	// build some feet
     	HashMap<AbstractBasicRegion, ArrayList<ConcreteSpiderFoot>> drawnFeet = 
     			new HashMap<AbstractBasicRegion, ArrayList<ConcreteSpiderFoot>>();
@@ -171,10 +171,8 @@ public class DiagramCreator {
             }
 		}
 		
-		// TODO draw legs
 		// TODO collect good choices of feet into spiders
-		// for now, we just pick feet which are in the right zones.
-		
+		// for now, we just pick feet which are in the right zones.		
 		it = m_initial_diagram.getSpiderIterator();
     	while(it.hasNext())
     	{
@@ -189,55 +187,39 @@ public class DiagramCreator {
     			ConcreteSpiderFoot foot = footList.get(0);
     			footList.remove(0);
     			cs.feet.add(foot);
-    			if(cs.feet.size() > 1)
-    			{
-    				ConcreteSpiderLeg leg = new ConcreteSpiderLeg();
-    				leg.from = cs.feet.get(cs.feet.size() - 2);
-    				leg.to = cs.feet.get(cs.feet.size() - 1);
-    				cs.legs.add(leg);
-    			}
     		}
+    		// choose a foot as "most central" - shortest leg length sum
+    		ConcreteSpiderFoot centralFoot = null;
+    		double best_dist_sum = Double.MAX_VALUE;
+    		for(ConcreteSpiderFoot centreCandidate : cs.feet)
+    		{
+    			double distSum = 0;
+        		for(ConcreteSpiderFoot other : cs.feet)
+        		{
+        			if(other == centreCandidate)
+        				continue;
+        			distSum += Math.sqrt((centreCandidate.x - other.x)*(centreCandidate.x - other.x) +
+        								 (centreCandidate.y - other.y)*(centreCandidate.y - other.y));
+        		}
+        		if(distSum < best_dist_sum)
+        		{
+        			best_dist_sum = distSum;
+        			centralFoot = centreCandidate;
+        		}    			
+    		}
+    		for(ConcreteSpiderFoot other : cs.feet)
+    		{
+    			if(other == centralFoot)
+    				continue;
+				ConcreteSpiderLeg leg = new ConcreteSpiderLeg();
+				leg.from = centralFoot;
+				leg.to = other;
+				cs.legs.add(leg);    			
+    		}
+    		
     		result.add(cs);
     	}
     	
-        // Some temp code to add spiders feet in each zone
-/*      
-        Iterator<AbstractBasicRegion> it = last_diag.getZoneIterator();
-        while(it.hasNext())
-	        {
-	        AbstractBasicRegion abr  = it.next();
-	        ArrayList<AbstractCurve> acs = new ArrayList<AbstractCurve>();
-	        acs.add(new AbstractCurve(null));
-	        acs.add(new AbstractCurve(null));
-        
-	        Rectangle2D.Double box = CircleContour.makeBigOuterBox(circles);
-            ArrayList<CircleContour> cs = findCircleContours(box, smallest_rad, 3,
-	              abr, last_diag, acs, 3);
-            for(CircleContour cc : cs)
-	            {
-	    		cc.radius = 1;
-	    		
-	    		cc.shift(10.0, 10.0);
-	    		
-	    		//check - is the spider in the abstract basic region
-	    		ConcreteZone cz = makeConcreteZone(abr);
-	    		Area a = new Area(cz.getShape(box));
-	    		if(!containedIn(cc, a))
-	    			{
-	    			System.out.println("XXXX");
-	    			}
-	    		else
-	    			{
-	    			ConcreteSpider cspider = new ConcreteSpider();
-	    			ConcreteSpider.SpiderFoot foot = cspider.new SpiderFoot();
-	    			foot.x = cc.cx;
-	    			foot.y = cc.cy;
-	    			cspider.feet.add(foot);
-	    			result.add(cspider);
-	    			}
-	            }
-	        }
-*/
     	return result;
 	}
 
