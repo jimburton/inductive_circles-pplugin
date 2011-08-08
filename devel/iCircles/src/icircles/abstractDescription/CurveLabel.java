@@ -22,6 +22,14 @@ public class CurveLabel implements Comparable<CurveLabel> {
     }
 
     public static CurveLabel get(String label) {
+        // TODO: This suboptimal existent label lookup should be fixed. This
+        //       should be used instead:
+        //
+        //              m_library.contains(label);
+        //
+        // The problem seems to stem from the fact that the string is not
+        // comparable with the CurveLabel. I would suggest that instead of a
+        // CurveLabel we use String.
         for (CurveLabel alreadyThere : m_library) {
             if (alreadyThere.m_label.equals(label)) {
                 return alreadyThere;

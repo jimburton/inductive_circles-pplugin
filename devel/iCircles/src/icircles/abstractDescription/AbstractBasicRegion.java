@@ -15,6 +15,10 @@ public class AbstractBasicRegion implements Comparable<AbstractBasicRegion> {
     }
 
     public static AbstractBasicRegion get(TreeSet<AbstractCurve> in_set) {
+        // TODO: This is quite an expensive way to look up already existing
+        // objects. This should definitely be replaced by 'contains'.
+        //
+        // I would suggest not to use the library at all.
         for (AbstractBasicRegion alreadyThere : m_library) {
             if (alreadyThere.m_in_set.equals(in_set)) {
                 return alreadyThere;

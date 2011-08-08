@@ -2,6 +2,8 @@ package icircles.abstractDescription;
 
 import icircles.util.DEB;
 
+// TODO: I would suggest using 'String' instead -- abandoning AbstractCurve
+// altogether. Why is the id necessary?
 public class AbstractCurve implements Comparable<AbstractCurve> {
 
     static int id = 0;

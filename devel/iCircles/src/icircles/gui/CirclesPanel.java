@@ -181,6 +181,7 @@ public class CirclesPanel extends JPanel {
                         (int) cc.getLabelXPosition(),
                         (int) cc.getLabelYPosition());
             }
+            g.setColor(Color.black);
             for (ConcreteSpider s : diagram.getSpiders())
             {
             	for (ConcreteSpiderFoot foot : s.feet)

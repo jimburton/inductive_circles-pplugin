@@ -7,7 +7,6 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.ComponentEvent;
 import java.awt.event.ComponentListener;
-import java.util.ArrayList;
 
 import javax.swing.AbstractAction;
 import javax.swing.ActionMap;
@@ -26,16 +25,12 @@ import javax.swing.KeyStroke;
 
 import icircles.abstractDescription.AbstractDescription;
 
-import icircles.recomposition.Recomposer;
-import icircles.recomposition.RecompositionStep;
 import icircles.recomposition.RecompositionStrategy;
 import icircles.test.TestData;
 import icircles.util.CannotDrawException;
 import icircles.util.DEB;
 import icircles.concreteDiagram.ConcreteDiagram;
 import icircles.concreteDiagram.DiagramCreator;
-import icircles.decomposition.Decomposer;
-import icircles.decomposition.DecompositionStep;
 import icircles.decomposition.DecompositionStrategy;
 
 public class CirclesFrame extends JFrame {
@@ -99,30 +94,20 @@ public class CirclesFrame extends JFrame {
     }
 
     void drawTest(int test_num) {
-        settingsPanel.setDecompStrategy(TestData.test_data[test_num - 1].decomp_strategy);
-        settingsPanel.setRecompStrategy(TestData.test_data[test_num - 1].recomp_strategy);
         draw(TestData.test_data[test_num - 1].description);
     }
 
     private void goDraw(String description, 
-    		            String shading,
     		            int decomp_strategy, int recomp_strategy) {
 
-        ArrayList<DecompositionStep> d_steps = new ArrayList<DecompositionStep>();
-        ArrayList<RecompositionStep> r_steps = new ArrayList<RecompositionStep>();
         ConcreteDiagram cd = null;
         String failureMessage = null;
         try {
-            Decomposer d = new Decomposer(decomp_strategy);
-            DEB.out(1,  "draw \""+description+"\", \""+shading+"\"");
-            AbstractDescription adr = AbstractDescription.makeForTesting(description, 
-            															shading);
+            AbstractDescription adr = AbstractDescription.makeForTesting(description);
             DEB.out(1,  "draw "+adr.debug());
-            d_steps.addAll(d.decompose(adr)); 
-
-            Recomposer r = new Recomposer(recomp_strategy);
-            r_steps.addAll(r.recompose(d_steps));
-            DiagramCreator dc = new DiagramCreator(d_steps, r_steps, SIZE);
+            DiagramCreator dc = new DiagramCreator(adr, 
+            		DecompositionStrategy.getStrategy(decomp_strategy), 
+            		RecompositionStrategy.getStrategy(recomp_strategy));
             cd = dc.createDiagram(SIZE);
         } catch (CannotDrawException x) {
             failureMessage = x.message;
@@ -133,7 +118,6 @@ public class CirclesFrame extends JFrame {
     class InputPanel {
 
         final JTextField inputJTF = new JTextField();
-        final JTextField inputshadedJTF = new JTextField();
         final JPanel p = new JPanel();
         final static String ESCAPE_ACTION = "cancel-typing";
         final static String ENTER_ACTION = "go-draw";
@@ -141,7 +125,6 @@ public class CirclesFrame extends JFrame {
         InputPanel() {
             p.setLayout(new BorderLayout());
             p.add(inputJTF, BorderLayout.CENTER);
-            p.add(inputshadedJTF, BorderLayout.SOUTH);
 
             InputMap im = inputJTF.getInputMap(JComponent.WHEN_FOCUSED);
             ActionMap am = inputJTF.getActionMap();
@@ -151,8 +134,6 @@ public class CirclesFrame extends JFrame {
             im.put(KeyStroke.getKeyStroke("ENTER"), ENTER_ACTION);
             am.put(ENTER_ACTION, new RedrawListener());
 
-            im = inputshadedJTF.getInputMap(JComponent.WHEN_FOCUSED);
-            am = inputshadedJTF.getActionMap();
             im.put(KeyStroke.getKeyStroke("ESCAPE"), ESCAPE_ACTION);
             am.put(ESCAPE_ACTION, new EscapeAction());
 
@@ -163,9 +144,6 @@ public class CirclesFrame extends JFrame {
         String getCurrentDescription() {
             return inputJTF.getText();
         }
-        String getCurrentShading() {
-            return inputshadedJTF.getText();
-        }
 
         void setInput(String s) {
             inputJTF.setText(s);
@@ -173,7 +151,6 @@ public class CirclesFrame extends JFrame {
 
         void clear() {
             inputJTF.setText("");
-            inputshadedJTF.setText("");
         }
 
         JPanel getPanel() {
@@ -282,12 +259,22 @@ public class CirclesFrame extends JFrame {
             next.addActionListener(new ActionListener() {
 
                 public void actionPerformed(ActionEvent e) {
-                    if (testJTF.getText().length() == 0) {
+/*
+                	if (testJTF.getText().length() == 0) {
                         test_num = 2;
                     } else {
                         test_num += 3;
                         if (test_num > TestData.test_data.length - 1) {
                             test_num = test_num % 3;
+                        }
+                    }
+*/                    
+                	if (testJTF.getText().length() == 0) {
+                        test_num = 0;
+                    } else {
+                        test_num += 1;
+                        if (test_num > TestData.test_data.length - 1) {
+                            test_num = 0;
                         }
                     }
                     testJTF.setText("" + (test_num + 1));
@@ -380,7 +367,6 @@ public class CirclesFrame extends JFrame {
 
     void redraw() {
         goDraw(inputPanel.getCurrentDescription(),
-        		inputPanel.getCurrentShading(),        		
                 settingsPanel.getDecompStrategy(),
                 settingsPanel.getRecompStrategy());
     }
