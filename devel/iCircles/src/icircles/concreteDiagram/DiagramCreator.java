@@ -140,6 +140,13 @@ public class DiagramCreator {
     	}
     	// now, for each zone, I know how many feet are in that zone
     	// build some feet
+        Rectangle2D.Double box = CircleContour.makeBigOuterBox(circles);
+        RecompositionStep last_step = null;
+        if(r_steps != null && r_steps.size() > 0)
+        	last_step = r_steps.get(r_steps.size() - 1);
+        AbstractDescription last_diag = null;
+        if(last_step != null)
+        	last_diag = last_step.to();
     	HashMap<AbstractBasicRegion, ArrayList<ConcreteSpiderFoot>> drawnFeet = 
     			new HashMap<AbstractBasicRegion, ArrayList<ConcreteSpiderFoot>>();
 		for(AbstractBasicRegion abr : footCount.keySet())
@@ -152,9 +159,6 @@ public class DiagramCreator {
 	        {
 	        acs.add(new AbstractCurve(null));
 	        }
-	        Rectangle2D.Double box = CircleContour.makeBigOuterBox(circles);
-	        RecompositionStep last_step = r_steps.get(r_steps.size() - 1);
-	        AbstractDescription last_diag = last_step.to();
 	        
 	        AbstractBasicRegion zone_in_last_diag = last_diag.getLabelEquivalentZone(abr);
 	        if(zone_in_last_diag == null)
@@ -172,8 +176,11 @@ public class DiagramCreator {
 		}
 		
 		// TODO collect good choices of feet into spiders
-		// for now, we just pick feet which are in the right zones.		
+		// for now, we just pick feet which are in the right zones.
 		it = m_initial_diagram.getSpiderIterator();
+		ArrayList<ConcreteSpider> spiders = new ArrayList<ConcreteSpider>();
+		HashMap<ConcreteSpiderFoot, AbstractBasicRegion> feet_and_zones = 
+				new HashMap<ConcreteSpiderFoot, AbstractBasicRegion>();
     	while(it.hasNext())
     	{
     		AbstractSpider as = it.next();
@@ -187,8 +194,16 @@ public class DiagramCreator {
     			ConcreteSpiderFoot foot = footList.get(0);
     			footList.remove(0);
     			cs.feet.add(foot);
+    			
+    			// get the corresponding abr from the last_diag
+    			feet_and_zones.put(foot, last_diag.getLabelEquivalentZone(abr));
     		}
     		// choose a foot as "most central" - shortest leg length sum
+    		// and draw legs from the central body to the outer feet
+    		//
+    		// TODO - not all spiders require a central body - e.g. four feet in a row
+    		// so we need a minimum-leg-span tree rather than choosing a central
+    		// foot as "body"
     		ConcreteSpiderFoot centralFoot = null;
     		double best_dist_sum = Double.MAX_VALUE;
     		for(ConcreteSpiderFoot centreCandidate : cs.feet)
@@ -217,6 +232,7 @@ public class DiagramCreator {
 				cs.legs.add(leg);    			
     		}
     		
+    		spiders.add(cs);
     		result.add(cs);
     	}
     	
@@ -224,6 +240,105 @@ public class DiagramCreator {
     	// those with a leg passing through the foot of another spider.
     	// For now, just nudge the spider foot off the offending leg.
     	// Check that the new foot is still in its relevant abstract basic region.
+    	
+    	// First - detect where feet meet a non-adjacent leg
+    	for( ConcreteSpider cs : spiders )
+    	{
+    		for(ConcreteSpiderFoot foot : cs.feet)
+    		{
+    			// check whether foot is too close to another leg
+    	    	for( ConcreteSpider cs2 : spiders )
+    	    	{
+    	    		for( ConcreteSpiderLeg leg : cs2.legs)
+    	    		{
+    	    			if( leg.from == foot || leg.to == foot )
+    	    			{
+    	    				// this leg is bound to be close to foot -it's attached!
+    	    				continue;
+    	    			}
+    	    			// is foot on leg?
+    	    			double sf_x = foot.x - leg.from.x;
+    	    			double sf_y = foot.y - leg.from.y;
+    	    			
+    	    			double se_x = leg.to.x - leg.from.x;
+    	    			double se_y = leg.to.y - leg.from.y;
+
+    	    			double se_length = Math.sqrt(se_x * se_x + se_y * se_y);
+    	    			
+    	    			double unit_leg_x = se_x / se_length;
+    	    			double unit_leg_y = se_y / se_length;
+    	    			
+    	    			double sf_dot_unit_leg = sf_x * unit_leg_x + sf_y * unit_leg_y;
+    	    			
+    	    			double sf_proj_leg_x = sf_dot_unit_leg * unit_leg_x;
+    	    			double sf_proj_leg_y = sf_dot_unit_leg * unit_leg_y;
+    	    			
+    	    			double sf_perp_leg_x = sf_x - sf_proj_leg_x;
+    	    			double sf_perp_leg_y = sf_y - sf_proj_leg_y;
+
+    	    			double sf_perp_leg_len = Math.sqrt(sf_perp_leg_x * sf_perp_leg_x + sf_perp_leg_y * sf_perp_leg_y);
+    	    			
+    	    			double sf_prop_leg = sf_proj_leg_x / se_x;
+    	    			double tol = 3;
+    	    			boolean foot_on_leg = sf_perp_leg_len < tol && 
+						    	    					sf_prop_leg > 0 && 
+						    	    					sf_prop_leg < 1;
+    	    	        if(foot_on_leg)
+    	    	    	    {
+    	    	        	// nudge the foot, but check it's still in its zone afterwards
+    	    	        	double old_x = foot.x;
+    	    	        	double old_y = foot.y;
+    	    	        	AbstractBasicRegion abr = feet_and_zones.get(foot);
+    	    	        	
+    	    	        	ConcreteZone cz = makeConcreteZone(abr);
+    	                    Area a = new Area(cz.getShape(box));
+    	                    double new_x = old_x + 2*tol;
+    	                    double new_y = old_y + 2*tol;
+    	                    CircleContour test = new CircleContour(new_x, new_y, tol, null);
+    	                    if(containedIn(test, a))
+    	                    	{
+    	                    	foot.x = new_x;
+    	                    	foot.y = new_y;
+    	                    	}
+    	                    else
+    	                    	{
+        	                    new_x = old_x - 2*tol;
+        	                    new_y = old_y - 2*tol;
+        	                    test = new CircleContour(new_x, new_y, tol, null);
+        	                    if(containedIn(test, a))
+        	                    	{
+        	                    	foot.x = new_x;
+        	                    	foot.y = new_y;
+        	                    	}
+        	                    else
+        	                    	{
+            	                    new_x = old_x + 2*tol;
+            	                    new_y = old_y - 2*tol;
+            	                    test = new CircleContour(new_x, new_y, tol, null);
+            	                    if(containedIn(test, a))
+            	                    	{
+            	                    	foot.x = new_x;
+            	                    	foot.y = new_y;
+            	                    	}
+            	                    else
+            	                    	{
+                	                    new_x = old_x - 2*tol;
+                	                    new_y = old_y + 2*tol;
+                	                    test = new CircleContour(new_x, new_y, tol, null);
+                	                    if(containedIn(test, a))
+                	                    	{
+                	                    	foot.x = new_x;
+                	                    	foot.y = new_y;
+                	                    	}
+            	                    	}
+        	                    	}
+    	                    	}
+    	    	    	    }
+    	    		}
+    	    	}
+    			
+    		}
+    	}
     	
     	return result;
 	}

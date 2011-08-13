@@ -25,12 +25,13 @@ public class TestData {
     public static final int FAIL_VIEW_PANEL_SIZE = 180;
     public static final int GRID_WIDTH = 7;
      public static int[] test_list = {
-        108, 109, 110, 111, 112, 113, 114, 115, 116, 117, 118, 119, 120//,224
+        //108, 109, 110, 111, 112, 113, 114, 115, 116, 117, 118, 119, 120
+    	 88
     };  // a set of tests of particular interest
     //public static int TASK = RUN_TEST_LIST;
-    public static int TASK = VIEW_TEST_LIST;
+    //public static int TASK = VIEW_TEST_LIST;
     //public static int TASK = RUN_ALL_TESTS;
-    //public static int TASK = VIEW_ALL_TESTS;
+    public static int TASK = VIEW_ALL_TESTS;
     
     public static TestDatum[] test_data = {
     	/*0*/new TestDatum( "a", 80.35747263647977),
