@@ -26,12 +26,12 @@ public class TestData {
     public static final int GRID_WIDTH = 7;
      public static int[] test_list = {
         //108, 109, 110, 111, 112, 113, 114, 115, 116, 117, 118, 119, 120
-    	 88
+    	 121, 122, 123, 124, 125, 126, 127
     };  // a set of tests of particular interest
     //public static int TASK = RUN_TEST_LIST;
-    //public static int TASK = VIEW_TEST_LIST;
+    public static int TASK = VIEW_TEST_LIST;
     //public static int TASK = RUN_ALL_TESTS;
-    public static int TASK = VIEW_ALL_TESTS;
+    //public static int TASK = VIEW_ALL_TESTS;
     
     public static TestDatum[] test_data = {
     	/*0*/new TestDatum( "a", 80.35747263647977),
@@ -155,6 +155,13 @@ public class TestData {
     	/*118*/new TestDatum( "a b ab, ,a b, . ab", 151.7819170426953),
     	/*119*/new TestDatum( "a b c ab ac bc abc ad, ,a b c abc ac", 354.40913258651284),
     	/*120*/new TestDatum( "a b c ab ac bc abc ad, ,a b c abc", 354.40913258651284),
+    	/*121*/new TestDatum( "a b ab, ,a b, ab", 354.40913258651284),
+    	/*122*/new TestDatum( "a b ab, ,a, ab", 354.40913258651284),
+    	/*123*/new TestDatum( "a b ab, ,b, ab", 354.40913258651284),
+    	/*124*/new TestDatum( "a b ab, ,a ab,b ab", 354.40913258651284),
+    	/*125*/new TestDatum( "a b ab, ,a ab,b", 354.40913258651284),
+    	/*126*/new TestDatum( "a b ab, ,b ab,a", 354.40913258651284),
+    	/*127*/new TestDatum( "a b ab c ac bc abc, ,a ab abc, b, b", 354.40913258651284),
 
     };
 }
