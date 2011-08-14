@@ -103,28 +103,59 @@ public class AbstractDescription {
     public static AbstractDescription makeForTesting(String s) {
     	return makeForTesting(s, false);
     }
+    
+    private static ArrayList<String> getDescriptors(String input_s)
+    {
+    	ArrayList<String> strings = new ArrayList<String>();
+    	strings.add(""); // diagram zones
+    	strings.add(""); // shaded zones
+    	// any more are spider descriptions
+    	
+        StringTokenizer st = new StringTokenizer(input_s, ",", true); // split by commas, return commas as tokens
+    	if(!st.hasMoreTokens())
+    		return strings;
+    	String s = st.nextToken();
+    	if(!s.equals(","))
+    	{
+    		strings.set(0,s);
+        	if(!st.hasMoreTokens())
+        		return strings;
+    		s = st.nextToken();
+    	}
+    	if(!st.hasMoreTokens())
+    		return strings;
+    	s = st.nextToken();
+    	if(!s.equals(","))
+    	{
+    		strings.set(1,s);
+        	if(!st.hasMoreTokens())
+        		return strings;
+    		s = st.nextToken();
+    	}
+    	while(true)
+    	{
+	    	if(!st.hasMoreTokens())
+	    		return strings;
+	    	s = st.nextToken();
+	    	if(!s.equals(","))
+	    	{
+	    		strings.add(s);
+	        	if(!st.hasMoreTokens())
+	        		return strings;
+	    		s = st.nextToken();
+	    	}
+    	}
+    }
 
     public static AbstractDescription makeForTesting(String s, boolean random_shaded_zones) {
-        StringTokenizer sc = new StringTokenizer(s, ","); // for commas
-        String diagString = null;
-        String shadingString = null;
-        ArrayList<String> spiderStrings = new ArrayList<String>();
-        if(s.length() == 0)
-    	{
-        	diagString = "";
-    	}
-        else if(s.charAt(0)!=',' && sc.hasMoreTokens())
-        {
-        	diagString = sc.nextToken(); // what are the zones in the diag
-        }
-        if(sc.hasMoreTokens())
-        {
-        	shadingString = sc.nextToken(); // which zones are shaded
-        }
-        while(sc.hasMoreTokens())
-        {
-        	spiderStrings.add(sc.nextToken());
-        }
+    	
+    	ArrayList<String> descriptors = getDescriptors(s);
+        String diagString = descriptors.get(0);
+        String shadingString = descriptors.get(1);
+        
+        descriptors.remove(0);
+        descriptors.remove(0);
+        ArrayList<String> spiderStrings = descriptors;
     	
         TreeSet<AbstractBasicRegion> ad_zones = new TreeSet<AbstractBasicRegion>();
         AbstractBasicRegion outsideZone = AbstractBasicRegion.get(new TreeSet<AbstractCurve>());
