@@ -1,5 +1,6 @@
 package icircles.concreteDiagram;
 
+import java.awt.Color;
 import java.awt.Shape;
 import java.awt.geom.Area;
 import java.awt.geom.Ellipse2D;
@@ -17,6 +18,9 @@ public class CircleContour {
     double cy;
     double radius;
     double nudge = 0.1;
+    
+    Color col;
+    
 //    Area bigInterior;
 //    Area smallInterior; 
     // TODO this caching of the smallInterior somehow became out of date.
@@ -40,6 +44,7 @@ public class CircleContour {
 		this.radius = c.radius;
 		this.ac = c.ac;
 		circle = makeEllipse(cx, cy, radius);
+		this.col = c.col;
 	}
 
 	public void shift(double x, double y) {
@@ -185,4 +190,12 @@ public class CircleContour {
         
         return new Rectangle2D.Double((int)(minX - 2*width), (int)(minY - 2*height), 5*width, 5*height);
     }
+
+	public Color color() {
+		return col;
+	}
+
+	public void set_color(Color color) {
+		col = color;
+	}
 }

@@ -35,40 +35,10 @@ public class CirclesPanel extends JPanel {
      *
      */
     private static final long serialVersionUID = 1L;
-    private static final HashMap<CurveLabel, Color> labelsToColours =
-            new HashMap<CurveLabel, Color>();
 
     public CirclesPanel(String desc, String failureMessage, ConcreteDiagram cd, int size,
             boolean useColors) 
-    	{
-    	// TODO a proper map from curve labels to colors
-        labelsToColours.put(CurveLabel.get("a"), new Color(0, 100, 0)); // dark green
-        labelsToColours.put(CurveLabel.get("b"), Color.red);
-        labelsToColours.put(CurveLabel.get("c"), Color.blue);
-        labelsToColours.put(CurveLabel.get("d"), new Color(150, 50, 0));
-        labelsToColours.put(CurveLabel.get("e"), new Color(0, 50, 150));
-        labelsToColours.put(CurveLabel.get("f"), new Color(100, 0, 100));
-        labelsToColours.put(CurveLabel.get("g"), new Color(0, 100, 0)); // dark green
-        labelsToColours.put(CurveLabel.get("h"), Color.red);
-        labelsToColours.put(CurveLabel.get("i"), Color.blue);
-        labelsToColours.put(CurveLabel.get("j"), new Color(150, 50, 0));
-        labelsToColours.put(CurveLabel.get("k"), new Color(0, 50, 150));
-        labelsToColours.put(CurveLabel.get("l"), new Color(100, 0, 100));
-        labelsToColours.put(CurveLabel.get("m"), new Color(0, 100, 0)); // dark green
-        labelsToColours.put(CurveLabel.get("n"), Color.red);
-        labelsToColours.put(CurveLabel.get("o"), Color.blue);
-        labelsToColours.put(CurveLabel.get("p"), new Color(150, 50, 0));
-        labelsToColours.put(CurveLabel.get("q"), new Color(0, 50, 150));
-        labelsToColours.put(CurveLabel.get("r"), new Color(100, 0, 100));
-        labelsToColours.put(CurveLabel.get("s"), new Color(0, 100, 0)); // dark green
-        labelsToColours.put(CurveLabel.get("t"), Color.red);
-        labelsToColours.put(CurveLabel.get("u"), Color.blue);
-        labelsToColours.put(CurveLabel.get("v"), new Color(150, 50, 0));
-        labelsToColours.put(CurveLabel.get("w"), new Color(0, 50, 150));
-        labelsToColours.put(CurveLabel.get("x"), new Color(100, 0, 100));
-        labelsToColours.put(CurveLabel.get("y"), new Color(0, 100, 0)); // dark green
-        labelsToColours.put(CurveLabel.get("z"), Color.red);
-
+    	{    	
         //setBorder(BorderFactory.createLineBorder(Color.black));
         setLayout(new BorderLayout());
         JLabel jl = new JLabel(desc);
@@ -153,7 +123,7 @@ public class CirclesPanel extends JPanel {
             ArrayList<CircleContour> circles = diagram.getCircles();
             for (CircleContour cc : circles) {
                 if (useColors) {
-                    Color col = labelsToColours.get(cc.ac.getLabel());
+                	Color col = cc.color();
                     if (col == null) {
                         col = Color.black;
                     }
@@ -167,7 +137,7 @@ public class CirclesPanel extends JPanel {
             	if( cc.ac.getLabel() == null )
             		continue;
                 if (useColors) {
-                    Color col = labelsToColours.get(cc.ac.getLabel());
+                	Color col = cc.color();
                     if (col == null) {
                         col = Color.black;
                     }

@@ -1,5 +1,6 @@
 package icircles.concreteDiagram;
 
+import java.awt.Color;
 import java.awt.Rectangle;
 import java.awt.geom.Area;
 import java.awt.geom.Rectangle2D;
@@ -946,13 +947,34 @@ public class DiagramCreator {
         if (DEB.level > 2) {
             System.out.println("adding " + c.debug());
         }
+        set_colour(c);
         circles.add(c);
         
         DEB_show_frame(3, debug_image_number, debug_size);
         debug_image_number++;
     }
 
-    private CircleContour growCircleContour(Area a, AbstractCurve ac,
+    private static Color[] colors = {
+        new Color(0, 100, 0), // dark green
+        Color.red,
+        Color.blue,
+        new Color(150, 50, 0),
+        new Color(0, 50, 150),
+        new Color(100, 0, 100)};
+
+    private void set_colour(CircleContour cc) {
+		String s = cc.ac.getLabel().getLabel();
+		if(s == null || s.length() < 1)
+			return;
+		char c = s.charAt(0);
+		int n = Character.getNumericValue(c) - Character.getNumericValue('a');
+		while( n < colors.length)
+			n += colors.length;
+		int col_index = n%colors.length;
+		cc.set_color(colors[col_index]);
+	}
+
+	private CircleContour growCircleContour(Area a, AbstractCurve ac,
             double cx, double cy,
             double suggested_rad, double start_rad,
             double smallest_rad) {
