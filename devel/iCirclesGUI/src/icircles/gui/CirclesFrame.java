@@ -259,16 +259,6 @@ public class CirclesFrame extends JFrame {
             next.addActionListener(new ActionListener() {
 
                 public void actionPerformed(ActionEvent e) {
-/*
-                	if (testJTF.getText().length() == 0) {
-                        test_num = 2;
-                    } else {
-                        test_num += 3;
-                        if (test_num > TestData.test_data.length - 1) {
-                            test_num = test_num % 3;
-                        }
-                    }
-*/                    
                 	if (testJTF.getText().length() == 0) {
                         test_num = 0;
                     } else {
@@ -286,12 +276,12 @@ public class CirclesFrame extends JFrame {
             prev.addActionListener(new ActionListener() {
 
                 public void actionPerformed(ActionEvent e) {
-                    if (testJTF.getText().length() == 0) {
-                        test_num = getBiggestTestNum(TestData.test_data.length, 3);
+                	if (testJTF.getText().length() == 0) {
+                        test_num = 0;
                     } else {
-                        test_num -= 3;
-                        if (test_num <= 0) {
-                            test_num = getBiggestTestNum(TestData.test_data.length, test_num);
+                        test_num -= 1;
+                        if (test_num < 0) {
+                            test_num = TestData.test_data.length - 1;
                         }
                     }
                     testJTF.setText("" + (test_num + 1));
@@ -299,21 +289,6 @@ public class CirclesFrame extends JFrame {
                 }
             });
             examplePanel.add(prev);
-        }
-
-        int getBiggestTestNum(int length_test_data_array, int n) {
-            while (n < 0) {
-                n += 3;
-            }
-            // seek maximal i with
-            // i < length_test_data_array
-            // and i % 3 == match_by_nine % 3
-            int result = length_test_data_array - 1;
-            while (result % 3 != n % 3) // can't be bothered to work out arithmetic...
-            {
-                result--;
-            }
-            return result;
         }
 
         void setDecompStrategy(int i) {
