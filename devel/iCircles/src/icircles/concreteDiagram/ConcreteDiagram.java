@@ -30,8 +30,13 @@ public class ConcreteDiagram {
     public ArrayList<CircleContour> getCircles() {
         return circles;
     }
+    
+    public double checksum()
+    {
+    	return circles_checksum() + shading_checksum() + spiders_checksum();
+    }
 
-    public static double checksum(ArrayList<CircleContour> circles) {
+    private double circles_checksum() {
 
         double result = 0.0;
         if (circles == null) {
@@ -43,7 +48,33 @@ public class ConcreteDiagram {
             CircleContour c = cIt.next();
             result += c.cx * 0.345 + c.cy * 0.456 + c.radius * 0.567 + c.ac.checksum() * 0.555;
             result *= 1.2;
+        }        
+        return result;
+    }
+    private double shading_checksum() {
+
+        double result = 0.0;
+        Iterator<ConcreteZone> czIt = shadedZones.iterator();
+        while (czIt.hasNext()) {
+            ConcreteZone cz = czIt.next();
+            result += cz.abr.checksum() * 1000.0;
+        }        
+        return result;
+    }
+
+    private double spiders_checksum() {
+
+        double result = 0.0;
+        if (spiders == null) {
+            return result;
         }
+
+        Iterator<ConcreteSpider> sIt = spiders.iterator();
+        while (sIt.hasNext()) {
+            ConcreteSpider s = sIt.next();
+            result += s.checksum();
+            result *= 1.2;
+        }        
         return result;
     }
 

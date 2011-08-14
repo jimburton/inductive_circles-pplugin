@@ -12,7 +12,6 @@ import javax.swing.JFrame;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 
-import icircles.concreteDiagram.CircleContour;
 import icircles.concreteDiagram.ConcreteDiagram;
 import icircles.concreteDiagram.DiagramCreator;
 
@@ -234,15 +233,14 @@ public class TestCode {
         if (DEB.level > 0) {
             System.out.println("test desc:" + desc);
         }
-        ArrayList<CircleContour> circles = null;
+        ConcreteDiagram cd = null;
         try {
-            ConcreteDiagram cd = getDiagram(test_num, 100); // fixed size for checksumming
-            circles = cd.getCircles();
+            cd = getDiagram(test_num, 100); // fixed size for checksumming
         } catch (CannotDrawException x) {
             // suppress
         }
 
-        double checksum_found = ConcreteDiagram.checksum(circles);
+        double checksum_found = cd == null ? 0.0 : cd.checksum();
 
         double baseline = TestData.test_data[test_num].expected_checksum;
 

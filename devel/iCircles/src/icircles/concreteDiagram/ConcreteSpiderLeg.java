@@ -6,4 +6,8 @@ public // TODO make some data private
 	ConcreteSpiderFoot from;
 public // TODO make some data private
 	ConcreteSpiderFoot to;
+public double checksum() {
+	// TODO Auto-generated method stub
+	return 1.1 * from.checksum() + 2.1 * to.checksum();
+}
 }
