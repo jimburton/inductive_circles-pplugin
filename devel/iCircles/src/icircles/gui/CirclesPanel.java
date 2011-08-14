@@ -10,7 +10,6 @@ import java.awt.Graphics;
 import java.awt.Graphics2D;
 import java.awt.RenderingHints;
 import java.util.ArrayList;
-import java.util.HashMap;
 
 import javax.swing.JFrame;
 import javax.swing.JLabel;
@@ -18,7 +17,6 @@ import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 
 import icircles.abstractDescription.AbstractDescription;
-import icircles.abstractDescription.CurveLabel;
 
 import icircles.concreteDiagram.CircleContour;
 import icircles.concreteDiagram.ConcreteDiagram;
