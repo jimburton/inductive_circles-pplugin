@@ -175,7 +175,7 @@ public class DiagramCreator {
             	footList.add(foot);
             }
 		}
-		
+		 
 		// TODO collect good choices of feet into spiders
 		// for now, we just pick feet which are in the right zones.
 		it = m_initial_diagram.getSpiderIterator();
@@ -185,7 +185,7 @@ public class DiagramCreator {
     	while(it.hasNext())
     	{
     		AbstractSpider as = it.next();
-    		ConcreteSpider cs = new ConcreteSpider();
+    		ConcreteSpider cs = new ConcreteSpider(as);
     		for(AbstractBasicRegion abr : as.get_feet())
     		{
     			ArrayList<ConcreteSpiderFoot> footList = drawnFeet.get(abr);

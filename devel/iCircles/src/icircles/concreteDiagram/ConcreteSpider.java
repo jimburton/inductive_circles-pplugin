@@ -1,5 +1,7 @@
 package icircles.concreteDiagram;
 
+import icircles.abstractDescription.AbstractSpider;
+
 import java.util.ArrayList;
 
 public class ConcreteSpider {
@@ -9,9 +11,11 @@ public // TODO make some data private
 public // TODO make some data private
 	ArrayList<ConcreteSpiderLeg> legs;
 
-public // TODO make some data private
-	ConcreteSpider()
+	public AbstractSpider as;
+
+public ConcreteSpider(AbstractSpider as)
 	{
+		this.as = as;
 		feet = new ArrayList<ConcreteSpiderFoot>();
 		legs = new ArrayList<ConcreteSpiderLeg>();
 	}

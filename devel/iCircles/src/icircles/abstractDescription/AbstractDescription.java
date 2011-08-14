@@ -233,10 +233,18 @@ public class AbstractDescription {
         {
         	StringTokenizer st = new StringTokenizer(spiderString); // for spaces
         	TreeSet<AbstractBasicRegion> habitat = new TreeSet<AbstractBasicRegion>();
+        	String spiderLabel = null;
             while (st.hasMoreTokens()) {
                 String word = st.nextToken();
                 AbstractBasicRegion thisZone = null;
-                if(word.equals("."))
+                if(word.charAt(0) == '\'')
+                {
+                	// this string represents the spider's label
+                	String name = word.substring(1);
+                	spiderLabel = name;
+                	continue;
+                }
+                else if(word.equals("."))
                 {
                 	// this means the outside zone
                 	thisZone = outsideZone;
@@ -260,7 +268,7 @@ public class AbstractDescription {
                 }
                 habitat.add(thisZone);
             }        	
-            AbstractSpider spider = new AbstractSpider(habitat, "s");
+            AbstractSpider spider = new AbstractSpider(habitat, spiderLabel);
             result.addSpider(spider);        	
         }
                 

@@ -12,7 +12,7 @@ public class TestData {
     public static final int TEST_PANEL_SIZE = 280;
     public static final boolean RANDOM_SHADING = false; // we don't have too many tests with shaded zones
 
-    public static boolean GENERATE_ALL_TEST_DATA = false; // with "run all tests", generates text for test_data array
+    public static boolean GENERATE_ALL_TEST_DATA = true; // with "run all tests", generates text for test_data array
 
     public static boolean TEST_EULER_THREE = false;
     
@@ -26,7 +26,7 @@ public class TestData {
     public static final int GRID_WIDTH = 7;
      public static int[] test_list = {
         //108, 109, 110, 111, 112, 113, 114, 115, 116, 117, 118, 119, 120
-    	 121, 122, 123, 124, 125, 126, 127
+    	 110
     };  // a set of tests of particular interest
     //public static int TASK = RUN_TEST_LIST;
     //public static int TASK = VIEW_TEST_LIST;
@@ -142,9 +142,9 @@ public class TestData {
     	/*105*/new TestDatum( "a ab c abc,a", 248.00486027942685),
     	/*106*/new TestDatum( "a ab c abc,ab", 248.00486027942685),
     	/*107*/new TestDatum( "a ab c abc,a ab", 248.00486027942685),
-    	/*108*/new TestDatum( "a b ab, ,a", 151.7819170426953),
-    	/*109*/new TestDatum( "a b ab, ,b", 151.7819170426953),
-    	/*110*/new TestDatum( "a b ab, ,a, b", 151.7819170426953),
+    	/*108*/new TestDatum( "a b ab, ,a 'my_label", 151.7819170426953),
+    	/*109*/new TestDatum( "a b ab, ,b 'label2", 151.7819170426953),
+    	/*110*/new TestDatum( "a b ab, ,a 'sa, b 'sb", 151.7819170426953),
     	/*111*/new TestDatum( "a b ab, ,., a", 151.7819170426953),
     	/*112*/new TestDatum( "a b ab, ,ab", 151.7819170426953),
     	/*113*/new TestDatum( "a b ab, ,a, ab", 151.7819170426953),
@@ -155,13 +155,19 @@ public class TestData {
     	/*118*/new TestDatum( "a b ab, ,a b, . ab", 151.7819170426953),
     	/*119*/new TestDatum( "a b c ab ac bc abc ad, ,a b c abc ac", 354.40913258651284),
     	/*120*/new TestDatum( "a b c ab ac bc abc ad, ,a b c abc", 354.40913258651284),
-    	/*121*/new TestDatum( "A B AB, ,A B, AB", 354.40913258651284),
-    	/*122*/new TestDatum( "A B AB, ,A, AB", 354.40913258651284),
-    	/*123*/new TestDatum( "A B AB, ,B, AB", 354.40913258651284),
-    	/*124*/new TestDatum( "A B AB, ,A AB,B AB", 354.40913258651284),
-    	/*125*/new TestDatum( "A B AB, ,A AB,B", 354.40913258651284),
-    	/*126*/new TestDatum( "A B AB, ,B AB,A", 354.40913258651284),
-    	/*127*/new TestDatum( "A B C AB AC BC ABC, B,A AB ABC, B, B", 354.40913258651284),
+    	/*121*/new TestDatum( "A B AB, ,A B, AB", 151.78190553421533),
+    	/*122*/new TestDatum( "A B AB, ,A, AB", 151.78190553421533),
+    	/*123*/new TestDatum( "A B AB, ,B, AB", 151.78190553421533),
+    	/*124*/new TestDatum( "A B AB, ,A AB,B AB", 151.78190553421533),
+    	/*125*/new TestDatum( "A B AB, ,A AB,B", 151.78190553421533),
+    	/*126*/new TestDatum( "A B AB, ,B AB,A", 151.78190553421533),
+    	/*127*/new TestDatum( "A B C AB AC BC ABC, B,A AB ABC, B, B", 239.4253900595133),
+    	/*128*/new TestDatum( ",", 0.0),
+    	/*129*/new TestDatum( ",,", 0.0),
+    	/*130*/new TestDatum( "a,,a .", 80.35747263647977),
+    	/*131*/new TestDatum( "a,.,a .,.", 80.35747263647977),
+    	/*132*/new TestDatum( "a,.,a .,.,.,.", 80.35747263647977),
+
 
     };
 }

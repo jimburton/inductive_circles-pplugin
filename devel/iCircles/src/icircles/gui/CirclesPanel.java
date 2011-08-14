@@ -130,8 +130,6 @@ public class CirclesPanel extends JPanel {
                     g.setColor(Color.black);
                 }
                 ((Graphics2D) g).draw(cc.getCircle());
-            }
-            for (CircleContour cc : circles) {
             	if( cc.ac.getLabel() == null )
             		continue;
                 if (useColors) {
@@ -160,6 +158,13 @@ public class CirclesPanel extends JPanel {
             	{
                     ((Graphics2D) g).drawLine((int)leg.from.x, (int)leg.from.y, (int)leg.to.x, (int)leg.to.y );
             	}
+            	if( s.as.get_name() == null )
+            		continue;
+                // TODO a proper way to place labels - it can't be a method in ConcreteSpider,
+                // we need the context in the ConcreteDiagram
+                ((Graphics2D) g).drawString(s.as.get_name(),
+                		(int)(s.feet.get(0).x + 5),
+        				(int)(s.feet.get(0).y - 5));
             }
         }
     }
