@@ -12,4 +12,7 @@ public // TODO make some data private
 	public Ellipse2D.Double getBlob() {
 	    return new Ellipse2D.Double(x - footRad, y - footRad, 2 * footRad, 2 * footRad);
 	}
+	public double checksum() {
+		return x + 1.02* y;
+	}
 }
