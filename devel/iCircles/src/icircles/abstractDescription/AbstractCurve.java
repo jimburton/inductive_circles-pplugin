@@ -2,8 +2,11 @@ package icircles.abstractDescription;
 
 import icircles.util.DEB;
 
-// TODO: I would suggest using 'String' instead -- abandoning AbstractCurve
-// altogether. Why is the id necessary?
+/**
+ * This class allows multiple different circles to have the same label.
+ * <p>Remark: we could still consider having String instead of CurveLabel.</p>
+ * @author Matej Urbas [matej.urbas@gmail.com]
+ */
 public class AbstractCurve implements Comparable<AbstractCurve> {
 
     static int id = 0;
