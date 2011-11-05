@@ -2,6 +2,7 @@ package icircles.concreteDiagram;
 
 import java.awt.Color;
 import java.awt.Shape;
+import java.awt.Stroke;
 import java.awt.geom.Area;
 import java.awt.geom.Ellipse2D;
 import java.awt.geom.Rectangle2D;
@@ -20,6 +21,7 @@ public class CircleContour {
     double nudge = 0.1;
     
     Color col;
+    Stroke stroke;
     
 //    Area bigInterior;
 //    Area smallInterior; 
@@ -195,7 +197,26 @@ public class CircleContour {
 		return col;
 	}
 
-	public void set_color(Color color) {
+	public void setColor(Color color) {
 		col = color;
+	}
+
+	public double get_cx() {
+		return cx;
+	}
+
+	public double get_cy() {
+		return cy;
+	}
+
+	public double get_radius() {
+		return radius;
+	}
+
+	public void setStroke(Stroke s) {
+		stroke = s;
+	}
+	public Stroke stroke() {
+		return stroke;
 	}
 }

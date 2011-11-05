@@ -4,7 +4,7 @@ import icircles.abstractDescription.AbstractDescription;
 import icircles.gui.CirclesPanel;
 import icircles.util.CannotDrawException;
 
-import java.awt.geom.Rectangle2D;
+ import java.awt.geom.Rectangle2D;
 import java.util.ArrayList;
 import java.util.Iterator;
 
@@ -15,15 +15,18 @@ public class ConcreteDiagram {
     Rectangle2D.Double box;
     ArrayList<CircleContour> circles;
     ArrayList<ConcreteZone> shadedZones;
+    ArrayList<ConcreteZone> unshadedZones;
     ArrayList<ConcreteSpider> spiders;
 
     public ConcreteDiagram(Rectangle2D.Double box,
             ArrayList<CircleContour> circles,
             ArrayList<ConcreteZone> shadedZones,
+            ArrayList<ConcreteZone> unshadedZones,
             ArrayList<ConcreteSpider> spiders) {
         this.box = box;
         this.circles = circles;
         this.shadedZones = shadedZones;
+        this.unshadedZones = unshadedZones;
         this.spiders = spiders;
     }
 
@@ -80,6 +83,9 @@ public class ConcreteDiagram {
 
     public ArrayList<ConcreteZone> getShadedZones() {
         return shadedZones;
+    }
+    public ArrayList<ConcreteZone> getUnshadedZones() {
+        return unshadedZones;
     }
 
     public Rectangle2D.Double getBox() {

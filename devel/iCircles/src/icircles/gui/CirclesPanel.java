@@ -9,6 +9,7 @@ import java.awt.Font;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
 import java.awt.RenderingHints;
+import java.awt.Stroke;
 import java.util.ArrayList;
 
 import javax.swing.JFrame;
@@ -33,10 +34,13 @@ public class CirclesPanel extends JPanel {
      *
      */
     private static final long serialVersionUID = 1L;
+    private ConcreteDiagram cd;
 
+    ConcreteDiagram getDiagram(){return cd;}
     public CirclesPanel(String desc, String failureMessage, ConcreteDiagram cd, int size,
             boolean useColors) 
-    	{    	
+    	{
+    	this.cd = cd;
         //setBorder(BorderFactory.createLineBorder(Color.black));
         setLayout(new BorderLayout());
         JLabel jl = new JLabel(desc);
@@ -115,7 +119,12 @@ public class CirclesPanel extends JPanel {
             g.setColor(Color.lightGray);
             ArrayList<ConcreteZone> zones = diagram.getShadedZones();
             for (ConcreteZone z : zones) {
-                ((Graphics2D) g).fill(z.getShape(diagram.getBox()));
+            	if(z.getColor() != null)
+            		g.setColor(z.getColor());
+            	else
+            		g.setColor(Color.lightGray);
+
+            	((Graphics2D) g).fill(z.getShape(diagram.getBox()));
             }
             ((Graphics2D) g).setStroke(new BasicStroke(2));
             ArrayList<CircleContour> circles = diagram.getCircles();
@@ -141,6 +150,10 @@ public class CirclesPanel extends JPanel {
                 } else {
                     g.setColor(Color.black);
                 }
+                if(cc.stroke() != null)
+                	((Graphics2D) g).setStroke(cc.stroke());
+                else
+                	((Graphics2D) g).setStroke(new BasicStroke(2));
                 // TODO a proper way to place labels - it can't be a method in CircleContour,
                 // we need the context in the ConcreteDiagram
                 ((Graphics2D) g).drawString(cc.ac.getLabel().getLabel(),
@@ -218,6 +231,21 @@ public class CirclesPanel extends JPanel {
     	viewingFrame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
     	viewingFrame.pack();
     	viewingFrame.setVisible(true);
+    }
+
+    ArrayList<CircleContour> getAllCircles()
+    {
+    	return cd.getCircles();
+    }
+    void setColor(CircleContour cc, Color c)
+    {
+    	cc.setColor(c);
+    	repaint();
+    }
+    void setStroke(CircleContour cc, Stroke s)
+    {
+    	cc.setStroke(s);
+    	repaint();
     }
 
 }

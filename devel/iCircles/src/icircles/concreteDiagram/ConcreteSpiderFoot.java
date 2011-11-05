@@ -4,7 +4,7 @@ import java.awt.geom.Ellipse2D;
 
 public // TODO make some data private
 class ConcreteSpiderFoot{
-	double footRad = 1;
+	public double footRad = 1;
 public // TODO make some data private
 	double x;
 public // TODO make some data private

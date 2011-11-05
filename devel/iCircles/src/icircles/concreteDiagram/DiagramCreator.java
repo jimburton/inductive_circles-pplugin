@@ -107,12 +107,14 @@ public class DiagramCreator {
 
         CircleContour.fitCirclesToSize(circles, size);
 
-        ArrayList<ConcreteZone> shadedZones = createShadedZones();
+        ArrayList<ConcreteZone> shadedZones = new ArrayList<ConcreteZone>();
+        ArrayList<ConcreteZone> unshadedZones = new ArrayList<ConcreteZone>();
+        createZones(shadedZones, unshadedZones);
         
         ArrayList<ConcreteSpider> spiders = createSpiders();
         
         ConcreteDiagram result = new ConcreteDiagram(new Rectangle2D.Double(0, 0, size, size),
-                circles, shadedZones, spiders);
+                circles, shadedZones, unshadedZones, spiders);
         return result;
     }
 
@@ -387,8 +389,8 @@ public class DiagramCreator {
         return 1.0;
     }
 
-    private ArrayList<ConcreteZone> createShadedZones() {
-        ArrayList<ConcreteZone> result = new ArrayList<ConcreteZone>();
+    private void createZones(ArrayList<ConcreteZone> shadedZones,
+                       		ArrayList<ConcreteZone> unshadedZones) {
         AbstractDescription final_diagram = null;
         if (d_steps.size() == 0) {
             final_diagram = m_initial_diagram;
@@ -420,10 +422,14 @@ public class DiagramCreator {
                     System.out.println("extra zone " + z.debug());
                 }
                 ConcreteZone cz = makeConcreteZone(z);
-                result.add(cz);
+                shadedZones.add(cz);
+            }
+            else
+            {
+                ConcreteZone cz = makeConcreteZone(z);
+                unshadedZones.add(cz);
             }
         }
-        return result;
     }
 
     private ConcreteZone makeConcreteZone(AbstractBasicRegion z) {
@@ -971,7 +977,7 @@ public class DiagramCreator {
 		while( n < colors.length)
 			n += colors.length;
 		int col_index = n%colors.length;
-		cc.set_color(colors[col_index]);
+		cc.setColor(colors[col_index]);
 	}
 
 	private CircleContour growCircleContour(Area a, AbstractCurve ac,
@@ -1466,6 +1472,7 @@ public class DiagramCreator {
 		
 		// build a ConcreteDiagram for the current collection of circles
 		ArrayList<ConcreteZone> shadedZones = new ArrayList<ConcreteZone>();
+		ArrayList<ConcreteZone> unshadedZones = new ArrayList<ConcreteZone>();
 		ArrayList<ConcreteSpider> spiders = new ArrayList<ConcreteSpider>();
 		
 		ArrayList<CircleContour> circles_copy = new ArrayList<CircleContour>();
@@ -1475,7 +1482,7 @@ public class DiagramCreator {
 		}
         CircleContour.fitCirclesToSize(circles_copy, size);
 		ConcreteDiagram cd = new ConcreteDiagram(new Rectangle2D.Double(0, 0, size, size),
-	            circles_copy, shadedZones, spiders );
+	            circles_copy, shadedZones, unshadedZones, spiders );
 	    CirclesPanel cp = new CirclesPanel("debug frame "+debug_frame_index, "no failure",
 	    		cd, size, true);
 	    DEB.addFilmStripShot(cp);
