@@ -22,6 +22,10 @@ public class AbstractSpider implements Comparable<AbstractSpider>{
 	public String get_name(){
 		return m_name;
 	}
+        
+        public void setName(String name) {
+            this.m_name = name;
+        }
 
 	public int compareTo(AbstractSpider other) {
 		
