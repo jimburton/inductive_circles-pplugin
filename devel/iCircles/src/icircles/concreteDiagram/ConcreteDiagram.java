@@ -142,5 +142,9 @@ public class ConcreteDiagram {
 	public ArrayList<ConcreteSpider> getSpiders() {
 		return spiders;
 	}
-
+	
+	public void set_spider_foot_size(int size)
+	{
+		ConcreteSpiderFoot.set_foot_size(size);
+	}
 }
