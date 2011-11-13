@@ -165,7 +165,7 @@ public class CirclesPanel extends JPanel {
             {
             	for (ConcreteSpiderFoot foot : s.feet)
             	{
-                    ((Graphics2D) g).draw(foot.getBlob());
+            		((Graphics2D) g).fill(foot.getBlob());
             	}
             	for (ConcreteSpiderLeg leg : s.legs)
             	{

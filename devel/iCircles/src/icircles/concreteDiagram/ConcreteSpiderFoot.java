@@ -5,15 +5,15 @@ import java.awt.geom.Ellipse2D;
 public // TODO make some data private
 class ConcreteSpiderFoot{
 	
-	static int FOOT_SIZE = 5;
+	public static double FOOT_SIZE = 3.5;
 	
-	public double footRad = 1;
 public // TODO make some data private
 	double x;
 public // TODO make some data private
 	double y;
 	public Ellipse2D.Double getBlob() {
-	    return new Ellipse2D.Double(x - footRad, y - footRad, FOOT_SIZE * footRad, FOOT_SIZE * footRad);
+		double rad = FOOT_SIZE;
+	    return new Ellipse2D.Double(x - rad, y - rad, 2*rad, 2*rad);
 	}
 	public double checksum() {
 		return x + 1.02* y;
