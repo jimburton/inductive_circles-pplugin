@@ -3,6 +3,7 @@ package icircles.test;
 import icircles.gui.CirclesPanel;
 
 import java.awt.BorderLayout;
+import java.awt.Font;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.Insets;
@@ -26,6 +27,8 @@ import icircles.abstractDescription.CurveLabel;
 public class TestCode {
 
     public static void main(String args[]) {
+    	
+    	TestData.font = new Font("Helvetica", Font.PLAIN,  22);
         DEB.level = TestData.TEST_DEBUG_LEVEL;
         if (TestData.TASK == TestData.RUN_ALL_TESTS) {
             ArrayList<Integer> failures = runAllTests();
@@ -236,6 +239,7 @@ public class TestCode {
         ConcreteDiagram cd = null;
         try {
             cd = getDiagram(test_num, 100); // fixed size for checksumming
+            cd.setFont(TestData.font);
         } catch (CannotDrawException x) {
             // suppress
         }
@@ -280,6 +284,7 @@ public class TestCode {
         try 
         {
             cd = getDiagram(test_num, size);
+            cd.setFont(TestData.font);
         } catch (CannotDrawException x) {
             failureMessage = x.message;
         }

@@ -1,5 +1,7 @@
 package icircles.test;
 
+import java.awt.Font;
+
 public class TestData {
 
 	// TODO : include shading and spiders into diagram checksums
@@ -32,6 +34,8 @@ public class TestData {
     //public static int TASK = VIEW_TEST_LIST;
     //public static int TASK = RUN_ALL_TESTS;
     public static int TASK = VIEW_ALL_TESTS;
+    
+    public static Font font;
     
     public static TestDatum[] test_data = {
     	/*0*/new TestDatum( "a", 80.35747263647977),

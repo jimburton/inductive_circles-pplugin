@@ -22,6 +22,7 @@ import icircles.recomposition.RecompData;
 import icircles.recomposition.Recomposer;
 import icircles.recomposition.RecompositionStep;
 import icircles.recomposition.RecompositionStrategy;
+import icircles.test.TestData;
 import icircles.util.CannotDrawException;
 import icircles.util.DEB;
 
@@ -115,6 +116,7 @@ public class DiagramCreator {
         
         ConcreteDiagram result = new ConcreteDiagram(new Rectangle2D.Double(0, 0, size, size),
                 circles, shadedZones, unshadedZones, spiders);
+        result.setFont(TestData.font);
         return result;
     }
 
@@ -1467,7 +1469,7 @@ public class DiagramCreator {
     		int debug_frame_index,
     		int size)
     {
-		if(deb_level < DEB.level)
+		if(deb_level > DEB.level)
 			return;
 		
 		// build a ConcreteDiagram for the current collection of circles

@@ -1,5 +1,7 @@
 package icircles.gui;
 
+
+
 import java.awt.BasicStroke;
 import java.awt.BorderLayout;
 import java.awt.Color;
@@ -156,6 +158,20 @@ public class CirclesPanel extends JPanel {
                 	((Graphics2D) g).setStroke(new BasicStroke(2));
                 // TODO a proper way to place labels - it can't be a method in CircleContour,
                 // we need the context in the ConcreteDiagram
+                Font f = diagram.getFont();
+                if(f!=null)
+                	((Graphics2D) g).setFont(f);
+/*                                
+                //TODO: ((Graphics2D) g).getFontMetrics(); //  for a string???
+         		// use the font metrics to adjust the anchor position
+                
+                JLabel jl = new JLabel("IGI");
+                jl.setFont(font);
+                jl.getWidth();
+                jl.getHeight();
+                jl.setLocation(arg0, arg1);
+*/                
+
                 ((Graphics2D) g).drawString(cc.ac.getLabel().getLabel(),
                         (int) cc.getLabelXPosition(),
                         (int) cc.getLabelYPosition());

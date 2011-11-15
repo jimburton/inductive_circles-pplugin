@@ -4,6 +4,7 @@ import icircles.abstractDescription.AbstractDescription;
 import icircles.gui.CirclesPanel;
 import icircles.util.CannotDrawException;
 
+import java.awt.Font;
  import java.awt.geom.Rectangle2D;
 import java.util.ArrayList;
 import java.util.Iterator;
@@ -17,6 +18,7 @@ public class ConcreteDiagram {
     ArrayList<ConcreteZone> shadedZones;
     ArrayList<ConcreteZone> unshadedZones;
     ArrayList<ConcreteSpider> spiders;
+	private Font font;
 
     public ConcreteDiagram(Rectangle2D.Double box,
             ArrayList<CircleContour> circles,
@@ -146,5 +148,13 @@ public class ConcreteDiagram {
 	public void set_spider_foot_size(int size)
 	{
 		ConcreteSpiderFoot.set_foot_size(size);
+	}
+
+	public void setFont(Font f)
+	{
+		font = f;
+	}
+	public Font getFont() {
+		return font;
 	}
 }
