@@ -68,9 +68,9 @@ public class CirclesPanel extends JPanel {
             dp.setMaximumSize(new Dimension(size + padding, size + padding));
         }
 
-        JPanel containsDiag = new JPanel();
-        containsDiag.setLayout(new FlowLayout());
-        containsDiag.add(dp);
+//        JPanel containsDiag = new JPanel();
+//        containsDiag.setLayout(new FlowLayout());
+//        containsDiag.add(dp);
         //containsDiag.setBackground(Color.orange);
 
         //containsDiag.setPreferredSize(new Dimension(size+2*padding, size+2*padding));
@@ -82,7 +82,7 @@ public class CirclesPanel extends JPanel {
         //setMinimumSize(  new Dimension(size+3*padding, size+3*padding + 20));
         //setMaximumSize(  new Dimension(size+3*padding, size+3*padding + 20));
 
-        add(containsDiag, BorderLayout.CENTER);
+        add(dp, BorderLayout.CENTER);
     }
 
     static class DiagramPanel extends JPanel {
