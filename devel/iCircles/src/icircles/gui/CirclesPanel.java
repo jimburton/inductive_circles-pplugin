@@ -58,14 +58,14 @@ public class CirclesPanel extends JPanel {
         jl.setHorizontalAlignment(JLabel.CENTER);
         add(jl, BorderLayout.NORTH);
 
-        int padding = 5;
+//        int padding = 5;
         DiagramPanel dp = new DiagramPanel(cd, failureMessage, useColors);
         //dp.setBorder(BorderFactory.createLineBorder(Color.black));
 
         if (cd == null) {
-            dp.setPreferredSize(new Dimension(size + padding, size + padding));
-            dp.setMinimumSize(new Dimension(size + padding, size + padding));
-            dp.setMaximumSize(new Dimension(size + padding, size + padding));
+            dp.setPreferredSize(new Dimension(size, size));
+            dp.setMinimumSize(new Dimension(size, size));
+            dp.setMaximumSize(new Dimension(size, size));
         }
 
 //        JPanel containsDiag = new JPanel();
