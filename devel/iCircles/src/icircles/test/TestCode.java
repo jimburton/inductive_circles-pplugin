@@ -28,7 +28,6 @@ public class TestCode {
 
     public static void main(String args[]) {
     	
-    	TestData.font = new Font("Helvetica", Font.PLAIN,  22);
         DEB.level = TestData.TEST_DEBUG_LEVEL;
         if (TestData.TASK == TestData.RUN_ALL_TESTS) {
             ArrayList<Integer> failures = runAllTests();
@@ -293,9 +292,10 @@ public class TestCode {
             description = "" + test_num + ".description..";
         }
 
-        JPanel jp = new CirclesPanel(description, failureMessage, cd, size,
+        CirclesPanel cp = new CirclesPanel(description, failureMessage, cd, size,
                 true);// do use colours
-        return jp;
+        cp.scaleBy(TestData.scale);
+        return cp;
     }
 //	static Rectangle getBoundingBox(ConstructedConcreteDiagram ccd)
 //	{

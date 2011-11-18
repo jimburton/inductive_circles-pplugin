@@ -35,7 +35,8 @@ public class TestData {
     //public static int TASK = RUN_ALL_TESTS;
     public static int TASK = VIEW_ALL_TESTS;
     
-    public static Font font;
+    public static Font font = new Font("Helvetica", Font.PLAIN,  10);
+    public static double scale = 0.5;
     
     public static TestDatum[] test_data = {
     	/*0*/new TestDatum( "a", 80.35747263647977),

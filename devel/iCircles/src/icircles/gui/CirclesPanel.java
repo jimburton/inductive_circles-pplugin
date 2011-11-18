@@ -11,7 +11,11 @@ import java.awt.Font;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
 import java.awt.RenderingHints;
+import java.awt.Shape;
 import java.awt.Stroke;
+import java.awt.geom.AffineTransform;
+import java.awt.geom.Area;
+import java.awt.geom.Ellipse2D;
 import java.util.ArrayList;
 
 import javax.swing.JFrame;
@@ -37,6 +41,7 @@ public class CirclesPanel extends JPanel {
      */
     private static final long serialVersionUID = 1L;
     private ConcreteDiagram cd;
+    DiagramPanel dp;
 
     ConcreteDiagram getDiagram(){return cd;}
     public CirclesPanel(String desc, String failureMessage, ConcreteDiagram cd, int size,
@@ -58,8 +63,7 @@ public class CirclesPanel extends JPanel {
         jl.setHorizontalAlignment(JLabel.CENTER);
         add(jl, BorderLayout.NORTH);
 
-//        int padding = 5;
-        DiagramPanel dp = new DiagramPanel(cd, failureMessage, useColors);
+        dp = new DiagramPanel(cd, failureMessage, useColors);
         //dp.setBorder(BorderFactory.createLineBorder(Color.black));
 
         if (cd == null) {
@@ -91,17 +95,29 @@ public class CirclesPanel extends JPanel {
         ConcreteDiagram diagram;
         String failureMessage;
         private boolean useColors;
+        double scaleFactor;
+        private AffineTransform trans;
 
-        DiagramPanel(ConcreteDiagram diagram, String failureMessage, boolean useColors) {
+        DiagramPanel(ConcreteDiagram diagram, 
+	        		String failureMessage, 
+	        		boolean useColors) {
             setBackground(Color.white);
             this.diagram = diagram;
             this.failureMessage = failureMessage;
             this.useColors = useColors;
-            if (diagram != null) {
-                setPreferredSize(new Dimension((int) (diagram.getBox().width) + 5,
-                        (int) (diagram.getBox().height) + 5));
-            }
+            this.scaleFactor = 1.0;
+            scaleBy(1.0);
             //setBackground(Color.yellow);
+        }
+        void scaleBy(double applyFactor)
+        {
+        	scaleFactor *= applyFactor;
+            this.trans = AffineTransform.getScaleInstance(scaleFactor, scaleFactor);        	
+            if (diagram != null) {
+            	Dimension d = new Dimension((int) ((diagram.getBox().width + 5) * scaleFactor),
+                    					(int) ((diagram.getBox().height + 5) * scaleFactor));
+            	setPreferredSize(d);
+            }
         }
 
         public void paint(Graphics g) {
@@ -126,7 +142,10 @@ public class CirclesPanel extends JPanel {
             	else
             		g.setColor(Color.lightGray);
 
-            	((Graphics2D) g).fill(z.getShape(diagram.getBox()));
+            	Area a = z.getShape(diagram.getBox());
+            	Area a_copy = (Area)a.clone();
+            	a_copy.transform(trans);
+            	((Graphics2D) g).fill(a_copy);
             }
             ((Graphics2D) g).setStroke(new BasicStroke(2));
             ArrayList<CircleContour> circles = diagram.getCircles();
@@ -140,7 +159,8 @@ public class CirclesPanel extends JPanel {
                 } else {
                     g.setColor(Color.black);
                 }
-                ((Graphics2D) g).draw(cc.getCircle());
+                Ellipse2D.Double circle = cc.getCircle();
+                ((Graphics2D) g).draw(transformCircle(trans, circle));
             	if( cc.ac.getLabel() == null )
             		continue;
                 if (useColors) {
@@ -173,29 +193,44 @@ public class CirclesPanel extends JPanel {
 */                
 
                 ((Graphics2D) g).drawString(cc.ac.getLabel().getLabel(),
-                        (int) cc.getLabelXPosition(),
-                        (int) cc.getLabelYPosition());
+                        (int) (cc.getLabelXPosition() * trans.getScaleX()),
+                        (int) (cc.getLabelYPosition() * trans.getScaleY()));
             }
             g.setColor(Color.black);
             for (ConcreteSpider s : diagram.getSpiders())
             {
             	for (ConcreteSpiderFoot foot : s.feet)
             	{
-            		((Graphics2D) g).fill(foot.getBlob());
+            		Ellipse2D.Double blob = foot.getBlob();
+            		((Graphics2D) g).fill(transformCircle(trans, blob));
             	}
             	for (ConcreteSpiderLeg leg : s.legs)
             	{
-                    ((Graphics2D) g).drawLine((int)leg.from.x, (int)leg.from.y, (int)leg.to.x, (int)leg.to.y );
+            		
+                    ((Graphics2D) g).drawLine(
+                    		(int)(leg.from.x * scaleFactor), 
+                    		(int)(leg.from.y * scaleFactor), 
+                    		(int)(leg.to.x * scaleFactor), 
+                    		(int)(leg.to.y * scaleFactor));
             	}
             	if( s.as.get_name() == null )
             		continue;
                 // TODO a proper way to place labels - it can't be a method in ConcreteSpider,
                 // we need the context in the ConcreteDiagram
                 ((Graphics2D) g).drawString(s.as.get_name(),
-                		(int)(s.feet.get(0).x + 5),
-        				(int)(s.feet.get(0).y - 5));
+                		(int)((s.feet.get(0).x + 5) * trans.getScaleX()),
+        				(int)((s.feet.get(0).y - 5) * trans.getScaleY()));
             }
         }
+
+		private Shape transformCircle(AffineTransform trans, Ellipse2D.Double circle) {
+			// TODO Auto-generated method stub
+			return new Ellipse2D.Double(
+					circle.x * scaleFactor, 
+					circle.y * scaleFactor, 
+					circle.width * scaleFactor, 
+					circle.height * scaleFactor);
+		}
     }
     /**
      * This can be used to obtain a drawing of an abstract diagram.
@@ -263,5 +298,7 @@ public class CirclesPanel extends JPanel {
     	cc.setStroke(s);
     	repaint();
     }
-
+	public void scaleBy(double scale) {
+		dp.scaleBy(scale);
+	}
 }
