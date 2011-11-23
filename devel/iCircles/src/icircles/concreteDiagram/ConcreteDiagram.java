@@ -131,7 +131,7 @@ public class ConcreteDiagram {
     		failuremessage = ex.message;
     	}
 
-    	CirclesPanel cp = new CirclesPanel("a sample CirclesPanel", failuremessage, cd, 100, 
+    	CirclesPanel cp = new CirclesPanel("a sample CirclesPanel", failuremessage, cd, 
     			true); // do use colors
     	
     	JFrame viewingFrame = new JFrame("frame to hold a CirclesPanel");
@@ -157,4 +157,8 @@ public class ConcreteDiagram {
 	public Font getFont() {
 		return font;
 	}
+        
+        public int getSize() {
+            return (int)Math.ceil(box.height);
+        }
 }

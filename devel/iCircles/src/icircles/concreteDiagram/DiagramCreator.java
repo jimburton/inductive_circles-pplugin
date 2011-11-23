@@ -1486,7 +1486,7 @@ public class DiagramCreator {
 		ConcreteDiagram cd = new ConcreteDiagram(new Rectangle2D.Double(0, 0, size, size),
 	            circles_copy, shadedZones, unshadedZones, spiders );
 	    CirclesPanel cp = new CirclesPanel("debug frame "+debug_frame_index, "no failure",
-	    		cd, size, true);
+	    		cd, true);
 	    DEB.addFilmStripShot(cp);
     }
 }

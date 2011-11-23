@@ -1,7 +1,5 @@
 package icircles.gui;
 
-
-
 import java.awt.BasicStroke;
 import java.awt.BorderLayout;
 import java.awt.Color;
@@ -43,11 +41,12 @@ public class CirclesPanel extends JPanel {
     private ConcreteDiagram cd;
     DiagramPanel dp;
 
-    ConcreteDiagram getDiagram(){return cd;}
-    public CirclesPanel(String desc, String failureMessage, ConcreteDiagram cd, int size,
-            boolean useColors) 
-    	{
-    	this.cd = cd;
+    ConcreteDiagram getDiagram() {
+        return cd;
+    }
+
+    public CirclesPanel(String desc, String failureMessage, ConcreteDiagram cd, boolean useColors) {
+        this.cd = cd;
         //setBorder(BorderFactory.createLineBorder(Color.black));
         setLayout(new BorderLayout());
         JLabel jl = new JLabel(desc);
@@ -66,6 +65,7 @@ public class CirclesPanel extends JPanel {
         dp = new DiagramPanel(cd, failureMessage, useColors);
         //dp.setBorder(BorderFactory.createLineBorder(Color.black));
 
+        int size = cd.getSize();
         if (cd == null) {
             dp.setPreferredSize(new Dimension(size, size));
             dp.setMinimumSize(new Dimension(size, size));
@@ -98,25 +98,38 @@ public class CirclesPanel extends JPanel {
         double scaleFactor;
         private AffineTransform trans;
 
-        DiagramPanel(ConcreteDiagram diagram, 
-	        		String failureMessage, 
-	        		boolean useColors) {
+        DiagramPanel(ConcreteDiagram diagram,
+                String failureMessage,
+                boolean useColors) {
             setBackground(Color.white);
             this.diagram = diagram;
             this.failureMessage = failureMessage;
             this.useColors = useColors;
             this.scaleFactor = 1.0;
-            scaleBy(1.0);
+            setScaleFactor(1.0);
             //setBackground(Color.yellow);
         }
-        void scaleBy(double applyFactor)
-        {
-        	scaleFactor *= applyFactor;
-            this.trans = AffineTransform.getScaleInstance(scaleFactor, scaleFactor);        	
+
+        @Override
+        public void doLayout() {
+            super.doLayout();
+
+            // Get the current width of this diagram panel and resize contents...
+            System.out.println("Relayouting: " + this.getSize().toString());
+
+            int size = diagram.getSize();
+            if (size > 0) {
+                setScaleFactor(Math.min((float)this.getWidth() / size, (float)this.getHeight() / size));
+            }
+        }
+
+        void setScaleFactor(double newScaleFactor) {
+            scaleFactor = newScaleFactor;
+            this.trans = AffineTransform.getScaleInstance(scaleFactor, scaleFactor);
             if (diagram != null) {
-            	Dimension d = new Dimension((int) ((diagram.getBox().width + 5) * scaleFactor),
-                    					(int) ((diagram.getBox().height + 5) * scaleFactor));
-            	setPreferredSize(d);
+                Dimension d = new Dimension((int) ((diagram.getBox().width + 5) * scaleFactor),
+                        (int) ((diagram.getBox().height + 5) * scaleFactor));
+                setPreferredSize(d);
             }
         }
 
@@ -137,21 +150,22 @@ public class CirclesPanel extends JPanel {
             g.setColor(Color.lightGray);
             ArrayList<ConcreteZone> zones = diagram.getShadedZones();
             for (ConcreteZone z : zones) {
-            	if(z.getColor() != null)
-            		g.setColor(z.getColor());
-            	else
-            		g.setColor(Color.lightGray);
+                if (z.getColor() != null) {
+                    g.setColor(z.getColor());
+                } else {
+                    g.setColor(Color.lightGray);
+                }
 
-            	Area a = z.getShape(diagram.getBox());
-            	Area a_copy = (Area)a.clone();
-            	a_copy.transform(trans);
-            	((Graphics2D) g).fill(a_copy);
+                Area a = z.getShape(diagram.getBox());
+                Area a_copy = (Area) a.clone();
+                a_copy.transform(trans);
+                ((Graphics2D) g).fill(a_copy);
             }
             ((Graphics2D) g).setStroke(new BasicStroke(2));
             ArrayList<CircleContour> circles = diagram.getCircles();
             for (CircleContour cc : circles) {
                 if (useColors) {
-                	Color col = cc.color();
+                    Color col = cc.color();
                     if (col == null) {
                         col = Color.black;
                     }
@@ -161,10 +175,11 @@ public class CirclesPanel extends JPanel {
                 }
                 Ellipse2D.Double circle = cc.getCircle();
                 ((Graphics2D) g).draw(transformCircle(trans, circle));
-            	if( cc.ac.getLabel() == null )
-            		continue;
+                if (cc.ac.getLabel() == null) {
+                    continue;
+                }
                 if (useColors) {
-                	Color col = cc.color();
+                    Color col = cc.color();
                     if (col == null) {
                         col = Color.black;
                     }
@@ -172,66 +187,67 @@ public class CirclesPanel extends JPanel {
                 } else {
                     g.setColor(Color.black);
                 }
-                if(cc.stroke() != null)
-                	((Graphics2D) g).setStroke(cc.stroke());
-                else
-                	((Graphics2D) g).setStroke(new BasicStroke(2));
+                if (cc.stroke() != null) {
+                    ((Graphics2D) g).setStroke(cc.stroke());
+                } else {
+                    ((Graphics2D) g).setStroke(new BasicStroke(2));
+                }
                 // TODO a proper way to place labels - it can't be a method in CircleContour,
                 // we need the context in the ConcreteDiagram
                 Font f = diagram.getFont();
-                if(f!=null)
-                	((Graphics2D) g).setFont(f);
-/*                                
+                if (f != null) {
+                    ((Graphics2D) g).setFont(f);
+                }
+                /*                                
                 //TODO: ((Graphics2D) g).getFontMetrics(); //  for a string???
-         		// use the font metrics to adjust the anchor position
+                // use the font metrics to adjust the anchor position
                 
                 JLabel jl = new JLabel("IGI");
                 jl.setFont(font);
                 jl.getWidth();
                 jl.getHeight();
                 jl.setLocation(arg0, arg1);
-*/                
+                 */
 
                 ((Graphics2D) g).drawString(cc.ac.getLabel().getLabel(),
                         (int) (cc.getLabelXPosition() * trans.getScaleX()),
                         (int) (cc.getLabelYPosition() * trans.getScaleY()));
             }
             g.setColor(Color.black);
-            for (ConcreteSpider s : diagram.getSpiders())
-            {
-            	for (ConcreteSpiderFoot foot : s.feet)
-            	{
-            		Ellipse2D.Double blob = foot.getBlob();
-            		((Graphics2D) g).fill(transformCircle(trans, blob));
-            	}
-            	for (ConcreteSpiderLeg leg : s.legs)
-            	{
-            		
+            for (ConcreteSpider s : diagram.getSpiders()) {
+                for (ConcreteSpiderFoot foot : s.feet) {
+                    Ellipse2D.Double blob = foot.getBlob();
+                    ((Graphics2D) g).fill(transformCircle(trans, blob));
+                }
+                for (ConcreteSpiderLeg leg : s.legs) {
+
                     ((Graphics2D) g).drawLine(
-                    		(int)(leg.from.x * scaleFactor), 
-                    		(int)(leg.from.y * scaleFactor), 
-                    		(int)(leg.to.x * scaleFactor), 
-                    		(int)(leg.to.y * scaleFactor));
-            	}
-            	if( s.as.get_name() == null )
-            		continue;
+                            (int) (leg.from.x * scaleFactor),
+                            (int) (leg.from.y * scaleFactor),
+                            (int) (leg.to.x * scaleFactor),
+                            (int) (leg.to.y * scaleFactor));
+                }
+                if (s.as.get_name() == null) {
+                    continue;
+                }
                 // TODO a proper way to place labels - it can't be a method in ConcreteSpider,
                 // we need the context in the ConcreteDiagram
                 ((Graphics2D) g).drawString(s.as.get_name(),
-                		(int)((s.feet.get(0).x + 5) * trans.getScaleX()),
-        				(int)((s.feet.get(0).y - 5) * trans.getScaleY()));
+                        (int) ((s.feet.get(0).x + 5) * trans.getScaleX()),
+                        (int) ((s.feet.get(0).y - 5) * trans.getScaleY()));
             }
         }
 
-		private Shape transformCircle(AffineTransform trans, Ellipse2D.Double circle) {
-			// TODO Auto-generated method stub
-			return new Ellipse2D.Double(
-					circle.x * scaleFactor, 
-					circle.y * scaleFactor, 
-					circle.width * scaleFactor, 
-					circle.height * scaleFactor);
-		}
+        private Shape transformCircle(AffineTransform trans, Ellipse2D.Double circle) {
+            // TODO Auto-generated method stub
+            return new Ellipse2D.Double(
+                    circle.x * scaleFactor,
+                    circle.y * scaleFactor,
+                    circle.width * scaleFactor,
+                    circle.height * scaleFactor);
+        }
     }
+
     /**
      * This can be used to obtain a drawing of an abstract diagram.
      * @param ad the description to be drawn
@@ -239,66 +255,78 @@ public class CirclesPanel extends JPanel {
      * @return
      * @throws CannotDrawException
      */
-    public static CirclesPanel makeCirclesPanel(AbstractDescription ad, 
-    		                                    String diagText,
-    		                                    int size)
-    {
-    	String failuremessage = "no failure";
-    	ConcreteDiagram cd = null;
-    	try
-    	{
-    	cd = ConcreteDiagram.makeConcreteDiagram(ad, size);
-    	}
-    	catch(CannotDrawException ex)
-    	{
-    		failuremessage = ex.message;
-    	}
+    public static CirclesPanel makeCirclesPanel(AbstractDescription ad,
+            String diagText,
+            int size) {
+        String failuremessage = "no failure";
+        ConcreteDiagram cd = null;
+        try {
+            cd = ConcreteDiagram.makeConcreteDiagram(ad, size);
+        } catch (CannotDrawException ex) {
+            failuremessage = ex.message;
+        }
 
-    	CirclesPanel cp = new CirclesPanel(diagText, failuremessage, cd, size, 
-    			true); // do use colors
-    	
-    	return cp;
-    }
-    public static void main(String[] args)
-    {
-    	// See the implementation of makeForTesting to see how to make an 
-    	// AbstractDescription from scratch.
-    	AbstractDescription ad = AbstractDescription.makeForTesting(
-    			//"qh h fh ih ik kh b ab ac de bd  abc bfg fc bj l lc al m mn nc bc bco bo boj bp bop cq cqb rs ra s t");
-    			"qh h fh ih ik kh b ab ac de bd  abc bfg fc bj l lc al m mn nc bc bco bo boj bp bop cq cqb rs ra s",
-    			true); // randomised shading
-    			//"a ab b c");
+        CirclesPanel cp = new CirclesPanel(diagText, failuremessage, cd, true); // do use colors
 
-    	DEB.level = 3; // generates intermediate frames
-    	
-    	int size = 600;
-    	
-    	CirclesPanel cp = CirclesPanel.makeCirclesPanel(ad, "a sample diagram", size);
-    	
-    	JFrame viewingFrame = new JFrame("frame to hold a CirclesPanel");
-    	JScrollPane scrollPane = new JScrollPane(cp);
-    	viewingFrame.getContentPane().setPreferredSize(new Dimension(Math.min(size,  800), Math.min(size,  800)));
-    	viewingFrame.getContentPane().add(scrollPane);
-    	viewingFrame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-    	viewingFrame.pack();
-    	viewingFrame.setVisible(true);
+        return cp;
     }
 
-    ArrayList<CircleContour> getAllCircles()
-    {
-    	return cd.getCircles();
+    public static void main(String[] args) {
+        // See the implementation of makeForTesting to see how to make an 
+        // AbstractDescription from scratch.
+        AbstractDescription ad = AbstractDescription.makeForTesting(
+                //"qh h fh ih ik kh b ab ac de bd  abc bfg fc bj l lc al m mn nc bc bco bo boj bp bop cq cqb rs ra s t");
+                "qh h fh ih ik kh b ab ac de bd  abc bfg fc bj l lc al m mn nc bc bco bo boj bp bop cq cqb rs ra s",
+                true); // randomised shading
+        //"a ab b c");
+
+        DEB.level = 3; // generates intermediate frames
+
+        int size = 600;
+
+        CirclesPanel cp = CirclesPanel.makeCirclesPanel(ad, "a sample diagram", size);
+
+        JFrame viewingFrame = new JFrame("frame to hold a CirclesPanel");
+        JScrollPane scrollPane = new JScrollPane(cp);
+        viewingFrame.getContentPane().setPreferredSize(new Dimension(Math.min(size, 800), Math.min(size, 800)));
+        viewingFrame.getContentPane().add(scrollPane);
+        viewingFrame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        viewingFrame.pack();
+        viewingFrame.setVisible(true);
     }
-    void setColor(CircleContour cc, Color c)
-    {
-    	cc.setColor(c);
-    	repaint();
+
+    ArrayList<CircleContour> getAllCircles() {
+        return cd.getCircles();
     }
-    void setStroke(CircleContour cc, Stroke s)
-    {
-    	cc.setStroke(s);
-    	repaint();
+
+    void setColor(CircleContour cc, Color c) {
+        cc.setColor(c);
+        repaint();
     }
-	public void scaleBy(double scale) {
-		dp.scaleBy(scale);
-	}
+
+    void setStroke(CircleContour cc, Stroke s) {
+        cc.setStroke(s);
+        repaint();
+    }
+    
+    /**
+     * Returns the size for which the concrete diagram has been drawn.
+     * <p>This is the size of the drawn contents of this panel when the {@link
+     * CirclesPanel#setScaleFactor(double) scale factor} is set to 1.</p>
+     * <p>The size of the drawn diagram can be calculated by multiplying
+     * {@link CirclesPanel#getScaleFactor()} with
+     * {@link CirclesPanel#getOriginalSize()}.</p>
+     * @return the size for which the concrete diagram has been drawn.
+     */
+    int getOriginalSize() {
+        return this.cd.getSize();
+    }
+    
+    public double getScaleFactor() {
+        return dp.scaleFactor;
+    }
+
+    public void setScaleFactor(double scale) {
+        dp.setScaleFactor(scale);
+    }
 }

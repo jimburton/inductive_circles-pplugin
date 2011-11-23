@@ -292,9 +292,9 @@ public class TestCode {
             description = "" + test_num + ".description..";
         }
 
-        CirclesPanel cp = new CirclesPanel(description, failureMessage, cd, size,
+        CirclesPanel cp = new CirclesPanel(description, failureMessage, cd,
                 true);// do use colours
-        cp.scaleBy(TestData.scale);
+        cp.setScaleFactor(TestData.scale);
         return cp;
     }
 //	static Rectangle getBoundingBox(ConstructedConcreteDiagram ccd)

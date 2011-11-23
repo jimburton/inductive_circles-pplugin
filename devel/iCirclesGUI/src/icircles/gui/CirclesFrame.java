@@ -184,7 +184,7 @@ public class CirclesFrame extends JFrame {
                 ConcreteDiagram cd,
                 int SIZE,
                 boolean useColors) {
-            JPanel jp = new CirclesPanel(description, failureMessage, cd, SIZE, useColors);
+            JPanel jp = new CirclesPanel(description, failureMessage, cd, useColors);
             p.removeAll();
             p.invalidate();
             p.add(jp);
