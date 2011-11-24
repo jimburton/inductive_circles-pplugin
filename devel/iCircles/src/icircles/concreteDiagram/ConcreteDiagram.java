@@ -133,6 +133,7 @@ public class ConcreteDiagram {
 
     	CirclesPanel cp = new CirclesPanel("a sample CirclesPanel", failuremessage, cd, 
     			true); // do use colors
+        cp.setAutoRescale(true);
     	
     	JFrame viewingFrame = new JFrame("frame to hold a CirclesPanel");
     	viewingFrame.getContentPane().add(cp);

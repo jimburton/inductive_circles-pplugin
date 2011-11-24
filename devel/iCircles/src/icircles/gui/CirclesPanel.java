@@ -66,11 +66,10 @@ public class CirclesPanel extends JPanel {
         //dp.setBorder(BorderFactory.createLineBorder(Color.black));
 
         int size = cd.getSize();
-        if (cd == null) {
-            dp.setPreferredSize(new Dimension(size, size));
-            dp.setMinimumSize(new Dimension(size, size));
-            dp.setMaximumSize(new Dimension(size, size));
-        }
+        dp.setPreferredSize(new Dimension(size, size));
+        this.setPreferredSize(new Dimension(size, size));
+//            dp.setMinimumSize(new Dimension(size, size));
+//            dp.setMaximumSize(new Dimension(size, size));
 
 //        JPanel containsDiag = new JPanel();
 //        containsDiag.setLayout(new FlowLayout());
@@ -89,7 +88,7 @@ public class CirclesPanel extends JPanel {
         add(dp, BorderLayout.CENTER);
     }
 
-    static class DiagramPanel extends JPanel {
+    private static final class DiagramPanel extends JPanel {
 
         private static final long serialVersionUID = 1L;
         ConcreteDiagram diagram;
@@ -97,6 +96,7 @@ public class CirclesPanel extends JPanel {
         private boolean useColors;
         double scaleFactor;
         private AffineTransform trans;
+        boolean autoRescale;
 
         DiagramPanel(ConcreteDiagram diagram,
                 String failureMessage,
@@ -105,9 +105,7 @@ public class CirclesPanel extends JPanel {
             this.diagram = diagram;
             this.failureMessage = failureMessage;
             this.useColors = useColors;
-            this.scaleFactor = 1.0;
-            setScaleFactor(1.0);
-            //setBackground(Color.yellow);
+            setScaleFactor(1);
         }
 
         @Override
@@ -115,21 +113,57 @@ public class CirclesPanel extends JPanel {
             super.doLayout();
 
             // Get the current width of this diagram panel and resize contents...
-            System.out.println("Relayouting: " + this.getSize().toString());
-
-            int size = diagram.getSize();
-            if (size > 0) {
-                setScaleFactor(Math.min((float)this.getWidth() / size, (float)this.getHeight() / size));
+            if (autoRescale) {
+                int size = diagram.getSize();
+                if (size > 0) {
+                    setScaleFactor(Math.min((float) this.getWidth() / size, (float) this.getHeight() / size));
+                }
             }
         }
 
+        /**
+         * Indicates whether this diagram panel should rescale its drawn
+         * contents to fit its current size.
+         * @return 
+         */
+        public boolean isAutoRescale() {
+            return autoRescale;
+        }
+
+        /**
+         * Tells this panel whether it should rescale its drawn
+         * contents to fit its current size.
+         * @param autoRescale 
+         */
+        public void setAutoRescale(boolean autoRescale) {
+            if (this.autoRescale != autoRescale) {
+                this.autoRescale = autoRescale;
+                if (this.autoRescale) {
+                    this.invalidate();
+                }
+            }
+        }
+
+        /**
+         * Sets the scale factor of the drawn contents to the new value.
+         * <p>This merely scales the drawn contents (without affecting the
+         * thickness of curves, size of spiders or fonts).</p>
+         * <p>Note: this method does not change the size of the panel (not
+         * even the preferred size).</p>
+         * @param newScaleFactor the new factor by which to scale the drawn
+         * contents.
+         */
         void setScaleFactor(double newScaleFactor) {
             scaleFactor = newScaleFactor;
+            recalculateScale();
+        }
+
+        private void recalculateScale() {
             this.trans = AffineTransform.getScaleInstance(scaleFactor, scaleFactor);
             if (diagram != null) {
                 Dimension d = new Dimension((int) ((diagram.getBox().width + 5) * scaleFactor),
                         (int) ((diagram.getBox().height + 5) * scaleFactor));
-                setPreferredSize(d);
+//                setPreferredSize(d);
             }
         }
 
@@ -308,7 +342,7 @@ public class CirclesPanel extends JPanel {
         cc.setStroke(s);
         repaint();
     }
-    
+
     /**
      * Returns the size for which the concrete diagram has been drawn.
      * <p>This is the size of the drawn contents of this panel when the {@link
@@ -321,12 +355,30 @@ public class CirclesPanel extends JPanel {
     int getOriginalSize() {
         return this.cd.getSize();
     }
-    
+
     public double getScaleFactor() {
         return dp.scaleFactor;
     }
 
     public void setScaleFactor(double scale) {
         dp.setScaleFactor(scale);
+    }
+
+    /**
+     * Indicates whether this diagram panel should rescale its drawn
+     * contents to fit its current size.
+     * @return 
+     */
+    public boolean isAutoRescale() {
+        return dp.isAutoRescale();
+    }
+
+    /**
+     * Tells this panel whether it should rescale its drawn
+     * contents to fit its current size.
+     * @param autoRescale 
+     */
+    public void setAutoRescale(boolean autoRescale) {
+        dp.setAutoRescale(autoRescale);
     }
 }
