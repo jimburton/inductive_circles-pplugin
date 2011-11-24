@@ -45,31 +45,36 @@ public class CirclesPanel extends JPanel {
         return cd;
     }
 
-    public CirclesPanel(String desc, String failureMessage, ConcreteDiagram cd, boolean useColors) {
-        this.cd = cd;
-        //setBorder(BorderFactory.createLineBorder(Color.black));
+    public CirclesPanel(String desc, String failureMessage, ConcreteDiagram diagram, boolean useColors) {
+        this.cd = diagram;
         setLayout(new BorderLayout());
-        JLabel jl = new JLabel(desc);
-        Font f = new Font("Dialog", Font.PLAIN, 12);
-        if (desc.length() > 24) {
-            f = new Font("Dialog", Font.PLAIN, 8);
-        } else if (desc.length() > 16) {
-            f = new Font("Dialog", Font.PLAIN, 8);
-        } else if (desc.length() > 14) {
-            f = new Font("Dialog", Font.PLAIN, 10);
+        setBorder(new javax.swing.border.LineBorder(new java.awt.Color(0, 0, 0), 1, true));
+        if (desc != null && !desc.isEmpty()) {
+            //setBorder(BorderFactory.createLineBorder(Color.black));
+            JLabel jl = new JLabel(desc);
+            Font f = new Font("Dialog", Font.PLAIN, 12);
+            if (desc.length() > 24) {
+                f = new Font("Dialog", Font.PLAIN, 8);
+            } else if (desc.length() > 16) {
+                f = new Font("Dialog", Font.PLAIN, 8);
+            } else if (desc.length() > 14) {
+                f = new Font("Dialog", Font.PLAIN, 10);
+            }
+            jl.setFont(f);
+            jl.setHorizontalAlignment(JLabel.CENTER);
+            add(jl, BorderLayout.NORTH);
         }
-        jl.setFont(f);
-        jl.setHorizontalAlignment(JLabel.CENTER);
-        add(jl, BorderLayout.NORTH);
 
-        dp = new DiagramPanel(cd, failureMessage, useColors);
+        dp = new DiagramPanel(diagram, failureMessage, useColors);
         //dp.setBorder(BorderFactory.createLineBorder(Color.black));
 
-        int size = cd.getSize();
-        dp.setPreferredSize(new Dimension(size, size));
+        int size = diagram.getSize();
         this.setPreferredSize(new Dimension(size, size));
-//            dp.setMinimumSize(new Dimension(size, size));
-//            dp.setMaximumSize(new Dimension(size, size));
+        dp.setPreferredSize(new Dimension(size, size));
+//        dp.setMinimumSize(new Dimension(size, size));
+//        dp.setMaximumSize(new Dimension(size, size));
+//        this.setMinimumSize(new Dimension(size, size));
+//        this.setMaximumSize(new Dimension(size, size));
 
 //        JPanel containsDiag = new JPanel();
 //        containsDiag.setLayout(new FlowLayout());
@@ -106,11 +111,15 @@ public class CirclesPanel extends JPanel {
             this.failureMessage = failureMessage;
             this.useColors = useColors;
             setScaleFactor(1);
+            int size = diagram.getSize();
+            setPreferredSize(new Dimension(size, size));
         }
 
         @Override
         public void doLayout() {
             super.doLayout();
+
+            System.out.println("Size inner panel: " + this.getSize().toString());
 
             // Get the current width of this diagram panel and resize contents...
             if (autoRescale) {
@@ -281,6 +290,13 @@ public class CirclesPanel extends JPanel {
                     circle.width * scaleFactor,
                     circle.height * scaleFactor);
         }
+    }
+
+    @Override
+    public void doLayout() {
+        super.doLayout();
+
+        System.out.println("Size outer panel: " + this.getSize().toString());
     }
 
     /**
