@@ -105,7 +105,7 @@ public class CircleContour {
     }
 
     public double getLabelYPosition() {
-        return cy - 0.8 * radius;
+        return cy - 0.75 * radius;
     }
 
     public int getMinX() {

@@ -5,7 +5,7 @@ import java.awt.geom.Ellipse2D;
 public // TODO make some data private
 class ConcreteSpiderFoot{
 	
-	public static double FOOT_SIZE = 3.5;
+	public static double FOOT_SIZE = 4;
 	
 public // TODO make some data private
 	double x;

@@ -284,7 +284,7 @@ public class DiagramCreator {
     	    			double sf_perp_leg_len = Math.sqrt(sf_perp_leg_x * sf_perp_leg_x + sf_perp_leg_y * sf_perp_leg_y);
     	    			
     	    			double sf_prop_leg = sf_proj_leg_x / se_x;
-    	    			double tol = 3;
+    	    			double tol = 6;
     	    			boolean foot_on_leg = sf_perp_leg_len < tol && 
 						    	    					sf_prop_leg > 0 && 
 						    	    					sf_prop_leg < 1;
@@ -297,8 +297,9 @@ public class DiagramCreator {
     	    	        	
     	    	        	ConcreteZone cz = makeConcreteZone(abr);
     	                    Area a = new Area(cz.getShape(box));
-    	                    double new_x = old_x + 2*tol;
     	                    double new_y = old_y + 2*tol;
+//    	                    double new_x = old_x + 2*tol;
+    	                    double new_x = old_x;
     	                    CircleContour test = new CircleContour(new_x, new_y, tol, null);
     	                    if(containedIn(test, a))
     	                    	{
