@@ -119,8 +119,6 @@ public class CirclesPanel extends JPanel {
         public void doLayout() {
             super.doLayout();
 
-            System.out.println("Size inner panel: " + this.getSize().toString());
-
             // Get the current width of this diagram panel and resize contents...
             if (autoRescale) {
                 int size = diagram.getSize();
@@ -290,13 +288,6 @@ public class CirclesPanel extends JPanel {
                     circle.width * scaleFactor,
                     circle.height * scaleFactor);
         }
-    }
-
-    @Override
-    public void doLayout() {
-        super.doLayout();
-
-        System.out.println("Size outer panel: " + this.getSize().toString());
     }
 
     /**
