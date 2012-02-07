@@ -49,8 +49,8 @@ public class CirclesPanel2 extends javax.swing.JPanel {
      * The scale that should be applied to the circles in this diagram (due to
      * the resizing of this panel).
      */
-    private double scaleFactor;
-    private AffineTransform trans;
+    private double scaleFactor = 1;
+    private AffineTransform trans = new AffineTransform();
     // </editor-fold>
 
     // <editor-fold defaultstate="collapsed" desc="Constructor">
@@ -62,7 +62,7 @@ public class CirclesPanel2 extends javax.swing.JPanel {
     public CirclesPanel2(ConcreteDiagram diagram) {
         initComponents();
         resetDiagram(diagram);
-        setScaleFactor(1);
+        resizeContents();
     }
 
     public CirclesPanel2() {
@@ -87,9 +87,18 @@ public class CirclesPanel2 extends javax.swing.JPanel {
     // End of variables declaration//GEN-END:variables
     // </editor-fold>
 
+    // <editor-fold defaultstate="collapsed" desc="Public Properties">
+    public void setDiagram(ConcreteDiagram diagram) {
+        if (this.diagram != diagram) {
+            resetDiagram(diagram);
+        }
+    }
+    // </editor-fold>
+
     // <editor-fold defaultstate="collapsed" desc="Overrides">
     @Override
     public void paint(Graphics g) {
+        // TODO: Center the whole thing. How can we do this the easiest?
         ((Graphics2D) g).setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
         if (diagram == null) {
             this.setBackground(Color.red);
@@ -97,6 +106,7 @@ public class CirclesPanel2 extends javax.swing.JPanel {
         } else {
             // draw the diagram
             super.paint(g);
+            g.translate((this.getWidth() - (int)Math.round(diagram.getSize() * scaleFactor))/2, (this.getHeight() - (int)Math.round(diagram.getSize() * scaleFactor))/2);
 
             // shaded zones
             g.setColor(Color.lightGray);
@@ -180,16 +190,41 @@ public class CirclesPanel2 extends javax.swing.JPanel {
             }
         }
     }
-    // </editor-fold>
+
+    @Override
+    public void setBounds(int x, int y, int width, int height) {
+        super.setBounds(x, y, width, height);
+        resizeContents();
+    }
 
     // <editor-fold defaultstate="collapsed" desc="Private methods">
+    /**
+     * This method sets the given diagram as the one to be displayed. <p>It
+     * refreshes the {@link CirclesPanel2#setPreferredSize(java.awt.Dimension)
+     * preferred size} of this panel and requests a refresh of the drawing area
+     * accordingly.</p>
+     *
+     * @param diagram
+     */
     private void resetDiagram(ConcreteDiagram diagram) {
         this.diagram = diagram;
         if (diagram == null) {
-            // NOTE: Currently we display nothing if there is no 
+            // NOTE: Currently we display nothing if there is no diagram
             this.setPreferredSize(null);
         } else {
             this.setPreferredSize(new Dimension(diagram.getSize(), diagram.getSize()));
+        }
+        // We have to redraw the entire area...
+        resizeContents();
+    }
+
+    private void resizeContents() {
+        if (diagram != null) {
+            // Get the current width of this diagram panel and resize contents...
+            int size = diagram.getSize();
+            if (size > 0) {
+                setScaleFactor(Math.min((float) this.getWidth() / size, (float) this.getHeight() / size));
+            }
         }
     }
 
@@ -204,19 +239,16 @@ public class CirclesPanel2 extends javax.swing.JPanel {
      */
     private void setScaleFactor(double newScaleFactor) {
         scaleFactor = newScaleFactor;
-        recalculateScale();
+        recalculateTransform();
+        repaint();
     }
 
     /**
      * Compares the width and height of this panel and tries to scale the
      * concrete diagram's box so that it nicely fits the contents of the panel.
      */
-    private void recalculateScale() {
-        this.trans = AffineTransform.getScaleInstance(scaleFactor, scaleFactor);
-        if (diagram != null) {
-            Dimension d = new Dimension((int) ((diagram.getBox().width + 5) * scaleFactor),
-                    (int) ((diagram.getBox().height + 5) * scaleFactor));
-        }
+    private void recalculateTransform() {
+        this.trans.setToScale(scaleFactor, scaleFactor);
     }
 
     /**
