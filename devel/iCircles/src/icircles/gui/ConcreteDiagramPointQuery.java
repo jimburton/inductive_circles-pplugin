@@ -47,7 +47,7 @@ public class ConcreteDiagramPointQuery {
 			{
 				double dist = Math.sqrt((p.x - f.x)*(p.x - f.x) + 
 										(p.y - f.y)*(p.y - f.y)); 
-				if(dist < ConcreteSpiderFoot.FOOT_SIZE + tol )
+				if(dist < ConcreteSpiderFoot.FOOT_RADIUS + tol )
 				{
 					this.s = s;
 					this.foot = f;

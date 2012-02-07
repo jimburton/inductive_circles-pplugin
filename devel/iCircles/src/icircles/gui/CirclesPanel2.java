@@ -45,6 +45,12 @@ public class CirclesPanel2 extends javax.swing.JPanel {
      * The diagram that will actually be drawn in this panel.
      */
     private ConcreteDiagram diagram;
+    /**
+     * The scale that should be applied to the circles in this diagram (due to
+     * the resizing of this panel).
+     */
+    private double scaleFactor;
+    private AffineTransform trans;
     // </editor-fold>
 
     // <editor-fold defaultstate="collapsed" desc="Constructor">
@@ -56,6 +62,11 @@ public class CirclesPanel2 extends javax.swing.JPanel {
     public CirclesPanel2(ConcreteDiagram diagram) {
         initComponents();
         resetDiagram(diagram);
+        setScaleFactor(1);
+    }
+
+    public CirclesPanel2() {
+        this(null);
     }
     // </editor-fold>
 
@@ -69,6 +80,7 @@ public class CirclesPanel2 extends javax.swing.JPanel {
     // <editor-fold defaultstate="collapsed" desc="Generated Code">//GEN-BEGIN:initComponents
     private void initComponents() {
 
+        setBackground(new java.awt.Color(255, 255, 255));
         setLayout(null);
     }// </editor-fold>//GEN-END:initComponents
     // Variables declaration - do not modify//GEN-BEGIN:variables
@@ -76,102 +88,98 @@ public class CirclesPanel2 extends javax.swing.JPanel {
     // </editor-fold>
 
     // <editor-fold defaultstate="collapsed" desc="Overrides">
-//    @Override
-//    public void paint(Graphics g) {
-//        ((Graphics2D) g).setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
-//        if (diagram == null) {
-//            this.setBackground(Color.red);
-//            super.paint(g);
-//        } else {
-//            // draw the diagram
-//            super.paint(g);
-//
-//            // shaded zones
-//            g.setColor(Color.lightGray);
-//            ArrayList<ConcreteZone> zones = diagram.getShadedZones();
-//            for (ConcreteZone z : zones) {
-//                if (z.getColor() != null) {
-//                    g.setColor(z.getColor());
-//                } else {
-//                    g.setColor(Color.lightGray);
-//                }
-//
-//                Area a = z.getShape(diagram.getBox());
-//                Area a_copy = (Area) a.clone();
-//                a_copy.transform(trans);
-//                ((Graphics2D) g).fill(a_copy);
-//            }
-//            ((Graphics2D) g).setStroke(new BasicStroke(2));
-//            ArrayList<CircleContour> circles = diagram.getCircles();
-//            for (CircleContour cc : circles) {
-//                Color col = cc.color();
-//                if (col == null) {
-//                    col = Color.black;
-//                }
-//                g.setColor(col);
-//                Ellipse2D.Double circle = cc.getCircle();
-//                ((Graphics2D) g).draw(transformCircle(trans, circle));
-//                if (cc.ac.getLabel() == null) {
-//                    continue;
-//                }
-//                if (useColors) {
-//                    Color col = cc.color();
-//                    if (col == null) {
-//                        col = Color.black;
-//                    }
-//                    g.setColor(col);
-//                } else {
-//                    g.setColor(Color.black);
-//                }
-//                if (cc.stroke() != null) {
-//                    ((Graphics2D) g).setStroke(cc.stroke());
-//                } else {
-//                    ((Graphics2D) g).setStroke(new BasicStroke(2));
-//                }
-//                // TODO a proper way to place labels - it can't be a method in CircleContour,
-//                // we need the context in the ConcreteDiagram
-//                Font f = diagram.getFont();
-//                if (f != null) {
-//                    ((Graphics2D) g).setFont(f);
-//                }
-//                /*
-//                 * //TODO: ((Graphics2D) g).getFontMetrics(); // for a
-//                 * string??? // use the font metrics to adjust the anchor
-//                 * position
-//                 *
-//                 * JLabel jl = new JLabel("IGI"); jl.setFont(font);
-//                 * jl.getWidth(); jl.getHeight(); jl.setLocation(arg0, arg1);
-//                 */
-//
-//                ((Graphics2D) g).drawString(cc.ac.getLabel().getLabel(),
-//                        (int) (cc.getLabelXPosition() * trans.getScaleX()),
-//                        (int) (cc.getLabelYPosition() * trans.getScaleY()));
-//            }
-//            g.setColor(Color.black);
-//            for (ConcreteSpider s : diagram.getSpiders()) {
-//                for (ConcreteSpiderFoot foot : s.feet) {
-//                    Ellipse2D.Double blob = foot.getBlob();
-//                    ((Graphics2D) g).fill(transformCircle(trans, blob));
-//                }
-//                for (ConcreteSpiderLeg leg : s.legs) {
-//
-//                    ((Graphics2D) g).drawLine(
-//                            (int) (leg.from.x * scaleFactor),
-//                            (int) (leg.from.y * scaleFactor),
-//                            (int) (leg.to.x * scaleFactor),
-//                            (int) (leg.to.y * scaleFactor));
-//                }
-//                if (s.as.get_name() == null) {
-//                    continue;
-//                }
-//                // TODO a proper way to place labels - it can't be a method in ConcreteSpider,
-//                // we need the context in the ConcreteDiagram
-//                ((Graphics2D) g).drawString(s.as.get_name(),
-//                        (int) ((s.feet.get(0).x + 5) * trans.getScaleX()),
-//                        (int) ((s.feet.get(0).y - 5) * trans.getScaleY()));
-//            }
-//        }
-//    }
+    @Override
+    public void paint(Graphics g) {
+        ((Graphics2D) g).setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+        if (diagram == null) {
+            this.setBackground(Color.red);
+            super.paint(g);
+        } else {
+            // draw the diagram
+            super.paint(g);
+
+            // shaded zones
+            g.setColor(Color.lightGray);
+            ArrayList<ConcreteZone> zones = diagram.getShadedZones();
+            for (ConcreteZone z : zones) {
+                if (z.getColor() != null) {
+                    g.setColor(z.getColor());
+                } else {
+                    g.setColor(Color.lightGray);
+                }
+
+                // TODO: The box of the diagram should not change. So we could
+                // precalculate the shape of the zone with its box.
+                Area a = z.getShape(diagram.getBox());
+                Area a_copy = (Area) a.clone();
+                a_copy.transform(trans);
+                ((Graphics2D) g).fill(a_copy);
+            }
+            ((Graphics2D) g).setStroke(new BasicStroke(2));
+            ArrayList<CircleContour> circles = diagram.getCircles();
+            Ellipse2D.Double tmpCircle = new Ellipse2D.Double();
+            for (CircleContour cc : circles) {
+                Color col = cc.color();
+                if (col == null) {
+                    col = Color.black;
+                }
+                g.setColor(col);
+                scaleCircle(scaleFactor, cc.getCircle(), tmpCircle);
+                ((Graphics2D) g).draw(tmpCircle);
+                if (cc.ac.getLabel() == null) {
+                    continue;
+                }
+                g.setColor(col);
+                if (cc.stroke() != null) {
+                    ((Graphics2D) g).setStroke(cc.stroke());
+                } else {
+                    ((Graphics2D) g).setStroke(new BasicStroke(2));
+                }
+                // TODO a proper way to place labels - it can't be a method in CircleContour,
+                // we need the context in the ConcreteDiagram
+                Font f = diagram.getFont();
+                if (f != null) {
+                    ((Graphics2D) g).setFont(f);
+                }
+                /*
+                 * //TODO: ((Graphics2D) g).getFontMetrics(); // for a
+                 * string??? // use the font metrics to adjust the anchor
+                 * position
+                 *
+                 * JLabel jl = new JLabel("IGI"); jl.setFont(font);
+                 * jl.getWidth(); jl.getHeight(); jl.setLocation(arg0, arg1);
+                 */
+
+                ((Graphics2D) g).drawString(cc.ac.getLabel().getLabel(),
+                        (int) (cc.getLabelXPosition() * trans.getScaleX()),
+                        (int) (cc.getLabelYPosition() * trans.getScaleY()));
+            }
+            g.setColor(Color.black);
+            for (ConcreteSpider s : diagram.getSpiders()) {
+                for (ConcreteSpiderFoot foot : s.feet) {
+                    foot.getBlob(tmpCircle);
+                    scaleCircle(scaleFactor, tmpCircle, tmpCircle);
+                    ((Graphics2D) g).fill(tmpCircle);
+                }
+                for (ConcreteSpiderLeg leg : s.legs) {
+
+                    ((Graphics2D) g).drawLine(
+                            (int) (leg.from.x * scaleFactor),
+                            (int) (leg.from.y * scaleFactor),
+                            (int) (leg.to.x * scaleFactor),
+                            (int) (leg.to.y * scaleFactor));
+                }
+                if (s.as.get_name() == null) {
+                    continue;
+                }
+                // TODO a proper way to place labels - it can't be a method in ConcreteSpider,
+                // we need the context in the ConcreteDiagram
+                ((Graphics2D) g).drawString(s.as.get_name(),
+                        (int) ((s.feet.get(0).x + 5) * trans.getScaleX()),
+                        (int) ((s.feet.get(0).y - 5) * trans.getScaleY()));
+            }
+        }
+    }
     // </editor-fold>
 
     // <editor-fold defaultstate="collapsed" desc="Private methods">
@@ -185,12 +193,45 @@ public class CirclesPanel2 extends javax.swing.JPanel {
         }
     }
 
-//    private void recalculateScale() {
-//        this.trans = AffineTransform.getScaleInstance(scaleFactor, scaleFactor);
-//        if (diagram != null) {
-//            Dimension d = new Dimension((int) ((diagram.getBox().width + 5) * scaleFactor),
-//                    (int) ((diagram.getBox().height + 5) * scaleFactor));
-//        }
-//    }
+    /**
+     * Sets the scale factor of the drawn contents to the new value. <p>This
+     * merely scales the drawn contents (without affecting the thickness of
+     * curves, size of spiders or fonts).</p> <p>Note: this method does not
+     * change the size of the panel (not even the preferred size).</p>
+     *
+     * @param newScaleFactor the new factor by which to scale the drawn
+     * contents.
+     */
+    private void setScaleFactor(double newScaleFactor) {
+        scaleFactor = newScaleFactor;
+        recalculateScale();
+    }
+
+    /**
+     * Compares the width and height of this panel and tries to scale the
+     * concrete diagram's box so that it nicely fits the contents of the panel.
+     */
+    private void recalculateScale() {
+        this.trans = AffineTransform.getScaleInstance(scaleFactor, scaleFactor);
+        if (diagram != null) {
+            Dimension d = new Dimension((int) ((diagram.getBox().width + 5) * scaleFactor),
+                    (int) ((diagram.getBox().height + 5) * scaleFactor));
+        }
+    }
+
+    /**
+     * Puts the scaled coordinates, width and height of {@code inCircle} into
+     * the {@code outCircle} (without changing {@code inCircle}).
+     *
+     * @param scaleFactor
+     * @param inCircle
+     * @param outCircle
+     */
+    private void scaleCircle(double scaleFactor, Ellipse2D.Double inCircle, Ellipse2D.Double outCircle) {
+        outCircle.x = inCircle.x * scaleFactor;
+        outCircle.y = inCircle.y * scaleFactor;
+        outCircle.width = inCircle.width * scaleFactor;
+        outCircle.height = inCircle.height * scaleFactor;
+    }
     // </editor-fold>
 }
