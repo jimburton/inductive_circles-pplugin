@@ -65,6 +65,9 @@ public class CirclesPanel2 extends javax.swing.JPanel {
         resizeContents();
     }
 
+    /**
+     * Creates new panel with no diagram.
+     */
     public CirclesPanel2() {
         this(null);
     }
@@ -98,7 +101,6 @@ public class CirclesPanel2 extends javax.swing.JPanel {
     // <editor-fold defaultstate="collapsed" desc="Overrides">
     @Override
     public void paint(Graphics g) {
-        // TODO: Center the whole thing. How can we do this the easiest?
         ((Graphics2D) g).setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
         if (diagram == null) {
             this.setBackground(Color.red);
@@ -106,6 +108,8 @@ public class CirclesPanel2 extends javax.swing.JPanel {
         } else {
             // draw the diagram
             super.paint(g);
+            
+            // This centers the diagram onto the drawing area.
             g.translate((this.getWidth() - (int)Math.round(diagram.getSize() * scaleFactor))/2, (this.getHeight() - (int)Math.round(diagram.getSize() * scaleFactor))/2);
 
             // shaded zones
@@ -196,6 +200,7 @@ public class CirclesPanel2 extends javax.swing.JPanel {
         super.setBounds(x, y, width, height);
         resizeContents();
     }
+    // </editor-fold>
 
     // <editor-fold defaultstate="collapsed" desc="Private methods">
     /**
