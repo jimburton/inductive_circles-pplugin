@@ -91,10 +91,22 @@ public class CirclesPanel2 extends javax.swing.JPanel {
     // </editor-fold>
 
     // <editor-fold defaultstate="collapsed" desc="Public Properties">
+    /**
+     * Sets the diagram that should be displayed by this panel.
+     * @param diagram the diagram that should be displayed by this panel.
+     */
     public void setDiagram(ConcreteDiagram diagram) {
         if (this.diagram != diagram) {
             resetDiagram(diagram);
         }
+    }
+
+    /**
+     * Gets the diagram that is currently being displayed by this panel.
+     * @return the diagram that is currently being displayed by this panel.
+     */
+    public ConcreteDiagram getDiagram() {
+        return diagram;
     }
     // </editor-fold>
 
@@ -122,8 +134,8 @@ public class CirclesPanel2 extends javax.swing.JPanel {
                     g.setColor(Color.lightGray);
                 }
 
-                // TODO: The box of the diagram should not change. So we could
-                // precalculate the shape of the zone with its box.
+                // TODO: The box of the diagram should not change. Put the box
+                // into the constructor?
                 Area a = z.getShape(diagram.getBox());
                 Area a_copy = (Area) a.clone();
                 a_copy.transform(trans);

@@ -1,11 +1,10 @@
 package icircles.concreteDiagram;
 
+import icircles.abstractDescription.AbstractBasicRegion;
 import java.awt.Color;
 import java.awt.geom.Area;
 import java.awt.geom.Rectangle2D;
 import java.util.ArrayList;
-
-import icircles.abstractDescription.AbstractBasicRegion;
 
 public class ConcreteZone {
 
@@ -38,18 +37,25 @@ public class ConcreteZone {
         shape = a;
         return a;
     }
-    public ArrayList<CircleContour> getContainingContours()
-    {return containingCircles;}
-    public ArrayList<CircleContour> getExcludingContours()
-    {return excludingCircles;}
-    public AbstractBasicRegion getAbstractBasicRegion()
-    {return abr;}
 
+    public ArrayList<CircleContour> getContainingContours() {
+        return containingCircles;
+    }
+
+    public ArrayList<CircleContour> getExcludingContours() {
+        return excludingCircles;
+    }
+
+    public AbstractBasicRegion getAbstractBasicRegion() {
+        return abr;
+    }
     Color col;
-	public void setColor(Color c) {
-		col = c;
-	}
-	public Color getColor() {
-		return col;
-	}
+
+    public void setColor(Color c) {
+        col = c;
+    }
+
+    public Color getColor() {
+        return col;
+    }
 }

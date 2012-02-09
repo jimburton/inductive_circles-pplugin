@@ -1,5 +1,20 @@
 package icircles.concreteDiagram;
 
+import icircles.abstractDescription.AbstractBasicRegion;
+import icircles.abstractDescription.AbstractCurve;
+import icircles.abstractDescription.AbstractDescription;
+import icircles.abstractDescription.AbstractSpider;
+import icircles.decomposition.Decomposer;
+import icircles.decomposition.DecompositionStep;
+import icircles.decomposition.DecompositionStrategy;
+import icircles.gui.CirclesPanel;
+import icircles.recomposition.RecompData;
+import icircles.recomposition.Recomposer;
+import icircles.recomposition.RecompositionStep;
+import icircles.recomposition.RecompositionStrategy;
+import icircles.test.TestData;
+import icircles.util.CannotDrawException;
+import icircles.util.DEB;
 import java.awt.Color;
 import java.awt.Rectangle;
 import java.awt.geom.Area;
@@ -9,47 +24,29 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Set;
 
-import icircles.decomposition.Decomposer;
-import icircles.decomposition.DecompositionStep;
-import icircles.decomposition.DecompositionStrategy;
-import icircles.gui.CirclesPanel;
+class AngleIterator {
 
-import icircles.abstractDescription.AbstractBasicRegion;
-import icircles.abstractDescription.AbstractCurve;
-import icircles.abstractDescription.AbstractDescription;
-import icircles.abstractDescription.AbstractSpider;
-import icircles.recomposition.RecompData;
-import icircles.recomposition.Recomposer;
-import icircles.recomposition.RecompositionStep;
-import icircles.recomposition.RecompositionStrategy;
-import icircles.test.TestData;
-import icircles.util.CannotDrawException;
-import icircles.util.DEB;
+    private int[] ints = {0, 8, 4, 12, 2, 6, 10, 14, 1, 3, 5, 7, 9, 11, 13, 15};
+    private int index = -1;
 
-class AngleIterator
-{
-	private int[] ints = {0, 8, 4, 12, 2, 6, 10, 14, 1, 3, 5, 7, 9, 11, 13, 15};
-	private int index = -1;
+    public AngleIterator() {
+    }
 
-	public AngleIterator(){}
-	
-	public boolean hasNext()
-	{
-		return index < ints.length - 1;
-	}
-	public double next_angle()
-	{
-	   index++;
-	   int mod_index = (index%ints.length);
-       double angle = Math.PI * 2 * ints[mod_index] / (1.0 * ints.length);
-	   return angle;		
-	}	
+    public boolean hasNext() {
+        return index < ints.length - 1;
+    }
+
+    public double next_angle() {
+        index++;
+        int mod_index = (index % ints.length);
+        double angle = Math.PI * 2 * ints[mod_index] / (1.0 * ints.length);
+        return angle;
+    }
 }
 
 public class DiagramCreator {
 
-	AbstractDescription m_initial_diagram;
-	
+    AbstractDescription m_initial_diagram;
     final static int smallest_rad = 3;
     ArrayList<DecompositionStep> d_steps;
     ArrayList<RecompositionStep> r_steps;
@@ -58,49 +55,46 @@ public class DiagramCreator {
     HashMap<AbstractCurve, Double> guide_sizes;
     HashMap<AbstractCurve, CircleContour> map;
     ArrayList<CircleContour> circles;
-    
     int debug_image_number = 0;
     int debug_size = 50;
 
-    public DiagramCreator( AbstractDescription ad )
-    {
-    	m_initial_diagram = ad;
+    public DiagramCreator(AbstractDescription ad) {
+        m_initial_diagram = ad;
         d_steps = new ArrayList<DecompositionStep>();
         r_steps = new ArrayList<RecompositionStep>();
         Decomposer d = new Decomposer();
-        d_steps.addAll(d.decompose(ad)); 
+        d_steps.addAll(d.decompose(ad));
         Recomposer r = new Recomposer();
         r_steps.addAll(r.recompose(d_steps));
         map = new HashMap<AbstractCurve, CircleContour>();
     }
 
-    public DiagramCreator( AbstractDescription ad, 
-    		DecompositionStrategy decomp_strategy,
-    		RecompositionStrategy recomp_strategy )
-    {
-    	m_initial_diagram = ad;
+    public DiagramCreator(AbstractDescription ad,
+            DecompositionStrategy decomp_strategy,
+            RecompositionStrategy recomp_strategy) {
+        m_initial_diagram = ad;
         d_steps = new ArrayList<DecompositionStep>();
         r_steps = new ArrayList<RecompositionStep>();
         Decomposer d = new Decomposer(decomp_strategy);
-        d_steps.addAll(d.decompose(ad)); 
+        d_steps.addAll(d.decompose(ad));
         Recomposer r = new Recomposer(recomp_strategy);
         r_steps.addAll(r.recompose(d_steps));
         map = new HashMap<AbstractCurve, CircleContour>();
     }
-    
+
     public ConcreteDiagram createDiagram(int size) throws CannotDrawException {
         make_guide_sizes(); // scores zones too
         /*
-        Rectangle2D.Double box = null;
-        if (guide_sizes.size() < 1) {
-            box = new Rectangle2D.Double(0, 0, 1000, 1000);
-        } else {
-            box = new Rectangle2D.Double(0, 0, 1000 * guide_sizes.size(), 1000 * guide_sizes.size());
-        }
-        */
+         * Rectangle2D.Double box = null; if (guide_sizes.size() < 1) { box =
+         * new Rectangle2D.Double(0, 0, 1000, 1000); } else { box = new
+         * Rectangle2D.Double(0, 0, 1000 * guide_sizes.size(), 1000 *
+         * guide_sizes.size()); }
+         */
         circles = new ArrayList<CircleContour>();
-        boolean ok = createCircles(/*box, */size);
-        		
+        boolean ok = createCircles(/*
+                 * box,
+                 */size);
+
         if (!ok) {
             circles = null;
             return null;
@@ -111,245 +105,221 @@ public class DiagramCreator {
         ArrayList<ConcreteZone> shadedZones = new ArrayList<ConcreteZone>();
         ArrayList<ConcreteZone> unshadedZones = new ArrayList<ConcreteZone>();
         createZones(shadedZones, unshadedZones);
-        
+
         ArrayList<ConcreteSpider> spiders = createSpiders();
-        
+
         ConcreteDiagram result = new ConcreteDiagram(new Rectangle2D.Double(0, 0, size, size),
                 circles, shadedZones, unshadedZones, spiders);
         result.setFont(TestData.font);
         return result;
     }
 
-    private ArrayList<ConcreteSpider> createSpiders() throws CannotDrawException{
-    	ArrayList<ConcreteSpider> result = new ArrayList<ConcreteSpider>();
+    private ArrayList<ConcreteSpider> createSpiders() throws CannotDrawException {
+        ArrayList<ConcreteSpider> result = new ArrayList<ConcreteSpider>();
 
-    	HashMap<AbstractBasicRegion, Integer> footCount = new HashMap<AbstractBasicRegion, Integer>();    	
-    	Iterator<AbstractSpider> it = m_initial_diagram.getSpiderIterator();
-    	while(it.hasNext())
-    	{
-    		AbstractSpider as = it.next();
-    		for(AbstractBasicRegion abr : as.get_feet())
-    		{
-    			Integer oldCount = footCount.get(abr);
-    			Integer newCount = null;
-    			if(oldCount != null)
-    			{
-    				newCount = new Integer(oldCount.intValue() + 1);
-    			}
-    			else
-    			{
-    				newCount = new Integer(1);
-    			}
-				footCount.put(abr, newCount);
-    		}
-    	}
-    	// now, for each zone, I know how many feet are in that zone
-    	// build some feet
+        HashMap<AbstractBasicRegion, Integer> footCount = new HashMap<AbstractBasicRegion, Integer>();
+        Iterator<AbstractSpider> it = m_initial_diagram.getSpiderIterator();
+        while (it.hasNext()) {
+            AbstractSpider as = it.next();
+            for (AbstractBasicRegion abr : as.get_feet()) {
+                Integer oldCount = footCount.get(abr);
+                Integer newCount = null;
+                if (oldCount != null) {
+                    newCount = new Integer(oldCount.intValue() + 1);
+                } else {
+                    newCount = new Integer(1);
+                }
+                footCount.put(abr, newCount);
+            }
+        }
+        // now, for each zone, I know how many feet are in that zone
+        // build some feet
         Rectangle2D.Double box = CircleContour.makeBigOuterBox(circles);
         RecompositionStep last_step = null;
-        if(r_steps != null && r_steps.size() > 0)
-        	last_step = r_steps.get(r_steps.size() - 1);
+        if (r_steps != null && r_steps.size() > 0) {
+            last_step = r_steps.get(r_steps.size() - 1);
+        }
         AbstractDescription last_diag = null;
-        if(last_step != null)
-        	last_diag = last_step.to();
-    	HashMap<AbstractBasicRegion, ArrayList<ConcreteSpiderFoot>> drawnFeet = 
-    			new HashMap<AbstractBasicRegion, ArrayList<ConcreteSpiderFoot>>();
-		for(AbstractBasicRegion abr : footCount.keySet())
-		{
-			ArrayList<ConcreteSpiderFoot> footList = new ArrayList<ConcreteSpiderFoot>();
-			drawnFeet.put(abr, footList);
-			Integer num_required = footCount.get(abr);
-	        ArrayList<AbstractCurve> acs = new ArrayList<AbstractCurve>();
-	        for(int i = 0; i < num_required.intValue(); i++)
-	        {
-	        acs.add(new AbstractCurve(null));
-	        }
-	        
-	        AbstractBasicRegion zone_in_last_diag = last_diag.getLabelEquivalentZone(abr);
-	        if(zone_in_last_diag == null)
-	        	throw new CannotDrawException("problem with spider habitat");
-	        
-            ArrayList<CircleContour> cs = findCircleContours(box, smallest_rad, 3,
-            		zone_in_last_diag, last_diag, acs, 3);
-            for(CircleContour cc : cs)
-            {
-            	ConcreteSpiderFoot foot = new ConcreteSpiderFoot();
-            	foot.x = cc.cx;
-            	foot.y = cc.cy;
-            	footList.add(foot);
+        if (last_step != null) {
+            last_diag = last_step.to();
+        }
+        HashMap<AbstractBasicRegion, ArrayList<ConcreteSpiderFoot>> drawnFeet =
+                new HashMap<AbstractBasicRegion, ArrayList<ConcreteSpiderFoot>>();
+        for (AbstractBasicRegion abr : footCount.keySet()) {
+            ArrayList<ConcreteSpiderFoot> footList = new ArrayList<ConcreteSpiderFoot>();
+            drawnFeet.put(abr, footList);
+            Integer num_required = footCount.get(abr);
+            ArrayList<AbstractCurve> acs = new ArrayList<AbstractCurve>();
+            for (int i = 0; i < num_required.intValue(); i++) {
+                acs.add(new AbstractCurve(null));
             }
-		}
-		 
-		// TODO collect good choices of feet into spiders
-		// for now, we just pick feet which are in the right zones.
-		it = m_initial_diagram.getSpiderIterator();
-		ArrayList<ConcreteSpider> spiders = new ArrayList<ConcreteSpider>();
-		HashMap<ConcreteSpiderFoot, AbstractBasicRegion> feet_and_zones = 
-				new HashMap<ConcreteSpiderFoot, AbstractBasicRegion>();
-    	while(it.hasNext())
-    	{
-    		AbstractSpider as = it.next();
-    		ConcreteSpider cs = new ConcreteSpider(as);
-    		for(AbstractBasicRegion abr : as.get_feet())
-    		{
-    			ArrayList<ConcreteSpiderFoot> footList = drawnFeet.get(abr);
-    			if(footList == null || footList.size() == 0)
-    				throw new CannotDrawException("spider foot problem");
-    			
-    			ConcreteSpiderFoot foot = footList.get(0);
-    			footList.remove(0);
-    			cs.feet.add(foot);
-    			
-    			// get the corresponding abr from the last_diag
-    			feet_and_zones.put(foot, last_diag.getLabelEquivalentZone(abr));
-    		}
-    		// choose a foot as "most central" - shortest leg length sum
-    		// and draw legs from the central body to the outer feet
-    		//
-    		// TODO - not all spiders require a central body - e.g. four feet in a row
-    		// so we need a minimum-leg-span tree rather than choosing a central
-    		// foot as "body"
-    		ConcreteSpiderFoot centralFoot = null;
-    		double best_dist_sum = Double.MAX_VALUE;
-    		for(ConcreteSpiderFoot centreCandidate : cs.feet)
-    		{
-    			double distSum = 0;
-        		for(ConcreteSpiderFoot other : cs.feet)
-        		{
-        			if(other == centreCandidate)
-        				continue;
-        			distSum += Math.sqrt((centreCandidate.x - other.x)*(centreCandidate.x - other.x) +
-        								 (centreCandidate.y - other.y)*(centreCandidate.y - other.y));
-        		}
-        		if(distSum < best_dist_sum)
-        		{
-        			best_dist_sum = distSum;
-        			centralFoot = centreCandidate;
-        		}    			
-    		}
-    		for(ConcreteSpiderFoot other : cs.feet)
-    		{
-    			if(other == centralFoot)
-    				continue;
-				ConcreteSpiderLeg leg = new ConcreteSpiderLeg();
-				leg.from = centralFoot;
-				leg.to = other;
-				cs.legs.add(leg);    			
-    		}
-    		
-    		spiders.add(cs);
-    		result.add(cs);
-    	}
-    	
-    	// Now we want to avoid spiders that overlap - especially 
-    	// those with a leg passing through the foot of another spider.
-    	// For now, just nudge the spider foot off the offending leg.
-    	// Check that the new foot is still in its relevant abstract basic region.
-    	
-    	// First - detect where feet meet a non-adjacent leg
-    	for( ConcreteSpider cs : spiders )
-    	{
-    		for(ConcreteSpiderFoot foot : cs.feet)
-    		{
-    			// check whether foot is too close to another leg
-    	    	for( ConcreteSpider cs2 : spiders )
-    	    	{
-    	    		for( ConcreteSpiderLeg leg : cs2.legs)
-    	    		{
-    	    			if( leg.from == foot || leg.to == foot )
-    	    			{
-    	    				// this leg is bound to be close to foot -it's attached!
-    	    				continue;
-    	    			}
-    	    			// is foot on leg?
-    	    			double sf_x = foot.x - leg.from.x;
-    	    			double sf_y = foot.y - leg.from.y;
-    	    			
-    	    			double se_x = leg.to.x - leg.from.x;
-    	    			double se_y = leg.to.y - leg.from.y;
 
-    	    			double se_length = Math.sqrt(se_x * se_x + se_y * se_y);
-    	    			
-    	    			double unit_leg_x = se_x / se_length;
-    	    			double unit_leg_y = se_y / se_length;
-    	    			
-    	    			double sf_dot_unit_leg = sf_x * unit_leg_x + sf_y * unit_leg_y;
-    	    			
-    	    			double sf_proj_leg_x = sf_dot_unit_leg * unit_leg_x;
-    	    			double sf_proj_leg_y = sf_dot_unit_leg * unit_leg_y;
-    	    			
-    	    			double sf_perp_leg_x = sf_x - sf_proj_leg_x;
-    	    			double sf_perp_leg_y = sf_y - sf_proj_leg_y;
+            AbstractBasicRegion zone_in_last_diag = last_diag.getLabelEquivalentZone(abr);
+            if (zone_in_last_diag == null) {
+                throw new CannotDrawException("problem with spider habitat");
+            }
 
-    	    			double sf_perp_leg_len = Math.sqrt(sf_perp_leg_x * sf_perp_leg_x + sf_perp_leg_y * sf_perp_leg_y);
-    	    			
-    	    			double sf_prop_leg = sf_proj_leg_x / se_x;
-    	    			double tol = 6;
-    	    			boolean foot_on_leg = sf_perp_leg_len < tol && 
-						    	    					sf_prop_leg > 0 && 
-						    	    					sf_prop_leg < 1;
-    	    	        if(foot_on_leg)
-    	    	    	    {
-    	    	        	// nudge the foot, but check it's still in its zone afterwards
-    	    	        	double old_x = foot.x;
-    	    	        	double old_y = foot.y;
-    	    	        	AbstractBasicRegion abr = feet_and_zones.get(foot);
-    	    	        	
-    	    	        	ConcreteZone cz = makeConcreteZone(abr);
-    	                    Area a = new Area(cz.getShape(box));
-    	                    double new_y = old_y + 2*tol;
+            ArrayList<CircleContour> cs = findCircleContours(box, smallest_rad, 3,
+                    zone_in_last_diag, last_diag, acs, 3);
+            for (CircleContour cc : cs) {
+                ConcreteSpiderFoot foot = new ConcreteSpiderFoot();
+                foot.x = cc.cx;
+                foot.y = cc.cy;
+                footList.add(foot);
+            }
+        }
+
+        // TODO collect good choices of feet into spiders
+        // for now, we just pick feet which are in the right zones.
+        it = m_initial_diagram.getSpiderIterator();
+        ArrayList<ConcreteSpider> spiders = new ArrayList<ConcreteSpider>();
+        HashMap<ConcreteSpiderFoot, AbstractBasicRegion> feet_and_zones =
+                new HashMap<ConcreteSpiderFoot, AbstractBasicRegion>();
+        while (it.hasNext()) {
+            AbstractSpider as = it.next();
+            ConcreteSpider cs = new ConcreteSpider(as);
+            for (AbstractBasicRegion abr : as.get_feet()) {
+                ArrayList<ConcreteSpiderFoot> footList = drawnFeet.get(abr);
+                if (footList == null || footList.size() == 0) {
+                    throw new CannotDrawException("spider foot problem");
+                }
+
+                ConcreteSpiderFoot foot = footList.get(0);
+                footList.remove(0);
+                cs.feet.add(foot);
+
+                // get the corresponding abr from the last_diag
+                feet_and_zones.put(foot, last_diag.getLabelEquivalentZone(abr));
+            }
+            // choose a foot as "most central" - shortest leg length sum
+            // and draw legs from the central body to the outer feet
+            //
+            // TODO - not all spiders require a central body - e.g. four feet in a row
+            // so we need a minimum-leg-span tree rather than choosing a central
+            // foot as "body"
+            ConcreteSpiderFoot centralFoot = null;
+            double best_dist_sum = Double.MAX_VALUE;
+            for (ConcreteSpiderFoot centreCandidate : cs.feet) {
+                double distSum = 0;
+                for (ConcreteSpiderFoot other : cs.feet) {
+                    if (other == centreCandidate) {
+                        continue;
+                    }
+                    distSum += Math.sqrt((centreCandidate.x - other.x) * (centreCandidate.x - other.x)
+                            + (centreCandidate.y - other.y) * (centreCandidate.y - other.y));
+                }
+                if (distSum < best_dist_sum) {
+                    best_dist_sum = distSum;
+                    centralFoot = centreCandidate;
+                }
+            }
+            for (ConcreteSpiderFoot other : cs.feet) {
+                if (other == centralFoot) {
+                    continue;
+                }
+                ConcreteSpiderLeg leg = new ConcreteSpiderLeg();
+                leg.from = centralFoot;
+                leg.to = other;
+                cs.legs.add(leg);
+            }
+
+            spiders.add(cs);
+            result.add(cs);
+        }
+
+        // Now we want to avoid spiders that overlap - especially 
+        // those with a leg passing through the foot of another spider.
+        // For now, just nudge the spider foot off the offending leg.
+        // Check that the new foot is still in its relevant abstract basic region.
+
+        // First - detect where feet meet a non-adjacent leg
+        for (ConcreteSpider cs : spiders) {
+            for (ConcreteSpiderFoot foot : cs.feet) {
+                // check whether foot is too close to another leg
+                for (ConcreteSpider cs2 : spiders) {
+                    for (ConcreteSpiderLeg leg : cs2.legs) {
+                        if (leg.from == foot || leg.to == foot) {
+                            // this leg is bound to be close to foot -it's attached!
+                            continue;
+                        }
+                        // is foot on leg?
+                        double sf_x = foot.x - leg.from.x;
+                        double sf_y = foot.y - leg.from.y;
+
+                        double se_x = leg.to.x - leg.from.x;
+                        double se_y = leg.to.y - leg.from.y;
+
+                        double se_length = Math.sqrt(se_x * se_x + se_y * se_y);
+
+                        double unit_leg_x = se_x / se_length;
+                        double unit_leg_y = se_y / se_length;
+
+                        double sf_dot_unit_leg = sf_x * unit_leg_x + sf_y * unit_leg_y;
+
+                        double sf_proj_leg_x = sf_dot_unit_leg * unit_leg_x;
+                        double sf_proj_leg_y = sf_dot_unit_leg * unit_leg_y;
+
+                        double sf_perp_leg_x = sf_x - sf_proj_leg_x;
+                        double sf_perp_leg_y = sf_y - sf_proj_leg_y;
+
+                        double sf_perp_leg_len = Math.sqrt(sf_perp_leg_x * sf_perp_leg_x + sf_perp_leg_y * sf_perp_leg_y);
+
+                        double sf_prop_leg = sf_proj_leg_x / se_x;
+                        double tol = 6;
+                        boolean foot_on_leg = sf_perp_leg_len < tol
+                                && sf_prop_leg > 0
+                                && sf_prop_leg < 1;
+                        if (foot_on_leg) {
+                            // nudge the foot, but check it's still in its zone afterwards
+                            double old_x = foot.x;
+                            double old_y = foot.y;
+                            AbstractBasicRegion abr = feet_and_zones.get(foot);
+
+                            ConcreteZone cz = makeConcreteZone(abr);
+                            Area a = new Area(cz.getShape(box));
+                            double new_y = old_y + 2 * tol;
 //    	                    double new_x = old_x + 2*tol;
-    	                    double new_x = old_x;
-    	                    CircleContour test = new CircleContour(new_x, new_y, tol, null);
-    	                    if(containedIn(test, a))
-    	                    	{
-    	                    	foot.x = new_x;
-    	                    	foot.y = new_y;
-    	                    	}
-    	                    else
-    	                    	{
-        	                    new_x = old_x - 2*tol;
-        	                    new_y = old_y - 2*tol;
-        	                    test = new CircleContour(new_x, new_y, tol, null);
-        	                    if(containedIn(test, a))
-        	                    	{
-        	                    	foot.x = new_x;
-        	                    	foot.y = new_y;
-        	                    	}
-        	                    else
-        	                    	{
-            	                    new_x = old_x + 2*tol;
-            	                    new_y = old_y - 2*tol;
-            	                    test = new CircleContour(new_x, new_y, tol, null);
-            	                    if(containedIn(test, a))
-            	                    	{
-            	                    	foot.x = new_x;
-            	                    	foot.y = new_y;
-            	                    	}
-            	                    else
-            	                    	{
-                	                    new_x = old_x - 2*tol;
-                	                    new_y = old_y + 2*tol;
-                	                    test = new CircleContour(new_x, new_y, tol, null);
-                	                    if(containedIn(test, a))
-                	                    	{
-                	                    	foot.x = new_x;
-                	                    	foot.y = new_y;
-                	                    	}
-            	                    	}
-        	                    	}
-    	                    	}
-    	    	    	    }
-    	    		}
-    	    	}
-    			
-    		}
-    	}
-    	
-    	return result;
-	}
+                            double new_x = old_x;
+                            CircleContour test = new CircleContour(new_x, new_y, tol, null);
+                            if (containedIn(test, a)) {
+                                foot.x = new_x;
+                                foot.y = new_y;
+                            } else {
+                                new_x = old_x - 2 * tol;
+                                new_y = old_y - 2 * tol;
+                                test = new CircleContour(new_x, new_y, tol, null);
+                                if (containedIn(test, a)) {
+                                    foot.x = new_x;
+                                    foot.y = new_y;
+                                } else {
+                                    new_x = old_x + 2 * tol;
+                                    new_y = old_y - 2 * tol;
+                                    test = new CircleContour(new_x, new_y, tol, null);
+                                    if (containedIn(test, a)) {
+                                        foot.x = new_x;
+                                        foot.y = new_y;
+                                    } else {
+                                        new_x = old_x - 2 * tol;
+                                        new_y = old_y + 2 * tol;
+                                        test = new CircleContour(new_x, new_y, tol, null);
+                                        if (containedIn(test, a)) {
+                                            foot.x = new_x;
+                                            foot.y = new_y;
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
 
-	private void make_guide_sizes() {
+            }
+        }
+
+        return result;
+    }
+
+    private void make_guide_sizes() {
         guide_sizes = new HashMap<AbstractCurve, Double>();
         if (r_steps.size() == 0) {
             return;
@@ -393,14 +363,12 @@ public class DiagramCreator {
     }
 
     private void createZones(ArrayList<ConcreteZone> shadedZones,
-                       		ArrayList<ConcreteZone> unshadedZones) {
+            ArrayList<ConcreteZone> unshadedZones) {
         AbstractDescription final_diagram = null;
         if (d_steps.size() == 0) {
             final_diagram = m_initial_diagram;
-        }
-        else
-        {
-        	final_diagram = r_steps.get(r_steps.size() - 1).to();
+        } else {
+            final_diagram = r_steps.get(r_steps.size() - 1).to();
         }
         // which zones in final_diagram were shaded in initial_diagram?
         // which zones in final_diagram were not in initial_diagram, or specified shaded in initial_diagram?
@@ -426,9 +394,7 @@ public class DiagramCreator {
                 }
                 ConcreteZone cz = makeConcreteZone(z);
                 shadedZones.add(cz);
-            }
-            else
-            {
+            } else {
                 ConcreteZone cz = makeConcreteZone(z);
                 unshadedZones.add(cz);
             }
@@ -450,8 +416,8 @@ public class DiagramCreator {
     }
 
     private boolean createCircles(int deb_size) throws CannotDrawException {
-    	debug_size = deb_size;
-    	debug_image_number = 0;
+        debug_size = deb_size;
+        debug_image_number = 0;
         BuildStep bs = null;
         BuildStep tail = null;
         for (RecompositionStep rs : r_steps) {
@@ -478,7 +444,7 @@ public class DiagramCreator {
         while (step != null) {
             DEB.out(2, "new build step");
             Rectangle2D.Double outerBox = CircleContour.makeBigOuterBox(circles);
-                        
+
             // we need to add the new curves with regard to their placement
             // relative to the existing ones in the map
             if (step.recomp_data.size() > 1) {
@@ -503,7 +469,7 @@ public class DiagramCreator {
                     // put contours into a zone
                     ArrayList<CircleContour> cs = findCircleContours(outerBox, smallest_rad, suggested_rad,
                             zone, last_diag, acs, debug_image_number);
-                    
+
                     if (cs != null && cs.size() > 0) {
                         DEB.assertCondition(cs.size() == step.recomp_data.size(), "not enough circles for rds");
                         for (int i = 0; i < cs.size(); i++) {
@@ -520,13 +486,13 @@ public class DiagramCreator {
                 } else if (step.recomp_data.get(0).split_zones.size() == 2) {
                     // we have a symmetry of 1-piercings.
                     // try to add them together
-                	
-                	// Look at the 1st 1-piercing
-                	RecompData rd0 = step.recomp_data.get(0);
+
+                    // Look at the 1st 1-piercing
+                    RecompData rd0 = step.recomp_data.get(0);
                     AbstractBasicRegion abr0 = rd0.split_zones.get(0);
                     AbstractBasicRegion abr1 = rd0.split_zones.get(1);
                     AbstractCurve piercingCurve = rd0.added_curve;
-                    
+
                     AbstractCurve pierced_ac = abr0.getStraddledContour(abr1);
                     CircleContour pierced_cc = map.get(pierced_ac);
                     ConcreteZone cz0 = makeConcreteZone(abr0);
@@ -536,50 +502,48 @@ public class DiagramCreator {
 
                     double suggested_rad = guide_sizes.get(piercingCurve);
 
-                    DEB.show(4, a, "a for 1-piercings "+debug_image_number);
-                    
-                	// We have made a piercing which is centred on the circumference of circle c.
-                	// but if the contents of rd.addedCurve are not equally balanced between
-                	// things inside c and things outside, we may end up squashing lots
-                	// into half of rd.addedCurve, leaving the other half looking empty.
-                	// See if we can nudge c outwards or inwards to accommodate
-                	// its contents.
-                	
-                	// iterate through zoneScores, looking for zones inside c,
-                	// then ask whether they are inside or outside cc.  If we
-                	// get a big score outside, then try to move c outwards.
-                	
-                	//  HashMap<AbstractBasicRegion, Double> zoneScores;
-                	double score_in_c = 0.0;
-                	double score_out_of_c = 0.0;
-                	
-                	double center_of_circle_lies_on_rad = pierced_cc.radius;
-                	                	
-                	Set<AbstractBasicRegion> allZones = zoneScores.keySet();
-                	for(AbstractBasicRegion abr : allZones)
-                	{
-                		DEB.out(1, "compare "+abr.debug()+" against "+piercingCurve.debug());
-                		if(!abr.is_in(piercingCurve))
-                			continue;
-                		DEB.out(1, "OK "+abr.debug()+" is in "+piercingCurve.debug()+", so compare against "+pierced_ac.debug());
-                		if(abr.is_in(pierced_ac))
-                			score_in_c += zoneScores.get(abr).doubleValue();
-                		else
-                			score_out_of_c += zoneScores.get(abr).doubleValue();                    		
-                	}
-            		DEB.out(3, "scores for "+piercingCurve+" are inside="+score_in_c+" and outside="+score_out_of_c);
-            		
-            		if(score_out_of_c > score_in_c)
-            		{
-            			double nudge = suggested_rad * 0.3;
-            			center_of_circle_lies_on_rad += nudge;
-            		}
-            		else if(score_out_of_c < score_in_c)
-            		{
-            			double nudge = Math.min(suggested_rad * 0.3, (pierced_cc.radius * 2 - suggested_rad) * 0.5) ;
-            			center_of_circle_lies_on_rad -= nudge;
-            		}
-                    
+                    DEB.show(4, a, "a for 1-piercings " + debug_image_number);
+
+                    // We have made a piercing which is centred on the circumference of circle c.
+                    // but if the contents of rd.addedCurve are not equally balanced between
+                    // things inside c and things outside, we may end up squashing lots
+                    // into half of rd.addedCurve, leaving the other half looking empty.
+                    // See if we can nudge c outwards or inwards to accommodate
+                    // its contents.
+
+                    // iterate through zoneScores, looking for zones inside c,
+                    // then ask whether they are inside or outside cc.  If we
+                    // get a big score outside, then try to move c outwards.
+
+                    //  HashMap<AbstractBasicRegion, Double> zoneScores;
+                    double score_in_c = 0.0;
+                    double score_out_of_c = 0.0;
+
+                    double center_of_circle_lies_on_rad = pierced_cc.radius;
+
+                    Set<AbstractBasicRegion> allZones = zoneScores.keySet();
+                    for (AbstractBasicRegion abr : allZones) {
+                        DEB.out(1, "compare " + abr.debug() + " against " + piercingCurve.debug());
+                        if (!abr.is_in(piercingCurve)) {
+                            continue;
+                        }
+                        DEB.out(1, "OK " + abr.debug() + " is in " + piercingCurve.debug() + ", so compare against " + pierced_ac.debug());
+                        if (abr.is_in(pierced_ac)) {
+                            score_in_c += zoneScores.get(abr).doubleValue();
+                        } else {
+                            score_out_of_c += zoneScores.get(abr).doubleValue();
+                        }
+                    }
+                    DEB.out(3, "scores for " + piercingCurve + " are inside=" + score_in_c + " and outside=" + score_out_of_c);
+
+                    if (score_out_of_c > score_in_c) {
+                        double nudge = suggested_rad * 0.3;
+                        center_of_circle_lies_on_rad += nudge;
+                    } else if (score_out_of_c < score_in_c) {
+                        double nudge = Math.min(suggested_rad * 0.3, (pierced_cc.radius * 2 - suggested_rad) * 0.5);
+                        center_of_circle_lies_on_rad -= nudge;
+                    }
+
                     double guide_rad = guide_sizes.get(step.recomp_data.get(0).added_curve);
                     int sampleSize = (int) (Math.PI / Math.asin(guide_rad / pierced_cc.radius));
                     if (sampleSize >= step.recomp_data.size()) {
@@ -608,7 +572,7 @@ public class DiagramCreator {
                                         CircleContour c = new CircleContour(x, y, guide_rad, added_curve);
                                         abr0 = step.recomp_data.get(i).split_zones.get(0);
                                         abr1 = step.recomp_data.get(i).split_zones.get(1);
-                                        
+
                                         map.put(added_curve, c);
                                         addCircle(c);
                                     }
@@ -643,7 +607,7 @@ public class DiagramCreator {
                     }
                 }
             }
-            
+
             for (RecompData rd : step.recomp_data) {
                 AbstractCurve ac = rd.added_curve;
                 double suggested_rad = guide_sizes.get(ac);
@@ -716,61 +680,58 @@ public class DiagramCreator {
                     ConcreteZone cz1 = makeConcreteZone(abr1);
                     Area a = new Area(cz0.getShape(outerBox));
 
-                    DEB.show(4, a, "for single piercing first half "+debug_image_number);
-                    DEB.show(4, new Area(cz1.getShape(outerBox)), "for single piercing second half "+debug_image_number);
+                    DEB.show(4, a, "for single piercing first half " + debug_image_number);
+                    DEB.show(4, new Area(cz1.getShape(outerBox)), "for single piercing second half " + debug_image_number);
                     a.add(cz1.getShape(outerBox));
-                    
-                    DEB.show(4, a, "for single piercing "+debug_image_number);
 
-                	// We have made a piercing which is centred on the circumference of circle c.
-                	// but if the contents of rd.addedCurve are not equally balanced between
-                	// things inside c and things outside, we may end up squashing lots
-                	// into half of rd.addedCurve, leaving the other half looking empty.
-                	// See if we can nudge c outwards or inwards to accommodate
-                	// its contents.
-                	
-                	// iterate through zoneScores, looking for zones inside c,
-                	// then ask whether they are inside or outside cc.  If we
-                	// get a big score outside, then try to move c outwards.
-                	
-                	//  HashMap<AbstractBasicRegion, Double> zoneScores;
-                	double score_in_c = 0.0;
-                	double score_out_of_c = 0.0;
-                	
-                	double center_of_circle_lies_on_rad = cc.radius;
-                	double smallest_allowed_rad = smallest_rad;
-                	
-                	Set<AbstractBasicRegion> allZones = zoneScores.keySet();
-                	for(AbstractBasicRegion abr : allZones)
-                	{
-                		DEB.out(1, "compare "+abr.debug()+" against "+c.debug());
-                		if(!abr.is_in(rd.added_curve))
-                			continue;
-                		DEB.out(1, "OK "+abr.debug()+" is in "+c.debug()+", so compare against "+cc.debug());
-                		if(abr.is_in(c))
-                			score_in_c += zoneScores.get(abr).doubleValue();
-                		else
-                			score_out_of_c += zoneScores.get(abr).doubleValue();                    		
-                	}
-            		DEB.out(3, "scores for "+c+" are inside="+score_in_c+" and outside="+score_out_of_c);
-            		
-            		if(score_out_of_c > score_in_c)
-            		{
-            			double nudge = suggested_rad * 0.3;
-            			smallest_allowed_rad += nudge;
-            			center_of_circle_lies_on_rad += nudge;
-            		}
-            		else if(score_out_of_c < score_in_c)
-            		{
-            			double nudge = Math.min(suggested_rad * 0.3, (cc.radius * 2 - suggested_rad) * 0.5) ;
-            			smallest_allowed_rad += nudge;
-            			center_of_circle_lies_on_rad -= nudge;
-            		}
-                    
+                    DEB.show(4, a, "for single piercing " + debug_image_number);
+
+                    // We have made a piercing which is centred on the circumference of circle c.
+                    // but if the contents of rd.addedCurve are not equally balanced between
+                    // things inside c and things outside, we may end up squashing lots
+                    // into half of rd.addedCurve, leaving the other half looking empty.
+                    // See if we can nudge c outwards or inwards to accommodate
+                    // its contents.
+
+                    // iterate through zoneScores, looking for zones inside c,
+                    // then ask whether they are inside or outside cc.  If we
+                    // get a big score outside, then try to move c outwards.
+
+                    //  HashMap<AbstractBasicRegion, Double> zoneScores;
+                    double score_in_c = 0.0;
+                    double score_out_of_c = 0.0;
+
+                    double center_of_circle_lies_on_rad = cc.radius;
+                    double smallest_allowed_rad = smallest_rad;
+
+                    Set<AbstractBasicRegion> allZones = zoneScores.keySet();
+                    for (AbstractBasicRegion abr : allZones) {
+                        DEB.out(1, "compare " + abr.debug() + " against " + c.debug());
+                        if (!abr.is_in(rd.added_curve)) {
+                            continue;
+                        }
+                        DEB.out(1, "OK " + abr.debug() + " is in " + c.debug() + ", so compare against " + cc.debug());
+                        if (abr.is_in(c)) {
+                            score_in_c += zoneScores.get(abr).doubleValue();
+                        } else {
+                            score_out_of_c += zoneScores.get(abr).doubleValue();
+                        }
+                    }
+                    DEB.out(3, "scores for " + c + " are inside=" + score_in_c + " and outside=" + score_out_of_c);
+
+                    if (score_out_of_c > score_in_c) {
+                        double nudge = suggested_rad * 0.3;
+                        smallest_allowed_rad += nudge;
+                        center_of_circle_lies_on_rad += nudge;
+                    } else if (score_out_of_c < score_in_c) {
+                        double nudge = Math.min(suggested_rad * 0.3, (cc.radius * 2 - suggested_rad) * 0.5);
+                        smallest_allowed_rad += nudge;
+                        center_of_circle_lies_on_rad -= nudge;
+                    }
+
                     // now place circles around cc, checking whether they fit into a
                     CircleContour solution = null;
-                    for (AngleIterator ai = new AngleIterator(); ai.hasNext(); )
-                    	{
+                    for (AngleIterator ai = new AngleIterator(); ai.hasNext();) {
                         double angle = ai.next_angle();
                         double x = cc.cx + Math.cos(angle) * center_of_circle_lies_on_rad;
                         double y = cc.cy + Math.sin(angle) * center_of_circle_lies_on_rad;
@@ -782,10 +743,10 @@ public class DiagramCreator {
                             } else {
                                 start_rad = smallest_rad;
                             }
-                            CircleContour attempt = growCircleContour(a, rd.added_curve, 
-                            		x, y, suggested_rad, 
-                            		start_rad, 
-                            		smallest_allowed_rad);
+                            CircleContour attempt = growCircleContour(a, rd.added_curve,
+                                    x, y, suggested_rad,
+                                    start_rad,
+                                    smallest_allowed_rad);
                             if (attempt != null) {
                                 solution = attempt;
                                 if (solution.radius == guide_sizes.get(ac)) {
@@ -798,9 +759,7 @@ public class DiagramCreator {
                     if (solution == null) // no single piercing found which was OK
                     {
                         throw new CannotDrawException("1-peircing no fit");
-                    }
-                    else 
-                    {
+                    } else {
                         DEB.out(2, "added a single piercing labelled " + solution.ac.getLabel());
                         map.put(rd.added_curve, solution);
                         addCircle(solution);
@@ -832,8 +791,8 @@ public class DiagramCreator {
                     a.add(cz2.getShape(outerBox));
                     a.add(cz3.getShape(outerBox));
 
-                    DEB.show(4, a, "for double piercing "+debug_image_number);
-                    
+                    DEB.show(4, a, "for double piercing " + debug_image_number);
+
                     double cx, cy;
                     if (a.contains(intn_coords[0][0], intn_coords[0][1])) {
                         if (DEB.level > 2) {
@@ -868,9 +827,9 @@ public class DiagramCreator {
             }// next RecompData in the BuildStep
             step = step.next;
         }// go to next BuildStep
-        
+
         DEB.showFilmStrip();
-        
+
         return true;
     }
 
@@ -958,11 +917,10 @@ public class DiagramCreator {
         }
         set_colour(c);
         circles.add(c);
-        
+
         DEB_show_frame(3, debug_image_number, debug_size);
         debug_image_number++;
     }
-
     private static Color[] colors = {
         new Color(0, 100, 0), // dark green
         Color.red,
@@ -972,18 +930,20 @@ public class DiagramCreator {
         new Color(100, 0, 100)};
 
     private void set_colour(CircleContour cc) {
-		String s = cc.ac.getLabel().getLabel();
-		if(s == null || s.length() < 1)
-			return;
-		char c = s.charAt(0);
-		int n = Character.getNumericValue(c) - Character.getNumericValue('a');
-		while( n < colors.length)
-			n += colors.length;
-		int col_index = n%colors.length;
-		cc.setColor(colors[col_index]);
-	}
+        String s = cc.ac.getLabel().getLabel();
+        if (s == null || s.length() < 1) {
+            return;
+        }
+        char c = s.charAt(0);
+        int n = Character.getNumericValue(c) - Character.getNumericValue('a');
+        while (n < colors.length) {
+            n += colors.length;
+        }
+        int col_index = n % colors.length;
+        cc.setColor(colors[col_index]);
+    }
 
-	private CircleContour growCircleContour(Area a, AbstractCurve ac,
+    private CircleContour growCircleContour(Area a, AbstractCurve ac,
             double cx, double cy,
             double suggested_rad, double start_rad,
             double smallest_rad) {
@@ -1058,7 +1018,7 @@ public class DiagramCreator {
             int label_index = 0;
             for (AbstractCurve ac : acs) {
                 result.add(new CircleContour(
-                		outerBox.getCenterX() - 0.5 * (guide_rad * 3 * acs.size()) + 1.5 * guide_rad
+                        outerBox.getCenterX() - 0.5 * (guide_rad * 3 * acs.size()) + 1.5 * guide_rad
                         + guide_rad * 3 * label_index,
                         outerBox.getCenterY(),
                         guide_rad, ac));
@@ -1148,8 +1108,8 @@ public class DiagramCreator {
         if (a.isEmpty()) {
             throw new CannotDrawException("cannot put a nested contour into an empty region");
         }
-        
-        DEB.show(4, a, "area for "+debug_index);
+
+        DEB.show(4, a, "area for " + debug_index);
 
         // special case : one contour inside another with no other interference between
         // look at the final diagram - find the corresponding zone
@@ -1267,31 +1227,19 @@ public class DiagramCreator {
 
         Rectangle bounds = a.getBounds();
         /*
-        // try from the middle of the bounds.
-        double cx = bounds.getCenterX();
-        double cy = bounds.getCenterX();
-        if(a.contains(cx, cy))
-        {
-        if(labels.size() == 1)
-        {
-        // go for a circle of the suggested size
-        CircleContour attempt = new CircleContour(cx, cy, guide_rad, labels.get(0));
-        if(containedIn(attempt, a))
-        {
-        result.add(attempt);
-        return result;
-        }
-        }
-        else
-        {
-        Rectangle box = new Rectangle(cx - guide_rad/2)
-        }
-        }
+         * // try from the middle of the bounds. double cx =
+         * bounds.getCenterX(); double cy = bounds.getCenterX();
+         * if(a.contains(cx, cy)) { if(labels.size() == 1) { // go for a circle
+         * of the suggested size CircleContour attempt = new CircleContour(cx,
+         * cy, guide_rad, labels.get(0)); if(containedIn(attempt, a)) {
+         * result.add(attempt); return result; } } else { Rectangle box = new
+         * Rectangle(cx - guide_rad/2) } }
          */
-        if(acs.get(0) == null)
-        	DEB.out(2, "putting unlabelled contour inside a zone - grid-style");
-        else
-        	DEB.out(2, "putting contour " + acs.get(0).getLabel() + " inside a zone - grid-style");
+        if (acs.get(0) == null) {
+            DEB.out(2, "putting unlabelled contour inside a zone - grid-style");
+        } else {
+            DEB.out(2, "putting contour " + acs.get(0).getLabel() + " inside a zone - grid-style");
+        }
 
         // Use a grid approach to search for a space for the contour(s)
         int ni = (int) (bounds.getWidth() / smallest_rad) + 1;
@@ -1466,29 +1414,29 @@ public class DiagramCreator {
         test.subtract(a);
         return test.isEmpty();
     }
+
     private void DEB_show_frame(int deb_level,// only show if deb_level >= global debug level
-    		int debug_frame_index,
-    		int size)
-    {
-		if(deb_level > DEB.level)
-			return;
-		
-		// build a ConcreteDiagram for the current collection of circles
-		ArrayList<ConcreteZone> shadedZones = new ArrayList<ConcreteZone>();
-		ArrayList<ConcreteZone> unshadedZones = new ArrayList<ConcreteZone>();
-		ArrayList<ConcreteSpider> spiders = new ArrayList<ConcreteSpider>();
-		
-		ArrayList<CircleContour> circles_copy = new ArrayList<CircleContour>();
-		for(CircleContour c : circles)
-		{
-			circles_copy.add(new CircleContour(c));
-		}
+            int debug_frame_index,
+            int size) {
+        if (deb_level > DEB.level) {
+            return;
+        }
+
+        // build a ConcreteDiagram for the current collection of circles
+        ArrayList<ConcreteZone> shadedZones = new ArrayList<ConcreteZone>();
+        ArrayList<ConcreteZone> unshadedZones = new ArrayList<ConcreteZone>();
+        ArrayList<ConcreteSpider> spiders = new ArrayList<ConcreteSpider>();
+
+        ArrayList<CircleContour> circles_copy = new ArrayList<CircleContour>();
+        for (CircleContour c : circles) {
+            circles_copy.add(new CircleContour(c));
+        }
         CircleContour.fitCirclesToSize(circles_copy, size);
-		ConcreteDiagram cd = new ConcreteDiagram(new Rectangle2D.Double(0, 0, size, size),
-	            circles_copy, shadedZones, unshadedZones, spiders );
-	    CirclesPanel cp = new CirclesPanel("debug frame "+debug_frame_index, "no failure",
-	    		cd, true);
-	    DEB.addFilmStripShot(cp);
+        ConcreteDiagram cd = new ConcreteDiagram(new Rectangle2D.Double(0, 0, size, size),
+                circles_copy, shadedZones, unshadedZones, spiders);
+        CirclesPanel cp = new CirclesPanel("debug frame " + debug_frame_index, "no failure",
+                cd, true);
+        DEB.addFilmStripShot(cp);
     }
 }
 
