@@ -31,9 +31,6 @@ public class ConcreteDiagramPointQuery {
         }
         boolean done = false;
         for (ConcreteSpider s : cd.getSpiders()) {
-            if (done) {
-                break;
-            }
             for (ConcreteSpiderFoot f : s.feet) {
                 double dist = Math.sqrt((p.x - f.x) * (p.x - f.x)
                         + (p.y - f.y) * (p.y - f.y));
@@ -43,6 +40,9 @@ public class ConcreteDiagramPointQuery {
                     done = true;
                     break;
                 }
+            }
+            if (done) {
+                break;
             }
         }
     }

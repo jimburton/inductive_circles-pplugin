@@ -28,10 +28,12 @@ package icircles.gui;
 
 import icircles.concreteDiagram.*;
 import java.awt.*;
+import java.awt.event.MouseEvent;
 import java.awt.geom.AffineTransform;
 import java.awt.geom.Area;
 import java.awt.geom.Ellipse2D;
 import java.util.ArrayList;
+import javax.swing.event.MouseInputListener;
 
 /**
  * This panel takes a {@link ConcreteDiagram concrete diagram} and draws it.
@@ -42,6 +44,14 @@ public class CirclesPanel2 extends javax.swing.JPanel {
 
     // <editor-fold defaultstate="collapsed" desc="Private Fields">
     /**
+     * This flag indicates whether mouse interaction with this circles panel is
+     * enabled. <p>Is this flag is set to {@code true} then the diagram elements
+     * will be highlighted if the user hovers the mouse over them, and also the
+     * user will be able to click on particular elements in the diagram, which
+     * will invoke a {@link DiagramClickListener diagram interaction event}.</p>
+     */
+    private boolean interactionEnabled = false;
+    /**
      * The diagram that will actually be drawn in this panel.
      */
     private ConcreteDiagram diagram;
@@ -51,6 +61,21 @@ public class CirclesPanel2 extends javax.swing.JPanel {
      */
     private double scaleFactor = 1;
     private AffineTransform trans = new AffineTransform();
+    /**
+     * This stroke is used to draw contours if no special stroke is specified
+     * for them.
+     */
+    private static final BasicStroke DEFAULT_CONTOUR_STROKE = new BasicStroke(2);
+    /**
+     * This stroke is used to draw highlighted lines and contours.
+     */
+    private static final BasicStroke HIGHLIGHT_STROKE = new BasicStroke(3);
+    private static final Color HIGHLIGHT_STROKE_COLOUR = Color.BLUE;
+    private static final Color HIGHLIGHTED_FOOT_COLOUR = Color.RED;
+    private Shape highlightedOutline = null;
+    private Area highlightedArea = null;
+    private ConcreteSpider highlightedSpider = null;
+    private ConcreteSpiderFoot highlightedFoot;
     // </editor-fold>
 
     // <editor-fold defaultstate="collapsed" desc="Constructor">
@@ -63,6 +88,10 @@ public class CirclesPanel2 extends javax.swing.JPanel {
         initComponents();
         resetDiagram(diagram);
         resizeContents();
+        // Register mouse listeners
+        CirclesPanelMouseHandler mouseHandler = new CirclesPanelMouseHandler();
+        addMouseListener(mouseHandler);
+        addMouseMotionListener(mouseHandler);
     }
 
     /**
@@ -93,6 +122,7 @@ public class CirclesPanel2 extends javax.swing.JPanel {
     // <editor-fold defaultstate="collapsed" desc="Public Properties">
     /**
      * Sets the diagram that should be displayed by this panel.
+     *
      * @param diagram the diagram that should be displayed by this panel.
      */
     public void setDiagram(ConcreteDiagram diagram) {
@@ -102,7 +132,34 @@ public class CirclesPanel2 extends javax.swing.JPanel {
     }
 
     /**
+     * This flag indicates whether mouse interaction with this circles panel is
+     * enabled. <p>Is this flag is set to {@code true} then the diagram elements
+     * will be highlighted if the user hovers the mouse over them, and also the
+     * user will be able to click on particular elements in the diagram, which
+     * will invoke a {@link DiagramClickListener diagram interaction event}.</p>
+     *
+     * @return {@code true} if and only if the mouse interaction is enabled.
+     */
+    public boolean isInteractionEnabled() {
+        return interactionEnabled;
+    }
+
+    /**
+     * This flag indicates whether mouse interaction with this circles panel is
+     * enabled. <p>Is this flag is set to {@code true} then the diagram elements
+     * will be highlighted if the user hovers the mouse over them, and also the
+     * user will be able to click on particular elements in the diagram, which
+     * will invoke a {@link DiagramClickListener diagram interaction event}.</p>
+     *
+     * @param interactionEnabled the new value to which to set the flag.
+     */
+    public void setInteractionEnabled(boolean interactionEnabled) {
+        this.interactionEnabled = interactionEnabled;
+    }
+
+    /**
      * Gets the diagram that is currently being displayed by this panel.
+     *
      * @return the diagram that is currently being displayed by this panel.
      */
     public ConcreteDiagram getDiagram() {
@@ -110,19 +167,64 @@ public class CirclesPanel2 extends javax.swing.JPanel {
     }
     // </editor-fold>
 
+    // <editor-fold defaultstate="collapsed" desc="Private Properties">
+    public Area getHighlightedArea() {
+        return highlightedArea;
+    }
+
+    public void setHighlightedArea(Area highlightedArea) {
+        if (this.highlightedArea != highlightedArea) {
+            setHighlightedOutline(null);
+            setHighlightedSpider(null, null);
+            repaintShape(this.highlightedArea);
+            this.highlightedArea = highlightedArea;
+            repaintShape(this.highlightedArea);
+        }
+    }
+
+    public Shape getHighlightedOutline() {
+        return highlightedOutline;
+    }
+
+    public void setHighlightedOutline(Shape highlightedOutline) {
+        if (this.highlightedOutline != highlightedOutline) {
+            setHighlightedArea(null);
+            setHighlightedSpider(null, null);
+            repaintShape(this.highlightedOutline);
+            this.highlightedOutline = highlightedOutline;
+            repaintShape(this.highlightedOutline);
+        }
+    }
+
+    public ConcreteSpider getHighlightedSpider() {
+        return highlightedSpider;
+    }
+
+    public void setHighlightedSpider(ConcreteSpider spider, ConcreteSpiderFoot foot) {
+        if (this.highlightedSpider != spider || this.highlightedFoot != foot) {
+            setHighlightedArea(null);
+            setHighlightedOutline(null);
+            this.highlightedSpider = spider;
+            this.highlightedFoot = foot;
+            repaint();
+        }
+    }
+    // </editor-fold>
+
     // <editor-fold defaultstate="collapsed" desc="Overrides">
     @Override
     public void paint(Graphics g) {
-        ((Graphics2D) g).setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+        Graphics2D g2d = (Graphics2D) g;
+        g2d.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
         if (diagram == null) {
             this.setBackground(Color.red);
             super.paint(g);
         } else {
             // draw the diagram
             super.paint(g);
-            
+
             // This centers the diagram onto the drawing area.
-            g.translate((this.getWidth() - (int)Math.round(diagram.getSize() * scaleFactor))/2, (this.getHeight() - (int)Math.round(diagram.getSize() * scaleFactor))/2);
+            g.translate(getCenteringTranslationX(), getCenteringTranslationY());
 
             // shaded zones
             g.setColor(Color.lightGray);
@@ -135,13 +237,13 @@ public class CirclesPanel2 extends javax.swing.JPanel {
                 }
 
                 // TODO: The box of the diagram should not change. Put the box
-                // into the constructor?
+                // into the constructor? NOTE: It would not add much to execution
+                // speed. The 'getShape' function already caches the calculated
+                // shape.
                 Area a = z.getShape(diagram.getBox());
-                Area a_copy = (Area) a.clone();
-                a_copy.transform(trans);
-                ((Graphics2D) g).fill(a_copy);
+                g2d.fill(a.createTransformedArea(trans));
             }
-            ((Graphics2D) g).setStroke(new BasicStroke(2));
+            g2d.setStroke(DEFAULT_CONTOUR_STROKE);
             ArrayList<CircleContour> circles = diagram.getCircles();
             Ellipse2D.Double tmpCircle = new Ellipse2D.Double();
             for (CircleContour cc : circles) {
@@ -151,58 +253,86 @@ public class CirclesPanel2 extends javax.swing.JPanel {
                 }
                 g.setColor(col);
                 scaleCircle(scaleFactor, cc.getCircle(), tmpCircle);
-                ((Graphics2D) g).draw(tmpCircle);
+                g2d.draw(tmpCircle);
                 if (cc.ac.getLabel() == null) {
                     continue;
                 }
                 g.setColor(col);
                 if (cc.stroke() != null) {
-                    ((Graphics2D) g).setStroke(cc.stroke());
+                    g2d.setStroke(cc.stroke());
                 } else {
-                    ((Graphics2D) g).setStroke(new BasicStroke(2));
+                    g2d.setStroke(DEFAULT_CONTOUR_STROKE);
                 }
                 // TODO a proper way to place labels - it can't be a method in CircleContour,
                 // we need the context in the ConcreteDiagram
                 Font f = diagram.getFont();
                 if (f != null) {
-                    ((Graphics2D) g).setFont(f);
+                    g2d.setFont(f);
                 }
                 /*
-                 * //TODO: ((Graphics2D) g).getFontMetrics(); // for a
-                 * string??? // use the font metrics to adjust the anchor
-                 * position
+                 * //TODO: g2d.getFontMetrics(); // for a string??? // use the
+                 * font metrics to adjust the anchor position
                  *
                  * JLabel jl = new JLabel("IGI"); jl.setFont(font);
                  * jl.getWidth(); jl.getHeight(); jl.setLocation(arg0, arg1);
                  */
 
-                ((Graphics2D) g).drawString(cc.ac.getLabel().getLabel(),
+                g2d.drawString(cc.ac.getLabel().getLabel(),
                         (int) (cc.getLabelXPosition() * trans.getScaleX()),
                         (int) (cc.getLabelYPosition() * trans.getScaleY()));
             }
             g.setColor(Color.black);
             for (ConcreteSpider s : diagram.getSpiders()) {
-                for (ConcreteSpiderFoot foot : s.feet) {
-                    foot.getBlob(tmpCircle);
-                    scaleCircle(scaleFactor, tmpCircle, tmpCircle);
-                    ((Graphics2D) g).fill(tmpCircle);
+                // Reset the stroke and the colour if the spider is highlighted.
+                Color oldColor = null;
+                Stroke oldStroke = null;
+                if (highlightedSpider == s) {
+                    oldColor = g2d.getColor();
+                    g2d.setColor(HIGHLIGHT_STROKE_COLOUR);
+                    oldStroke = g2d.getStroke();
+                    g2d.setStroke(HIGHLIGHT_STROKE);
                 }
+                
                 for (ConcreteSpiderLeg leg : s.legs) {
 
-                    ((Graphics2D) g).drawLine(
+                    g2d.drawLine(
                             (int) (leg.from.x * scaleFactor),
                             (int) (leg.from.y * scaleFactor),
                             (int) (leg.to.x * scaleFactor),
                             (int) (leg.to.y * scaleFactor));
+                }
+
+                for (ConcreteSpiderFoot foot : s.feet) {
+                    foot.getBlob(tmpCircle);
+                    Color oldColor2 = g2d.getColor();
+                    scaleCircle(scaleFactor, tmpCircle, tmpCircle);
+                    if (highlightedFoot == foot) {
+                        oldColor2 = g2d.getColor();
+                        g2d.setColor(HIGHLIGHTED_FOOT_COLOUR);
+                        tmpCircle.x -= tmpCircle.width * 0.1;
+                        tmpCircle.y -= tmpCircle.height * 0.1;
+                        tmpCircle.width *= 1.2;
+                        tmpCircle.height *= 1.2;
+                    }
+                    g2d.fill(tmpCircle);
+                    if (highlightedFoot == foot) {
+                        g2d.setColor(oldColor2);
+                    }
                 }
                 if (s.as.get_name() == null) {
                     continue;
                 }
                 // TODO a proper way to place labels - it can't be a method in ConcreteSpider,
                 // we need the context in the ConcreteDiagram
-                ((Graphics2D) g).drawString(s.as.get_name(),
+                g2d.drawString(s.as.get_name(),
                         (int) ((s.feet.get(0).x + 5) * trans.getScaleX()),
                         (int) ((s.feet.get(0).y - 5) * trans.getScaleY()));
+
+                // Reset the stroke and colour appropriatelly.
+                if (highlightedSpider == s) {
+                    g2d.setColor(oldColor);
+                    g2d.setStroke(oldStroke);
+                }
             }
         }
     }
@@ -282,5 +412,77 @@ public class CirclesPanel2 extends javax.swing.JPanel {
         outCircle.width = inCircle.width * scaleFactor;
         outCircle.height = inCircle.height * scaleFactor;
     }
+
+    private void repaintShape(Shape shape) {
+        if (shape != null) {
+            repaint(shape.getBounds());
+        }
+    }
+
+    private int getCenteringTranslationX() {
+        return (this.getWidth() - (int) Math.round(diagram.getSize() * scaleFactor)) / 2;
+    }
+
+    private int getCenteringTranslationY() {
+        return (this.getHeight() - (int) Math.round(diagram.getSize() * scaleFactor)) / 2;
+    }
     // </editor-fold>
+
+    //<editor-fold defaultstate="collapsed" desc="Helper Classes">
+    private class CirclesPanelMouseHandler implements MouseInputListener {
+
+        public CirclesPanelMouseHandler() {
+        }
+
+        public void mouseClicked(MouseEvent e) {
+            if (interactionEnabled) {
+            }
+        }
+
+        public void mousePressed(MouseEvent e) {
+        }
+
+        public void mouseReleased(MouseEvent e) {
+        }
+
+        public void mouseEntered(MouseEvent e) {
+        }
+
+        public void mouseExited(MouseEvent e) {
+        }
+
+        public void mouseDragged(MouseEvent e) {
+        }
+
+        public void mouseMoved(MouseEvent e) {
+            if (interactionEnabled) {
+                Point p = transformPoint(e.getPoint());
+                // Check if the mouse hovers over a contour:
+                // Check if the mouse hovers over a spider:
+                for (ConcreteSpider s : diagram.getSpiders()) {
+                    for (ConcreteSpiderFoot f : s.feet) {
+                        double dist = Math.sqrt((p.x - f.x) * (p.x - f.x)
+                                + (p.y - f.y) * (p.y - f.y));
+                        if (dist < ConcreteSpiderFoot.FOOT_RADIUS + 2) {
+                            setHighlightedSpider(s, f);
+                            return;
+                        }
+                    }
+                }
+                // Check if the mouse hovers over a zone:
+                setHighlightedArea(null);
+                setHighlightedOutline(null);
+                setHighlightedSpider(null, null);
+            }
+        }
+
+        private Point transformPoint(Point p) {
+            p.x -= getCenteringTranslationX();
+            p.x /= scaleFactor;
+            p.y -= getCenteringTranslationY();
+            p.y /= scaleFactor;
+            return p;
+        }
+    }
+    //</editor-fold>
 }
