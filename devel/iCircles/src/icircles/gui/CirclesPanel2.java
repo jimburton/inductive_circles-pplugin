@@ -457,7 +457,7 @@ public class CirclesPanel2 extends javax.swing.JPanel {
         public void mouseMoved(MouseEvent e) {
             if (interactionEnabled) {
                 Point p = transformPoint(e.getPoint());
-                // Check if the mouse hovers over a contour:
+                // TODO: Check if the mouse hovers over a contour:
                 // Check if the mouse hovers over a spider:
                 for (ConcreteSpider s : diagram.getSpiders()) {
                     for (ConcreteSpiderFoot f : s.feet) {
@@ -469,7 +469,7 @@ public class CirclesPanel2 extends javax.swing.JPanel {
                         }
                     }
                 }
-                // Check if the mouse hovers over a zone:
+                // TODO: Check if the mouse hovers over a zone:
                 setHighlightedArea(null);
                 setHighlightedOutline(null);
                 setHighlightedSpider(null, null);
