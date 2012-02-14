@@ -2,13 +2,13 @@ package icircles.concreteDiagram;
 
 import icircles.abstractDescription.AbstractDescription;
 import icircles.gui.CirclesPanel;
+import icircles.gui.CirclesPanel2;
 import icircles.util.CannotDrawException;
-
 import java.awt.Font;
+import java.awt.Point;
 import java.awt.geom.Rectangle2D;
 import java.util.ArrayList;
 import java.util.Iterator;
-
 import javax.swing.JFrame;
 
 public class ConcreteDiagram {
@@ -142,10 +142,6 @@ public class ConcreteDiagram {
         return spiders;
     }
 
-    public void set_spider_foot_size(int size) {
-        ConcreteSpiderFoot.set_foot_size(size);
-    }
-
     public void setFont(Font f) {
         font = f;
     }
@@ -157,4 +153,65 @@ public class ConcreteDiagram {
     public int getSize() {
         return (int) Math.ceil(box.height);
     }
+
+    // <editor-fold defaultstate="collapsed" desc="Diagram Element Lookup by Coordinates">
+    /**
+     * Returns the {@link ConcreteSpiderFoot spider foot} located at the given
+     * coordinates. <p>Returns {@code null} if no foot is located on the given
+     * coordinates.</p>
+     *
+     * @param p the coordinates at which to look for a spider's foot. <p>These
+     * are the coordinates in the diagram's own local coordinate system. Thus,
+     * if you look up elements with a point in the coordinate system of {@link
+     * CirclesPanel2 a panel} then you first have to convert it with {@link
+     * CirclesPanel2#toDiagramCoordinates(java.awt.Point)} and then use the
+     * resulting point as an argument to this method.</p>
+     * @return the {@link ConcreteSpiderFoot spider foot} located at the given
+     * coordinates. <p>Returns {@code null} if no foot is located on the given
+     * coordinates.</p>
+     */
+    public ConcreteSpiderFoot getSpiderFootAtPoint(Point p) {
+        if (getSpiders() != null) {
+            for (ConcreteSpider s : getSpiders()) {
+                for (ConcreteSpiderFoot f : s.feet) {
+                    double dist = Math.sqrt((p.x - f.getX()) * (p.x - f.getX())
+                            + (p.y - f.getY()) * (p.y - f.getY()));
+                    if (dist < ConcreteSpiderFoot.FOOT_RADIUS + 2) {
+                        return f;
+                    }
+                }
+            }
+        }
+        return null;
+    }
+
+    /**
+     * Returns the {@link CircleContour circle contour} that is located in the
+     * <span style="font-style:italic;">vicinity</span> of the given point. 
+     * <p>The vicinity is dependent upon the given {@code tolerance}.</p>
+     *
+     * @param p the coordinates at which to look for a circle contour. <p>These
+     * are the coordinates in the diagram's own local coordinate system. Thus,
+     * if you look up elements with a point in the coordinate system of {@link
+     * CirclesPanel2 a panel} then you first have to convert it with {@link
+     * CirclesPanel2#toDiagramCoordinates(java.awt.Point)} and then use the
+     * resulting point as an argument to this method.</p>
+     * @param tolerance the distance from the contour which is still considered
+     * a hit.
+     * @return the {@link CircleContour circle contour} that is located <span
+     * style="font-style:italic;">near</span> the given point.
+     */
+    public CircleContour getCircleContourAtPoint(Point p, double tolerance) {
+        if (getCircles() != null) {
+            for (CircleContour cc : getCircles()) {
+                double dist = Math.sqrt((p.x - cc.get_cx()) * (p.x - cc.get_cx())
+                        + (p.y - cc.get_cy()) * (p.y - cc.get_cy()));
+                if (dist > cc.get_radius() - tolerance && dist < cc.get_radius() + tolerance) {
+                    return cc;
+                }
+            }
+        }
+        return null;
+    }
+    // </editor-fold>
 }

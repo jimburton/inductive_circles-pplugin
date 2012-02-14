@@ -68,16 +68,17 @@ public class CirclesPanel2 extends javax.swing.JPanel {
      */
     private static final BasicStroke DEFAULT_CONTOUR_STROKE = new BasicStroke(2);
     /**
-     * This stroke is used to draw highlighted lines and contours.
+     * This stroke is used to draw highlighted legs, outlines, and contours.
      */
     private static final BasicStroke HIGHLIGHT_STROKE = new BasicStroke(3.5f);
-    private static final Color HIGHLIGHT_STROKE_COLOUR = Color.BLUE;
+    private static final Color HIGHLIGHT_LEG_COLOUR = Color.BLUE;
     private static final Color HIGHLIGHTED_FOOT_COLOUR = Color.RED;
+    private static final Color HIGHLIGHT_STROKE_COLOUR = Color.RED;
     private static final double HIGHLIGHTED_FOOT_SCALE = 1.4;
-    private Shape highlightedOutline = null;
+    private static final double HIGHLIGHT_CONTOUR_TOLERANCE = 6;
+    private CircleContour highlightedContour = null;
     private Area highlightedArea = null;
-    private ConcreteSpider highlightedSpider = null;
-    private ConcreteSpiderFoot highlightedFoot;
+    private ConcreteSpiderFoot highlightedFoot = null;
     // </editor-fold>
 
     // <editor-fold defaultstate="collapsed" desc="Constructor">
@@ -169,44 +170,64 @@ public class CirclesPanel2 extends javax.swing.JPanel {
     }
     // </editor-fold>
 
-    // <editor-fold defaultstate="collapsed" desc="Private Properties">
-    public Area getHighlightedArea() {
+    // <editor-fold defaultstate="collapsed" desc="Public Methods">
+    /**
+     * Converts the given point from the coordinate system of this panel to the
+     * coordinate system of the {@link CirclesPanel2#getDiagram() displayed
+     * diagram}. <p>Use this method to issue queries on which diagrammatic
+     * element is located under the given point.</p>
+     *
+     * @param p the coordinates which to convert.
+     * @return the coordinates of the corresponding point in the coordinate
+     * system of the {@link CirclesPanel2#getDiagram() displayed diagram}.
+     */
+    public Point toDiagramCoordinates(Point p) {
+        p.x -= getCenteringTranslationX();
+        p.x /= scaleFactor;
+        p.y -= getCenteringTranslationY();
+        p.y /= scaleFactor;
+        return p;
+    }
+    // </editor-fold>
+
+    // <editor-fold defaultstate="collapsed" desc="Highlighting">
+    private Area getHighlightedArea() {
         return highlightedArea;
     }
 
-    public void setHighlightedArea(Area highlightedArea) {
+    private void setHighlightedArea(Area highlightedArea) {
         if (this.highlightedArea != highlightedArea) {
-            setHighlightedOutline(null);
-            setHighlightedSpider(null, null);
+            setHighlightedContour(null);
+            setHighlightedFoot(null);
             repaintShape(this.highlightedArea);
             this.highlightedArea = highlightedArea;
             repaintShape(this.highlightedArea);
         }
     }
 
-    public Shape getHighlightedOutline() {
-        return highlightedOutline;
+    private CircleContour getHighlightedContour() {
+        return highlightedContour;
     }
 
-    public void setHighlightedOutline(Shape highlightedOutline) {
-        if (this.highlightedOutline != highlightedOutline) {
+    private void setHighlightedContour(CircleContour highlightedContour) {
+        if (this.highlightedContour != highlightedContour) {
             setHighlightedArea(null);
-            setHighlightedSpider(null, null);
-            repaintShape(this.highlightedOutline);
-            this.highlightedOutline = highlightedOutline;
-            repaintShape(this.highlightedOutline);
+            setHighlightedFoot(null);
+//            repaintShape(this.highlightedContour);
+            this.highlightedContour = highlightedContour;
+//            repaintShape(this.highlightedContour);
+            repaint();
         }
     }
 
-    public ConcreteSpider getHighlightedSpider() {
-        return highlightedSpider;
+    private ConcreteSpiderFoot getHighlightedFoot() {
+        return highlightedFoot;
     }
 
-    public void setHighlightedSpider(ConcreteSpider spider, ConcreteSpiderFoot foot) {
-        if (this.highlightedSpider != spider || this.highlightedFoot != foot) {
+    private void setHighlightedFoot(ConcreteSpiderFoot foot) {
+        if (this.highlightedFoot != foot) {
             setHighlightedArea(null);
-            setHighlightedOutline(null);
-            this.highlightedSpider = spider;
+            setHighlightedContour(null);
             this.highlightedFoot = foot;
             repaint();
         }
@@ -283,6 +304,8 @@ public class CirclesPanel2 extends javax.swing.JPanel {
                         (int) (cc.getLabelXPosition() * trans.getScaleX()),
                         (int) (cc.getLabelYPosition() * trans.getScaleY()));
             }
+
+            ConcreteSpider highlightedSpider = getHighlightedFoot() == null ? null : getHighlightedFoot().getSpider();
             g.setColor(Color.black);
             for (ConcreteSpider s : diagram.getSpiders()) {
                 // Reset the stroke and the colour if the spider is highlighted.
@@ -290,31 +313,31 @@ public class CirclesPanel2 extends javax.swing.JPanel {
                 Stroke oldStroke = null;
                 if (highlightedSpider == s) {
                     oldColor = g2d.getColor();
-                    g2d.setColor(HIGHLIGHT_STROKE_COLOUR);
+                    g2d.setColor(HIGHLIGHT_LEG_COLOUR);
                     oldStroke = g2d.getStroke();
                     g2d.setStroke(HIGHLIGHT_STROKE);
                 }
-                
+
                 for (ConcreteSpiderLeg leg : s.legs) {
 
                     g2d.drawLine(
-                            (int) (leg.from.x * scaleFactor),
-                            (int) (leg.from.y * scaleFactor),
-                            (int) (leg.to.x * scaleFactor),
-                            (int) (leg.to.y * scaleFactor));
+                            (int) (leg.from.getX() * scaleFactor),
+                            (int) (leg.from.getY() * scaleFactor),
+                            (int) (leg.to.getX() * scaleFactor),
+                            (int) (leg.to.getY() * scaleFactor));
                 }
 
                 for (ConcreteSpiderFoot foot : s.feet) {
                     foot.getBlob(tmpCircle);
                     Color oldColor2 = g2d.getColor();
                     scaleCircle(scaleFactor, tmpCircle, tmpCircle);
-                    if (highlightedFoot == foot) {
+                    if (getHighlightedFoot() == foot) {
                         oldColor2 = g2d.getColor();
                         g2d.setColor(HIGHLIGHTED_FOOT_COLOUR);
-                        highlightFoot(tmpCircle, HIGHLIGHTED_FOOT_SCALE);
+                        rescaleCircle(tmpCircle, HIGHLIGHTED_FOOT_SCALE);
                     }
                     g2d.fill(tmpCircle);
-                    if (highlightedFoot == foot) {
+                    if (getHighlightedFoot() == foot) {
                         g2d.setColor(oldColor2);
                     }
                 }
@@ -324,14 +347,23 @@ public class CirclesPanel2 extends javax.swing.JPanel {
                 // TODO a proper way to place labels - it can't be a method in ConcreteSpider,
                 // we need the context in the ConcreteDiagram
                 g2d.drawString(s.as.get_name(),
-                        (int) ((s.feet.get(0).x + 5) * trans.getScaleX()),
-                        (int) ((s.feet.get(0).y - 5) * trans.getScaleY()));
+                        (int) ((s.feet.get(0).getX() + 5) * trans.getScaleX()),
+                        (int) ((s.feet.get(0).getY() - 5) * trans.getScaleY()));
 
                 // Reset the stroke and colour appropriatelly.
                 if (highlightedSpider == s) {
                     g2d.setColor(oldColor);
                     g2d.setStroke(oldStroke);
                 }
+            }
+
+            // Draw the highlighted circle contour
+            if (getHighlightedContour() != null) {
+                // Reset the stroke and the colour of the highlighted outline.
+                g2d.setColor(HIGHLIGHT_STROKE_COLOUR);
+                g2d.setStroke(HIGHLIGHT_STROKE);
+                scaleCircle(scaleFactor, getHighlightedContour().getCircle(), tmpCircle);
+                g2d.draw(tmpCircle);
             }
         }
     }
@@ -343,7 +375,7 @@ public class CirclesPanel2 extends javax.swing.JPanel {
     }
     // </editor-fold>
 
-    // <editor-fold defaultstate="collapsed" desc="Private methods">
+    // <editor-fold defaultstate="collapsed" desc="Private Utility Methods">
     /**
      * This method sets the given diagram as the one to be displayed. <p>It
      * refreshes the {@link CirclesPanel2#setPreferredSize(java.awt.Dimension)
@@ -412,25 +444,49 @@ public class CirclesPanel2 extends javax.swing.JPanel {
         outCircle.height = inCircle.height * scaleFactor;
     }
 
+    /**
+     * Issues a repaint of the content of this panel within the bounds of the
+     * given shape.
+     *
+     * @param shape
+     */
     private void repaintShape(Shape shape) {
         if (shape != null) {
             repaint(shape.getBounds());
         }
     }
 
+    /**
+     * Returns the horizontal centring translation of the diagram.
+     *
+     * @return
+     */
     private int getCenteringTranslationX() {
         return (this.getWidth() - (int) Math.round(diagram.getSize() * scaleFactor)) / 2;
     }
 
+    /**
+     * Returns the vertical centring translation of the diagram.
+     *
+     * @return
+     */
     private int getCenteringTranslationY() {
         return (this.getHeight() - (int) Math.round(diagram.getSize() * scaleFactor)) / 2;
     }
 
-    private void highlightFoot(Double tmpCircle, double scale) {
-        tmpCircle.x -= tmpCircle.width * (scale - 1) / 2;
-        tmpCircle.y -= tmpCircle.height * (scale - 1) / 2;
-        tmpCircle.width *= scale;
-        tmpCircle.height *= scale;
+    /**
+     * Scales the given circle while preserving the location of its centre.
+     *
+     * @param circle
+     * @param scale
+     */
+    private void rescaleCircle(Double circle, double scale) {
+        circle.x -= circle.width * (scale - 1) / 2;
+        circle.y -= circle.height * (scale - 1) / 2;
+        circle.width *= scale;
+        circle.height *= scale;
+
+
     }
     // </editor-fold>
 
@@ -461,34 +517,29 @@ public class CirclesPanel2 extends javax.swing.JPanel {
         }
 
         public void mouseMoved(MouseEvent e) {
-            if (interactionEnabled) {
-                Point p = transformPoint(e.getPoint());
-                // TODO: Check if the mouse hovers over a contour:
-                // Check if the mouse hovers over a spider:
-                for (ConcreteSpider s : diagram.getSpiders()) {
-                    for (ConcreteSpiderFoot f : s.feet) {
-                        double dist = Math.sqrt((p.x - f.x) * (p.x - f.x)
-                                + (p.y - f.y) * (p.y - f.y));
-                        if (dist < ConcreteSpiderFoot.FOOT_RADIUS + 2) {
-                            setHighlightedSpider(s, f);
-                            return;
-                        }
-                    }
+            if (interactionEnabled && getDiagram() != null) {
+                Point p = toDiagramCoordinates(e.getPoint());
+
+                // Check if the mouse hovers over a contour:
+                CircleContour contour = getDiagram().getCircleContourAtPoint(p, HIGHLIGHT_CONTOUR_TOLERANCE / scaleFactor);
+                if (contour != null) {
+                    setHighlightedContour(contour);
+                    return;
                 }
+
+                // Check if the mouse hovers over a spider:
+                ConcreteSpiderFoot foot = getDiagram().getSpiderFootAtPoint(p);
+                if (foot != null) {
+                    setHighlightedFoot(foot);
+                    return;
+                }
+
                 // TODO: Check if the mouse hovers over a zone:
                 setHighlightedArea(null);
-                setHighlightedOutline(null);
-                setHighlightedSpider(null, null);
+                setHighlightedContour(null);
+                setHighlightedFoot(null);
             }
         }
-
-        private Point transformPoint(Point p) {
-            p.x -= getCenteringTranslationX();
-            p.x /= scaleFactor;
-            p.y -= getCenteringTranslationY();
-            p.y /= scaleFactor;
-            return p;
-        }
     }
-    //</editor-fold>
+//</editor-fold>
 }

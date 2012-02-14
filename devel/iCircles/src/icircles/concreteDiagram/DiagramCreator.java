@@ -162,10 +162,7 @@ public class DiagramCreator {
             ArrayList<CircleContour> cs = findCircleContours(box, smallest_rad, 3,
                     zone_in_last_diag, last_diag, acs, 3);
             for (CircleContour cc : cs) {
-                ConcreteSpiderFoot foot = new ConcreteSpiderFoot();
-                foot.x = cc.cx;
-                foot.y = cc.cy;
-                footList.add(foot);
+                footList.add(new ConcreteSpiderFoot(cc.cx, cc.cy));
             }
         }
 
@@ -186,6 +183,7 @@ public class DiagramCreator {
 
                 ConcreteSpiderFoot foot = footList.get(0);
                 footList.remove(0);
+                foot.setSpider(cs);
                 cs.feet.add(foot);
 
                 // get the corresponding abr from the last_diag
@@ -205,8 +203,8 @@ public class DiagramCreator {
                     if (other == centreCandidate) {
                         continue;
                     }
-                    distSum += Math.sqrt((centreCandidate.x - other.x) * (centreCandidate.x - other.x)
-                            + (centreCandidate.y - other.y) * (centreCandidate.y - other.y));
+                    distSum += Math.sqrt((centreCandidate.getX() - other.getX()) * (centreCandidate.getX() - other.getX())
+                            + (centreCandidate.getY() - other.getY()) * (centreCandidate.getY() - other.getY()));
                 }
                 if (distSum < best_dist_sum) {
                     best_dist_sum = distSum;
@@ -243,11 +241,11 @@ public class DiagramCreator {
                             continue;
                         }
                         // is foot on leg?
-                        double sf_x = foot.x - leg.from.x;
-                        double sf_y = foot.y - leg.from.y;
+                        double sf_x = foot.getX() - leg.from.getX();
+                        double sf_y = foot.getY() - leg.from.getY();
 
-                        double se_x = leg.to.x - leg.from.x;
-                        double se_y = leg.to.y - leg.from.y;
+                        double se_x = leg.to.getX() - leg.from.getX();
+                        double se_y = leg.to.getY() - leg.from.getY();
 
                         double se_length = Math.sqrt(se_x * se_x + se_y * se_y);
 
@@ -271,8 +269,8 @@ public class DiagramCreator {
                                 && sf_prop_leg < 1;
                         if (foot_on_leg) {
                             // nudge the foot, but check it's still in its zone afterwards
-                            double old_x = foot.x;
-                            double old_y = foot.y;
+                            double old_x = foot.getX();
+                            double old_y = foot.getY();
                             AbstractBasicRegion abr = feet_and_zones.get(foot);
 
                             ConcreteZone cz = makeConcreteZone(abr);
@@ -282,29 +280,29 @@ public class DiagramCreator {
                             double new_x = old_x;
                             CircleContour test = new CircleContour(new_x, new_y, tol, null);
                             if (containedIn(test, a)) {
-                                foot.x = new_x;
-                                foot.y = new_y;
+                                foot.setX(new_x);
+                                foot.setY(new_y);
                             } else {
                                 new_x = old_x - 2 * tol;
                                 new_y = old_y - 2 * tol;
                                 test = new CircleContour(new_x, new_y, tol, null);
                                 if (containedIn(test, a)) {
-                                    foot.x = new_x;
-                                    foot.y = new_y;
+                                    foot.setX(new_x);
+                                    foot.setY(new_y);
                                 } else {
                                     new_x = old_x + 2 * tol;
                                     new_y = old_y - 2 * tol;
                                     test = new CircleContour(new_x, new_y, tol, null);
                                     if (containedIn(test, a)) {
-                                        foot.x = new_x;
-                                        foot.y = new_y;
+                                        foot.setX(new_x);
+                                        foot.setY(new_y);
                                     } else {
                                         new_x = old_x - 2 * tol;
                                         new_y = old_y + 2 * tol;
                                         test = new CircleContour(new_x, new_y, tol, null);
                                         if (containedIn(test, a)) {
-                                            foot.x = new_x;
-                                            foot.y = new_y;
+                                            foot.setX(new_x);
+                                            foot.setY(new_y);
                                         }
                                     }
                                 }

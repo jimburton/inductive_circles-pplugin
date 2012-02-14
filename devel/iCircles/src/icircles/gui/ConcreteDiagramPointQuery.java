@@ -32,8 +32,8 @@ public class ConcreteDiagramPointQuery {
         boolean done = false;
         for (ConcreteSpider s : cd.getSpiders()) {
             for (ConcreteSpiderFoot f : s.feet) {
-                double dist = Math.sqrt((p.x - f.x) * (p.x - f.x)
-                        + (p.y - f.y) * (p.y - f.y));
+                double dist = Math.sqrt((p.x - f.getX()) * (p.x - f.getX())
+                        + (p.y - f.getY()) * (p.y - f.getY()));
                 if (dist < ConcreteSpiderFoot.FOOT_RADIUS + tol) {
                     this.s = s;
                     this.foot = f;
