@@ -32,6 +32,7 @@ import java.awt.event.MouseEvent;
 import java.awt.geom.AffineTransform;
 import java.awt.geom.Area;
 import java.awt.geom.Ellipse2D;
+import java.awt.geom.Ellipse2D.Double;
 import java.util.ArrayList;
 import javax.swing.event.MouseInputListener;
 
@@ -69,9 +70,10 @@ public class CirclesPanel2 extends javax.swing.JPanel {
     /**
      * This stroke is used to draw highlighted lines and contours.
      */
-    private static final BasicStroke HIGHLIGHT_STROKE = new BasicStroke(3);
+    private static final BasicStroke HIGHLIGHT_STROKE = new BasicStroke(3.5f);
     private static final Color HIGHLIGHT_STROKE_COLOUR = Color.BLUE;
     private static final Color HIGHLIGHTED_FOOT_COLOUR = Color.RED;
+    private static final double HIGHLIGHTED_FOOT_SCALE = 1.4;
     private Shape highlightedOutline = null;
     private Area highlightedArea = null;
     private ConcreteSpider highlightedSpider = null;
@@ -309,10 +311,7 @@ public class CirclesPanel2 extends javax.swing.JPanel {
                     if (highlightedFoot == foot) {
                         oldColor2 = g2d.getColor();
                         g2d.setColor(HIGHLIGHTED_FOOT_COLOUR);
-                        tmpCircle.x -= tmpCircle.width * 0.1;
-                        tmpCircle.y -= tmpCircle.height * 0.1;
-                        tmpCircle.width *= 1.2;
-                        tmpCircle.height *= 1.2;
+                        highlightFoot(tmpCircle, HIGHLIGHTED_FOOT_SCALE);
                     }
                     g2d.fill(tmpCircle);
                     if (highlightedFoot == foot) {
@@ -425,6 +424,13 @@ public class CirclesPanel2 extends javax.swing.JPanel {
 
     private int getCenteringTranslationY() {
         return (this.getHeight() - (int) Math.round(diagram.getSize() * scaleFactor)) / 2;
+    }
+
+    private void highlightFoot(Double tmpCircle, double scale) {
+        tmpCircle.x -= tmpCircle.width * (scale - 1) / 2;
+        tmpCircle.y -= tmpCircle.height * (scale - 1) / 2;
+        tmpCircle.width *= scale;
+        tmpCircle.height *= scale;
     }
     // </editor-fold>
 
