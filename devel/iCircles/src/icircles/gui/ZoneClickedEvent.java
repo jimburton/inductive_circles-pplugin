@@ -27,6 +27,7 @@
 package icircles.gui;
 
 import icircles.concreteDiagram.ConcreteZone;
+import java.awt.event.MouseEvent;
 import java.util.EventObject;
 
 /**
@@ -36,7 +37,7 @@ import java.util.EventObject;
  *
  * @author Matej Urbas [matej.urbas@gmail.com]
  */
-public class ZoneClickedEvent extends EventObject {
+public class ZoneClickedEvent extends DiagramClickEvent {
 
     /**
      * The clicked zone.
@@ -50,9 +51,11 @@ public class ZoneClickedEvent extends EventObject {
      * @param source the object that invoked this event (usually its a {@link
      * CirclesPanel2 circles panel}).
      * @param zone the zone that has been clicked.
+     * @param clickInfo the additional mouse click information (the underlying mouse event that triggered
+     * this diagram click event).
      */
-    public ZoneClickedEvent(Object source, ConcreteZone zone) {
-        super(source);
+    public ZoneClickedEvent(Object source, ConcreteZone zone, MouseEvent clickInfo) {
+        super(source, clickInfo);
         this.zone = zone;
     }
 

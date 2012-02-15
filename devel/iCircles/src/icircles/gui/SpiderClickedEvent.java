@@ -27,6 +27,7 @@
 package icircles.gui;
 
 import icircles.concreteDiagram.ConcreteSpiderFoot;
+import java.awt.event.MouseEvent;
 import java.util.EventObject;
 
 /**
@@ -36,7 +37,7 @@ import java.util.EventObject;
  *
  * @author Matej Urbas [matej.urbas@gmail.com]
  */
-public class SpiderClickedEvent extends EventObject {
+public class SpiderClickedEvent extends DiagramClickEvent {
 
     /**
      * The clicked foot.
@@ -50,9 +51,11 @@ public class SpiderClickedEvent extends EventObject {
      * @param source the object that invoked this event (usually its a {@link 
      * CirclesPanel2 circles panel}).
      * @param foot the spider's foot that has been clicked.
+     * @param clickInfo the additional mouse click information (the underlying mouse event that triggered
+     * this diagram click event).
      */
-    public SpiderClickedEvent(Object source, ConcreteSpiderFoot foot) {
-        super(source);
+    public SpiderClickedEvent(Object source, ConcreteSpiderFoot foot, MouseEvent clickInfo) {
+        super(source, clickInfo);
         this.foot = foot;
     }
 
