@@ -163,7 +163,8 @@ public class ConcreteDiagram {
      * @param p the coordinates at which to look for a spider's foot. <p>These
      * are the coordinates in the diagram's own local coordinate system. Thus,
      * if you look up elements with a point in the coordinate system of {@link
-     * CirclesPanel2 a panel} then you first have to convert it with {@link
+     * CirclesPanel2 a panel} then you first have to convert the coordinates
+     * of the point with {@link
      * CirclesPanel2#toDiagramCoordinates(java.awt.Point)} and then use the
      * resulting point as an argument to this method.</p>
      * @return the {@link ConcreteSpiderFoot spider foot} located at the given
@@ -187,19 +188,21 @@ public class ConcreteDiagram {
 
     /**
      * Returns the {@link CircleContour circle contour} that is located in the
-     * <span style="font-style:italic;">vicinity</span> of the given point. 
+     * <span style="font-style:italic;">vicinity</span> of the given point.
      * <p>The vicinity is dependent upon the given {@code tolerance}.</p>
      *
      * @param p the coordinates at which to look for a circle contour. <p>These
      * are the coordinates in the diagram's own local coordinate system. Thus,
      * if you look up elements with a point in the coordinate system of {@link
-     * CirclesPanel2 a panel} then you first have to convert it with {@link
+     * CirclesPanel2 a panel} then you first have to convert the coordinates
+     * of the point with {@link
      * CirclesPanel2#toDiagramCoordinates(java.awt.Point)} and then use the
      * resulting point as an argument to this method.</p>
      * @param tolerance the distance from the contour which is still considered
      * a hit.
      * @return the {@link CircleContour circle contour} that is located <span
-     * style="font-style:italic;">near</span> the given point.
+     * style="font-style:italic;">near</span> the given point. <p>Returns {@code
+     * null} if no circle contour is located near the given coordinates.</p>
      */
     public CircleContour getCircleContourAtPoint(Point p, double tolerance) {
         if (getCircles() != null) {
@@ -209,6 +212,33 @@ public class ConcreteDiagram {
                 if (dist > cc.get_radius() - tolerance && dist < cc.get_radius() + tolerance) {
                     return cc;
                 }
+            }
+        }
+        return null;
+    }
+
+    /**
+     * Returns the {@link ConcreteZone zone} that contains the given point.
+     * @param p the coordinates at which to look for the zone. <p>These
+     * are the coordinates in the diagram's own local coordinate system. Thus,
+     * if you look up elements with a point in the coordinate system of {@link
+     * CirclesPanel2 a panel} then you first have to convert the coordinates
+     * of the point with {@link
+     * CirclesPanel2#toDiagramCoordinates(java.awt.Point)} and then use the
+     * resulting point as an argument to this method.</p>
+     * @return the {@link ConcreteZone zone} that contains the given point.
+     * <p>Returns {@code null} if no zone is located at the given
+     * coordinates.</p>
+     */
+    public ConcreteZone getZoneAtPoint(Point p) {
+        for (ConcreteZone zone : this.unshadedZones) {
+            if (zone.getShape(box).contains(p)) {
+                return zone;
+            }
+        }
+        for (ConcreteZone zone : this.shadedZones) {
+            if (zone.getShape(box).contains(p)) {
+                return zone;
             }
         }
         return null;

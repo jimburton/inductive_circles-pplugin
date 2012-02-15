@@ -74,10 +74,11 @@ public class CirclesPanel2 extends javax.swing.JPanel {
     private static final Color HIGHLIGHT_LEG_COLOUR = Color.BLUE;
     private static final Color HIGHLIGHTED_FOOT_COLOUR = Color.RED;
     private static final Color HIGHLIGHT_STROKE_COLOUR = Color.RED;
+    private static final Color HIGHLIGHT_ZONE_COLOUR = new Color(0x70ff0000, true);
     private static final double HIGHLIGHTED_FOOT_SCALE = 1.4;
     private static final double HIGHLIGHT_CONTOUR_TOLERANCE = 6;
     private CircleContour highlightedContour = null;
-    private Area highlightedArea = null;
+    private ConcreteZone highlightedZone = null;
     private ConcreteSpiderFoot highlightedFoot = null;
     // </editor-fold>
 
@@ -191,17 +192,18 @@ public class CirclesPanel2 extends javax.swing.JPanel {
     // </editor-fold>
 
     // <editor-fold defaultstate="collapsed" desc="Highlighting">
-    private Area getHighlightedArea() {
-        return highlightedArea;
+    private ConcreteZone getHighlightedZone() {
+        return highlightedZone;
     }
 
-    private void setHighlightedArea(Area highlightedArea) {
-        if (this.highlightedArea != highlightedArea) {
+    private void setHighlightedZone(ConcreteZone highlightedZone) {
+        if (this.highlightedZone != highlightedZone) {
             setHighlightedContour(null);
             setHighlightedFoot(null);
-            repaintShape(this.highlightedArea);
-            this.highlightedArea = highlightedArea;
-            repaintShape(this.highlightedArea);
+//            repaintShape(this.highlightedZone);
+            this.highlightedZone = highlightedZone;
+//            repaintShape(this.highlightedZone);
+            repaint();
         }
     }
 
@@ -211,7 +213,7 @@ public class CirclesPanel2 extends javax.swing.JPanel {
 
     private void setHighlightedContour(CircleContour highlightedContour) {
         if (this.highlightedContour != highlightedContour) {
-            setHighlightedArea(null);
+            setHighlightedZone(null);
             setHighlightedFoot(null);
 //            repaintShape(this.highlightedContour);
             this.highlightedContour = highlightedContour;
@@ -226,7 +228,7 @@ public class CirclesPanel2 extends javax.swing.JPanel {
 
     private void setHighlightedFoot(ConcreteSpiderFoot foot) {
         if (this.highlightedFoot != foot) {
-            setHighlightedArea(null);
+            setHighlightedZone(null);
             setHighlightedContour(null);
             this.highlightedFoot = foot;
             repaint();
@@ -249,10 +251,9 @@ public class CirclesPanel2 extends javax.swing.JPanel {
             // This centers the diagram onto the drawing area.
             g.translate(getCenteringTranslationX(), getCenteringTranslationY());
 
-            // shaded zones
+            // Draw shaded zones:
             g.setColor(Color.lightGray);
-            ArrayList<ConcreteZone> zones = diagram.getShadedZones();
-            for (ConcreteZone z : zones) {
+            for (ConcreteZone z : diagram.getShadedZones()) {
                 if (z.getColor() != null) {
                     g.setColor(z.getColor());
                 } else {
@@ -266,6 +267,16 @@ public class CirclesPanel2 extends javax.swing.JPanel {
                 Area a = z.getShape(diagram.getBox());
                 g2d.fill(a.createTransformedArea(trans));
             }
+            
+            // Draw the highlighted zone:
+            if (getHighlightedZone() != null) {
+                Color oldColour = g2d.getColor();
+                g2d.setColor(HIGHLIGHT_ZONE_COLOUR);
+                g2d.fill(getHighlightedZone().getShape(diagram.getBox()).createTransformedArea(trans));
+                g2d.setColor(oldColour);
+            }
+            
+            // Draw contours:
             g2d.setStroke(DEFAULT_CONTOUR_STROKE);
             ArrayList<CircleContour> circles = diagram.getCircles();
             Ellipse2D.Double tmpCircle = new Ellipse2D.Double();
@@ -535,7 +546,13 @@ public class CirclesPanel2 extends javax.swing.JPanel {
                 }
 
                 // TODO: Check if the mouse hovers over a zone:
-                setHighlightedArea(null);
+                ConcreteZone zone = getDiagram().getZoneAtPoint(p);
+                if (zone != null) {
+                    setHighlightedZone(zone);
+                    return;
+                }
+
+                setHighlightedZone(null);
                 setHighlightedContour(null);
                 setHighlightedFoot(null);
             }
