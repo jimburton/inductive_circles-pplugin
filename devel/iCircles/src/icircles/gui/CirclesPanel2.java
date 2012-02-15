@@ -45,46 +45,40 @@ public class CirclesPanel2 extends javax.swing.JPanel {
 
     // <editor-fold defaultstate="collapsed" desc="Private Fields">
     /**
-     * This flag is used in {@link CirclesPanel2#setInteraction(int)} to
-     * indicate that the user may interact with the spiders in the currently
-     * displayed diagram.
+     * This flag is used in {@link CirclesPanel2#setHighlighting(int)} to
+     * indicate that the user may highlight the spiders in the currently
+     * displayed diagram with the mouse.
      */
     public static final int Spiders = 0x1;
     /**
-     * This flag is used in {@link CirclesPanel2#setInteraction(int)} to
-     * indicate that the user may interact with the zones in the currently
-     * displayed diagram.
+     * This flag is used in {@link CirclesPanel2#setHighlighting(int)} to
+     * indicate that the user may highlight the zones in the currently
+     * displayed diagram with the mouse.
      */
     public static final int Zones = 0x2;
     /**
-     * This flag is used in {@link CirclesPanel2#setInteraction(int)} to
-     * indicate that the user may interact with the circle contours in the
-     * currently displayed diagram.
+     * This flag is used in {@link CirclesPanel2#setHighlighting(int)} to
+     * indicate that the user may highlight the circle contours in the
+     * currently displayed diagram with the mouse.
      */
     public static final int Contours = 0x4;
     /**
-     * This flag is used in {@link CirclesPanel2#setInteraction(int)} to
-     * indicate that the user may interact with all elements in the currently
-     * displayed diagram.
+     * This flag is used in {@link CirclesPanel2#setHighlighting(int)} to
+     * indicate that the user may highlight all the elements in the currently
+     * displayed diagram with the mouse.
      */
     public static final int All = Spiders | Zones | Contours;
     /**
-     * This set of flag determines for which elements of the diagram mouse
-     * interaction is enabled. <p>This flag can be a (binary) combination of the
+     * This set of flag determines which elements of the diagram may be
+     * highlighted with the mouse. <p>This flag can be a (binary) combination of the
      * following flags: <ul> <li>{@link CirclesPanel2#Spiders}: which indicates
-     * that spiders will be highlighted and that the user will be able to click
-     * on them, which will invoke the
-     * {@link DiagramClickListener#spiderClicked} event.</li> <li>{@link CirclesPanel2#Zones}:
-     * which indicates that zones will be highlighted and that the user will be
-     * able to click on them, which will invoke the
-     * {@link DiagramClickListener#zoneClicked} event.</li> <li>{@link CirclesPanel2#Contours}:
-     * which indicates that circle contours will be highlighted and that the
-     * user will be able to click on them, which will invoke the
-     * {@link DiagramClickListener#contourClicked} event.</li> </ul></p> <p>One
-     * can also use the {@link CirclesPanel2#All} flag, which indicates that all
-     * diagram elements will be interactive.</p>
+     * that spiders will be highlighted when the user hovers over them.</li> <li>{@link CirclesPanel2#Zones}:
+     * which indicates that zones will be highlighted when the user hovers over them.</li> <li>{@link CirclesPanel2#Contours}:
+     * which indicates that circle contours will be highlighted when the user hovers over them.</li> </ul></p> <p>
+     * The {@link CirclesPanel2#All} flag can also be used. It indicates that all
+     * diagram elements can be highlighted with the mouse.</p>
      */
-    private int interaction = 0;
+    private int highlighting = 0;
     /**
      * The diagram that will actually be drawn in this panel.
      */
@@ -178,49 +172,37 @@ public class CirclesPanel2 extends javax.swing.JPanel {
     }
 
     /**
-     * Gets the set of flags which determine for which elements of the diagram
-     * mouse interaction is enabled. <p>This flag can be a (binary) combination
-     * of the following flags: <ul> <li>{@link CirclesPanel2#Spiders}: which
-     * indicates that spiders will be highlighted and that the user will be able
-     * to click on them, which will invoke the
-     * {@link DiagramClickListener#spiderClicked} event.</li> <li>{@link CirclesPanel2#Zones}:
-     * which indicates that zones will be highlighted and that the user will be
-     * able to click on them, which will invoke the
-     * {@link DiagramClickListener#zoneClicked} event.</li> <li>{@link CirclesPanel2#Contours}:
-     * which indicates that circle contours will be highlighted and that the
-     * user will be able to click on them, which will invoke the
-     * {@link DiagramClickListener#contourClicked} event.</li> </ul></p> <p>One
-     * can also use the {@link CirclesPanel2#All} flag, which indicates that all
-     * diagram elements will be interactive.</p>
+     * Returns the set of flags that determines which elements of the diagram may be
+     * highlighted with the mouse. <p>This flag can be a (binary) combination of the
+     * following flags: <ul> <li>{@link CirclesPanel2#Spiders}: which indicates
+     * that spiders will be highlighted when the user hovers over them.</li> <li>{@link CirclesPanel2#Zones}:
+     * which indicates that zones will be highlighted when the user hovers over them.</li> <li>{@link CirclesPanel2#Contours}:
+     * which indicates that circle contours will be highlighted when the user hovers over them.</li> </ul></p> <p>
+     * The {@link CirclesPanel2#All} flag can also be used. It indicates that all
+     * diagram elements can be highlighted with the mouse.</p>
      *
-     * @return the set of flags which determine for which elements of the
-     * diagram mouse interaction is enabled.
+     * @return the set of flags that determines which elements of the diagram may be
+     * highlighted with the mouse.
      */
-    public int getInteraction() {
-        return interaction;
+    public int getHighlighting() {
+        return highlighting;
     }
 
     /**
-     * Sets the set of flags which determine for which elements of the diagram
-     * mouse interaction is enabled. <p>This flag can be a (binary) combination
-     * of the following flags: <ul> <li>{@link CirclesPanel2#Spiders}: which
-     * indicates that spiders will be highlighted and that the user will be able
-     * to click on them, which will invoke the
-     * {@link DiagramClickListener#spiderClicked} event.</li> <li>{@link CirclesPanel2#Zones}:
-     * which indicates that zones will be highlighted and that the user will be
-     * able to click on them, which will invoke the
-     * {@link DiagramClickListener#zoneClicked} event.</li> <li>{@link CirclesPanel2#Contours}:
-     * which indicates that circle contours will be highlighted and that the
-     * user will be able to click on them, which will invoke the
-     * {@link DiagramClickListener#contourClicked} event.</li> </ul></p> <p>One
-     * can also use the {@link CirclesPanel2#All} flag, which indicates that all
-     * diagram elements will be interactive.</p>
+     * Sets the set of flags that determines which elements of the diagram may be
+     * highlighted with the mouse. <p>This flag can be a (binary) combination of the
+     * following flags: <ul> <li>{@link CirclesPanel2#Spiders}: which indicates
+     * that spiders will be highlighted when the user hovers over them.</li> <li>{@link CirclesPanel2#Zones}:
+     * which indicates that zones will be highlighted when the user hovers over them.</li> <li>{@link CirclesPanel2#Contours}:
+     * which indicates that circle contours will be highlighted when the user hovers over them.</li> </ul></p> <p>
+     * The {@link CirclesPanel2#All} flag can also be used. It indicates that all
+     * diagram elements can be highlighted with the mouse.</p>
      *
-     * @param interaction the new set of flags which determine for which
-     * elements of the diagram mouse interaction is enabled.
+     * @param highlighting the new set of flags that determines which elements of the diagram may be
+     * highlighted with the mouse.
      */
-    public void setInteraction(int interaction) {
-        this.interaction = interaction & All;
+    public void setHighlighting(int highlighting) {
+        this.highlighting = highlighting & All;
     }
     // </editor-fold>
 
@@ -241,6 +223,72 @@ public class CirclesPanel2 extends javax.swing.JPanel {
         p.y -= getCenteringTranslationY();
         p.y /= scaleFactor;
         return p;
+    }
+    // </editor-fold>
+    
+    // <editor-fold defaultstate="collapsed" desc="Events">
+    /**
+     * Registers the given {@link DiagramClickListener diagram click listener} to
+     * the events which are fired when the user clicks on particular diagram
+     * elements.
+     *  <p><span style="font-weight:bold">Note</span>: the events are invoked
+     * regardless of whether {@link CirclesPanel2#getHighlighting()} flags are
+     * set.</p>
+     * @param l the event listener to register.
+     */
+    public void addDiagramClickListener(DiagramClickListener l) {
+        this.listenerList.add(DiagramClickListener.class, l);
+    }
+    
+    /**
+     * Removes the given {@link DiagramClickListener diagram click listener}
+     * from the events which are fired when the user clicks on particular diagram
+     * elements.
+     *  <p>The given listener will no longer receive these events.</p>
+     * @param l the event listener to deregister.
+     */
+    public void removeDiagramClickListener(DiagramClickListener l) {
+        this.listenerList.remove(DiagramClickListener.class, l);
+    }
+    
+    /**
+     * Returns the array of all {@link CirclesPanel2#addDiagramClickListener(icircles.gui.DiagramClickListener) registered}
+     * {@link DiagramClickListener diagram click listeners}.
+     * @return the array of all {@link CirclesPanel2#addDiagramClickListener(icircles.gui.DiagramClickListener) registered}
+     * {@link DiagramClickListener diagram click listeners}.
+     */
+    public DiagramClickListener[] getDiagramClickListeners() {
+        return listenerList.getListeners(DiagramClickListener.class);
+    }
+    
+    protected void fireSpiderClickedEvent(ConcreteSpiderFoot foot) {
+        DiagramClickListener[] ls = listenerList.getListeners(DiagramClickListener.class);
+        if (ls != null && ls.length > 0) {
+            SpiderClickedEvent e = new SpiderClickedEvent(this, foot);
+            for (int i = 0; i < ls.length; i++) {
+                ls[i].spiderClicked(e);
+            }
+        }
+    }
+    
+    protected void fireZoneClickedEvent(ConcreteZone zone) {
+        DiagramClickListener[] ls = listenerList.getListeners(DiagramClickListener.class);
+        if (ls != null && ls.length > 0) {
+            ZoneClickedEvent e = new ZoneClickedEvent(this, zone);
+            for (int i = 0; i < ls.length; i++) {
+                ls[i].zoneClicked(e);
+            }
+        }
+    }
+    
+    protected void fireContourClickedEvent(CircleContour contour) {
+        DiagramClickListener[] ls = listenerList.getListeners(DiagramClickListener.class);
+        if (ls != null && ls.length > 0) {
+            ContourClickedEvent e = new ContourClickedEvent(this, contour);
+            for (int i = 0; i < ls.length; i++) {
+                ls[i].contourClicked(e);
+            }
+        }
     }
     // </editor-fold>
 
@@ -561,6 +609,32 @@ public class CirclesPanel2 extends javax.swing.JPanel {
         }
 
         public void mouseClicked(MouseEvent e) {
+            if (getDiagram() != null) {
+                Point p = toDiagramCoordinates(e.getPoint());
+
+                if ((getHighlighting() & Contours) == Contours) {
+                    CircleContour contour = getDiagram().getCircleContourAtPoint(p, HIGHLIGHT_CONTOUR_TOLERANCE / scaleFactor);
+                    if (contour != null) {
+                        fireContourClickedEvent(contour);
+                        return;
+                    }
+                }
+
+                if ((getHighlighting() & Spiders) == Spiders) {
+                    ConcreteSpiderFoot foot = getDiagram().getSpiderFootAtPoint(p);
+                    if (foot != null) {
+                        fireSpiderClickedEvent(foot);
+                        return;
+                    }
+                }
+
+                if ((getHighlighting() & Zones) == Zones) {
+                    ConcreteZone zone = getDiagram().getZoneAtPoint(p);
+                    if (zone != null) {
+                        fireZoneClickedEvent(zone);
+                    }
+                }
+            }
         }
 
         public void mousePressed(MouseEvent e) {
@@ -579,11 +653,11 @@ public class CirclesPanel2 extends javax.swing.JPanel {
         }
 
         public void mouseMoved(MouseEvent e) {
-            if (getInteraction() != 0 && getDiagram() != null) {
+            if (getHighlighting() != 0 && getDiagram() != null) {
                 Point p = toDiagramCoordinates(e.getPoint());
 
                 // Check if the mouse hovers over a contour:
-                if ((getInteraction() & Contours) == Contours) {
+                if ((getHighlighting() & Contours) == Contours) {
                     CircleContour contour = getDiagram().getCircleContourAtPoint(p, HIGHLIGHT_CONTOUR_TOLERANCE / scaleFactor);
                     if (contour != null) {
                         setHighlightedContour(contour);
@@ -592,7 +666,7 @@ public class CirclesPanel2 extends javax.swing.JPanel {
                 }
 
                 // Check if the mouse hovers over a spider:
-                if ((getInteraction() & Spiders) == Spiders) {
+                if ((getHighlighting() & Spiders) == Spiders) {
                     ConcreteSpiderFoot foot = getDiagram().getSpiderFootAtPoint(p);
                     if (foot != null) {
                         setHighlightedFoot(foot);
@@ -601,7 +675,7 @@ public class CirclesPanel2 extends javax.swing.JPanel {
                 }
 
                 // Check if the mouse hovers over a zone:
-                if ((getInteraction() & Zones) == Zones) {
+                if ((getHighlighting() & Zones) == Zones) {
                     ConcreteZone zone = getDiagram().getZoneAtPoint(p);
                     if (zone != null) {
                         setHighlightedZone(zone);
