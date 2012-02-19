@@ -28,7 +28,6 @@ package icircles.gui;
 
 import icircles.concreteDiagram.ConcreteSpiderFoot;
 import java.awt.event.MouseEvent;
-import java.util.EventObject;
 
 /**
  * This is the event descriptor of the {@link DiagramClickListener#spiderClicked(icircles.gui.SpiderClickedEvent)

@@ -28,7 +28,6 @@ package icircles.gui;
 
 import icircles.concreteDiagram.CircleContour;
 import java.awt.event.MouseEvent;
-import java.util.EventObject;
 
 /**
  * This is the event descriptor of the {@link DiagramClickListener#contourClicked(icircles.gui.ContourClickedEvent)

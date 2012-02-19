@@ -28,7 +28,6 @@ package icircles.gui;
 
 import icircles.concreteDiagram.ConcreteZone;
 import java.awt.event.MouseEvent;
-import java.util.EventObject;
 
 /**
  * This is the event descriptor of the {@link DiagramClickListener#zoneClicked(icircles.gui.ZoneClickedEvent)

@@ -45,25 +45,31 @@ public class CirclesPanel2 extends javax.swing.JPanel {
 
     // <editor-fold defaultstate="collapsed" desc="Private Fields">
     /**
-     * This flag is used in {@link CirclesPanel2#setHighlighting(int)} to
+     * This flag is used in {@link CirclesPanel2#setHighlightMode(int)} to
+     * indicate that the user may highlight no elements in the currently
+     * displayed diagram with the mouse.
+     */
+    public static final int None = 0;
+    /**
+     * This flag is used in {@link CirclesPanel2#setHighlightMode(int)} to
      * indicate that the user may highlight the spiders in the currently
      * displayed diagram with the mouse.
      */
     public static final int Spiders = 0x1;
     /**
-     * This flag is used in {@link CirclesPanel2#setHighlighting(int)} to
+     * This flag is used in {@link CirclesPanel2#setHighlightMode(int)} to
      * indicate that the user may highlight the zones in the currently displayed
      * diagram with the mouse.
      */
     public static final int Zones = 0x2;
     /**
-     * This flag is used in {@link CirclesPanel2#setHighlighting(int)} to
+     * This flag is used in {@link CirclesPanel2#setHighlightMode(int)} to
      * indicate that the user may highlight the circle contours in the currently
      * displayed diagram with the mouse.
      */
     public static final int Contours = 0x4;
     /**
-     * This flag is used in {@link CirclesPanel2#setHighlighting(int)} to
+     * This flag is used in {@link CirclesPanel2#setHighlightMode(int)} to
      * indicate that the user may highlight all the elements in the currently
      * displayed diagram with the mouse.
      */
@@ -76,11 +82,11 @@ public class CirclesPanel2 extends javax.swing.JPanel {
      * them.</li> <li>{@link CirclesPanel2#Zones}: which indicates that zones
      * will be highlighted when the user hovers over them.</li> <li>{@link CirclesPanel2#Contours}:
      * which indicates that circle contours will be highlighted when the user
-     * hovers over them.</li> </ul></p> <p> The {@link CirclesPanel2#All} flag
-     * can also be used. It indicates that all diagram elements can be
+     * hovers over them.</li> </ul></p> <p> The {@link CirclesPanel2#All} and {@link CirclesPanel2#None} flags
+     * can also be used. These indicate that all diagram or no elements (respectively) can be
      * highlighted with the mouse.</p>
      */
-    private int highlighting = 0;
+    private int highlightMode = None;
     /**
      * The diagram that will actually be drawn in this panel.
      */
@@ -181,15 +187,15 @@ public class CirclesPanel2 extends javax.swing.JPanel {
      * over them.</li> <li>{@link CirclesPanel2#Zones}: which indicates that
      * zones will be highlighted when the user hovers over them.</li> <li>{@link CirclesPanel2#Contours}:
      * which indicates that circle contours will be highlighted when the user
-     * hovers over them.</li> </ul></p> <p> The {@link CirclesPanel2#All} flag
-     * can also be used. It indicates that all diagram elements can be
+     * hovers over them.</li> </ul></p> <p> The {@link CirclesPanel2#All} and {@link CirclesPanel2#None} flags
+     * can also be used. These indicate that all diagram or no elements (respectively) can be
      * highlighted with the mouse.</p>
      *
      * @return the set of flags that determines which elements of the diagram
      * may be highlighted with the mouse.
      */
-    public int getHighlighting() {
-        return highlighting;
+    public int getHighlightMode() {
+        return highlightMode;
     }
 
     /**
@@ -200,15 +206,15 @@ public class CirclesPanel2 extends javax.swing.JPanel {
      * them.</li> <li>{@link CirclesPanel2#Zones}: which indicates that zones
      * will be highlighted when the user hovers over them.</li> <li>{@link CirclesPanel2#Contours}:
      * which indicates that circle contours will be highlighted when the user
-     * hovers over them.</li> </ul></p> <p> The {@link CirclesPanel2#All} flag
-     * can also be used. It indicates that all diagram elements can be
+     * hovers over them.</li> </ul></p> <p> The {@link CirclesPanel2#All} and {@link CirclesPanel2#None} flags
+     * can also be used. These indicate that all diagram or no elements (respectively) can be
      * highlighted with the mouse.</p>
      *
-     * @param highlighting the new set of flags that determines which elements
+     * @param highlightMode the new set of flags that determines which elements
      * of the diagram may be highlighted with the mouse.
      */
-    public void setHighlighting(int highlighting) {
-        this.highlighting = highlighting & All;
+    public void setHighlightMode(int highlightMode) {
+        this.highlightMode = highlightMode & All;
     }
     // </editor-fold>
 
@@ -237,7 +243,7 @@ public class CirclesPanel2 extends javax.swing.JPanel {
      * Registers the given {@link DiagramClickListener diagram click listener}
      * to the events which are fired when the user clicks on particular diagram
      * elements. <p><span style="font-weight:bold">Note</span>: the events are
-     * invoked regardless of whether {@link CirclesPanel2#getHighlighting()}
+     * invoked regardless of whether {@link CirclesPanel2#getHighlightMode()}
      * flags are set.</p>
      *
      * @param l the event listener to register.
@@ -300,7 +306,7 @@ public class CirclesPanel2 extends javax.swing.JPanel {
     }
     // </editor-fold>
 
-    // <editor-fold defaultstate="collapsed" desc="Highlighting">
+    // <editor-fold defaultstate="collapsed" desc="Private Highlighting Properties">
     private ConcreteZone getHighlightedZone() {
         return highlightedZone;
     }
@@ -620,28 +626,28 @@ public class CirclesPanel2 extends javax.swing.JPanel {
             if (getDiagram() != null) {
                 Point p = toDiagramCoordinates(e.getPoint());
 
-                if ((getHighlighting() & Contours) == Contours) {
-                    CircleContour contour = getDiagram().getCircleContourAtPoint(p, HIGHLIGHT_CONTOUR_TOLERANCE / scaleFactor);
-                    if (contour != null) {
-                        fireContourClickedEvent(contour, e);
-                        return;
-                    }
+//                if ((getHighlightMode() & Contours) == Contours) {
+                CircleContour contour = getDiagram().getCircleContourAtPoint(p, HIGHLIGHT_CONTOUR_TOLERANCE / scaleFactor);
+                if (contour != null) {
+                    fireContourClickedEvent(contour, e);
+                    return;
                 }
+//                }
 
-                if ((getHighlighting() & Spiders) == Spiders) {
-                    ConcreteSpiderFoot foot = getDiagram().getSpiderFootAtPoint(p);
-                    if (foot != null) {
-                        fireSpiderClickedEvent(foot, e);
-                        return;
-                    }
+//                if ((getHighlightMode() & Spiders) == Spiders) {
+                ConcreteSpiderFoot foot = getDiagram().getSpiderFootAtPoint(p);
+                if (foot != null) {
+                    fireSpiderClickedEvent(foot, e);
+                    return;
                 }
+//                }
 
-                if ((getHighlighting() & Zones) == Zones) {
-                    ConcreteZone zone = getDiagram().getZoneAtPoint(p);
-                    if (zone != null) {
-                        fireZoneClickedEvent(zone, e);
-                    }
+//                if ((getHighlightMode() & Zones) == Zones) {
+                ConcreteZone zone = getDiagram().getZoneAtPoint(p);
+                if (zone != null) {
+                    fireZoneClickedEvent(zone, e);
                 }
+//                }
             }
         }
 
@@ -664,11 +670,11 @@ public class CirclesPanel2 extends javax.swing.JPanel {
         }
 
         public void mouseMoved(MouseEvent e) {
-            if (getHighlighting() != 0 && getDiagram() != null) {
+            if (getHighlightMode() != 0 && getDiagram() != null) {
                 Point p = toDiagramCoordinates(e.getPoint());
 
                 // Check if the mouse hovers over a contour:
-                if ((getHighlighting() & Contours) == Contours) {
+                if ((getHighlightMode() & Contours) == Contours) {
                     CircleContour contour = getDiagram().getCircleContourAtPoint(p, HIGHLIGHT_CONTOUR_TOLERANCE / scaleFactor);
                     if (contour != null) {
                         setHighlightedContour(contour);
@@ -677,7 +683,7 @@ public class CirclesPanel2 extends javax.swing.JPanel {
                 }
 
                 // Check if the mouse hovers over a spider:
-                if ((getHighlighting() & Spiders) == Spiders) {
+                if ((getHighlightMode() & Spiders) == Spiders) {
                     ConcreteSpiderFoot foot = getDiagram().getSpiderFootAtPoint(p);
                     if (foot != null) {
                         setHighlightedFoot(foot);
@@ -686,7 +692,7 @@ public class CirclesPanel2 extends javax.swing.JPanel {
                 }
 
                 // Check if the mouse hovers over a zone:
-                if ((getHighlighting() & Zones) == Zones) {
+                if ((getHighlightMode() & Zones) == Zones) {
                     ConcreteZone zone = getDiagram().getZoneAtPoint(p);
                     if (zone != null) {
                         setHighlightedZone(zone);
@@ -700,5 +706,5 @@ public class CirclesPanel2 extends javax.swing.JPanel {
             }
         }
     }
-//</editor-fold>
+    //</editor-fold>
 }
