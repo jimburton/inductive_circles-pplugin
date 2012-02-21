@@ -278,7 +278,7 @@ public class CirclesPanel2 extends javax.swing.JPanel {
     protected void fireSpiderClickedEvent(ConcreteSpiderFoot foot, MouseEvent clickInfo) {
         DiagramClickListener[] ls = listenerList.getListeners(DiagramClickListener.class);
         if (ls != null && ls.length > 0) {
-            SpiderClickedEvent e = new SpiderClickedEvent(this, foot, clickInfo);
+            SpiderClickedEvent e = new SpiderClickedEvent(this, getDiagram(), clickInfo, this.toDiagramCoordinates(clickInfo.getPoint()), foot);
             for (int i = 0; i < ls.length; i++) {
                 ls[i].spiderClicked(e);
             }
@@ -288,7 +288,7 @@ public class CirclesPanel2 extends javax.swing.JPanel {
     protected void fireZoneClickedEvent(ConcreteZone zone, MouseEvent clickInfo) {
         DiagramClickListener[] ls = listenerList.getListeners(DiagramClickListener.class);
         if (ls != null && ls.length > 0) {
-            ZoneClickedEvent e = new ZoneClickedEvent(this, zone, clickInfo);
+            ZoneClickedEvent e = new ZoneClickedEvent(this, getDiagram(), clickInfo, this.toDiagramCoordinates(clickInfo.getPoint()), zone);
             for (int i = 0; i < ls.length; i++) {
                 ls[i].zoneClicked(e);
             }
@@ -298,7 +298,7 @@ public class CirclesPanel2 extends javax.swing.JPanel {
     protected void fireContourClickedEvent(CircleContour contour, MouseEvent clickInfo) {
         DiagramClickListener[] ls = listenerList.getListeners(DiagramClickListener.class);
         if (ls != null && ls.length > 0) {
-            ContourClickedEvent e = new ContourClickedEvent(this, contour, clickInfo);
+            ContourClickedEvent e = new ContourClickedEvent(this, getDiagram(), clickInfo, this.toDiagramCoordinates(clickInfo.getPoint()), contour);
             for (int i = 0; i < ls.length; i++) {
                 ls[i].contourClicked(e);
             }

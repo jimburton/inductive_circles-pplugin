@@ -27,6 +27,8 @@
 package icircles.gui;
 
 import icircles.concreteDiagram.CircleContour;
+import icircles.concreteDiagram.ConcreteDiagram;
+import java.awt.Point;
 import java.awt.event.MouseEvent;
 
 /**
@@ -47,14 +49,20 @@ public class ContourClickedEvent extends DiagramClickEvent {
      * Creates the descriptor of the {@link DiagramClickListener#contourClicked(icircles.gui.ContourClickedEvent) 
      * contour clicked event}.
      *
-     * @param source the object that invoked this event (usually its a {@link
-     * CirclesPanel2 circles panel}).
+     * @param source the {@link CirclesPanel2 circles panel} that is the origin
+     * of this event.
      * @param contour the contour that has been clicked.
+     * @param diagram the diagram which has been clicked.
      * @param clickInfo the additional mouse click information (the underlying mouse event that triggered
      * this diagram click event).
+     * @param diagramCoordinates the coordinates of the click in diagram's local
+     * coordinates.
      */
-    public ContourClickedEvent(Object source, CircleContour contour, MouseEvent clickInfo) {
-        super(source, clickInfo);
+    public ContourClickedEvent(CirclesPanel2 source, ConcreteDiagram diagram, MouseEvent clickInfo, Point diagramCoordinates, CircleContour contour) {
+        super(source, diagram, clickInfo, diagramCoordinates);
+        if (contour == null) {
+            throw new IllegalArgumentException(icircles.i18n.Translations.i18n("GERR_NULL_ARGUMENT", "contour"));
+        }
         this.contour = contour;
     }
 

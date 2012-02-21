@@ -26,7 +26,9 @@
  */
 package icircles.gui;
 
+import icircles.concreteDiagram.ConcreteDiagram;
 import icircles.concreteDiagram.ConcreteZone;
+import java.awt.Point;
 import java.awt.event.MouseEvent;
 
 /**
@@ -47,14 +49,20 @@ public class ZoneClickedEvent extends DiagramClickEvent {
      * Creates the descriptor of the {@link DiagramClickListener#zoneClicked(icircles.gui.ZoneClickedEvent)
      * zone clicked event}.
      *
-     * @param source the object that invoked this event (usually its a {@link
-     * CirclesPanel2 circles panel}).
+     * @param source the {@link CirclesPanel2 circles panel} that is the origin
+     * of this event.
      * @param zone the zone that has been clicked.
+     * @param diagram the diagram which has been clicked.
      * @param clickInfo the additional mouse click information (the underlying mouse event that triggered
      * this diagram click event).
+     * @param diagramCoordinates the coordinates of the click in diagram's local
+     * coordinates.
      */
-    public ZoneClickedEvent(Object source, ConcreteZone zone, MouseEvent clickInfo) {
-        super(source, clickInfo);
+    public ZoneClickedEvent(CirclesPanel2 source, ConcreteDiagram diagram, MouseEvent clickInfo, Point diagramCoordinates, ConcreteZone zone) {
+        super(source, diagram, clickInfo, diagramCoordinates);
+        if (zone == null) {
+            throw new IllegalArgumentException(icircles.i18n.Translations.i18n("GERR_NULL_ARGUMENT", "zone"));
+        }
         this.zone = zone;
     }
 

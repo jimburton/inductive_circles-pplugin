@@ -26,7 +26,9 @@
  */
 package icircles.gui;
 
+import icircles.concreteDiagram.ConcreteDiagram;
 import icircles.concreteDiagram.ConcreteSpiderFoot;
+import java.awt.Point;
 import java.awt.event.MouseEvent;
 
 /**
@@ -47,14 +49,20 @@ public class SpiderClickedEvent extends DiagramClickEvent {
      * Creates the descriptor of the {@link DiagramClickListener#spiderClicked(icircles.gui.SpiderClickedEvent)
      * spider clicked event}.
      *
-     * @param source the object that invoked this event (usually its a {@link 
-     * CirclesPanel2 circles panel}).
+     * @param source the {@link CirclesPanel2 circles panel} that is the origin
+     * of this event.
      * @param foot the spider's foot that has been clicked.
+     * @param diagram the diagram which has been clicked.
      * @param clickInfo the additional mouse click information (the underlying mouse event that triggered
      * this diagram click event).
+     * @param diagramCoordinates the coordinates of the click in diagram's local
+     * coordinates.
      */
-    public SpiderClickedEvent(Object source, ConcreteSpiderFoot foot, MouseEvent clickInfo) {
-        super(source, clickInfo);
+    public SpiderClickedEvent(CirclesPanel2 source, ConcreteDiagram diagram, MouseEvent clickInfo, Point diagramCoordinates, ConcreteSpiderFoot foot) {
+        super(source, diagram, clickInfo, diagramCoordinates);
+        if (foot == null) {
+            throw new IllegalArgumentException(icircles.i18n.Translations.i18n("GERR_NULL_ARGUMENT", "foot"));
+        }
         this.foot = foot;
     }
 
