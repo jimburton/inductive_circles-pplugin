@@ -28,6 +28,7 @@ package icircles.gui;
 
 import icircles.concreteDiagram.ConcreteDiagram;
 import icircles.concreteDiagram.ConcreteSpiderFoot;
+import icircles.concreteDiagram.ConcreteZone;
 import java.awt.Point;
 import java.awt.event.MouseEvent;
 
@@ -44,6 +45,7 @@ public class SpiderClickedEvent extends DiagramClickEvent {
      * The clicked foot.
      */
     private final ConcreteSpiderFoot foot;
+    private ConcreteZone zone;
 
     /**
      * Creates the descriptor of the {@link DiagramClickListener#spiderClicked(icircles.gui.SpiderClickedEvent)
@@ -53,8 +55,8 @@ public class SpiderClickedEvent extends DiagramClickEvent {
      * of this event.
      * @param foot the spider's foot that has been clicked.
      * @param diagram the diagram which has been clicked.
-     * @param clickInfo the additional mouse click information (the underlying mouse event that triggered
-     * this diagram click event).
+     * @param clickInfo the additional mouse click information (the underlying
+     * mouse event that triggered this diagram click event).
      * @param diagramCoordinates the coordinates of the click in diagram's local
      * coordinates.
      */
@@ -68,9 +70,21 @@ public class SpiderClickedEvent extends DiagramClickEvent {
 
     /**
      * Returns the foot that was clicked by the user.
+     *
      * @return the foot that was clicked by the user.
      */
     public ConcreteSpiderFoot getFoot() {
         return foot;
+    }
+
+    /**
+     * Returns the zone in which the {@link SpiderClickedEvent#getFoot() foot} lies.
+     * @return the zone in which the {@link SpiderClickedEvent#getFoot() foot} lies.
+     */
+    public ConcreteZone getZoneOfFoot() {
+        if (zone == null) {
+            zone = getDiagram().getZoneAtPoint(getDiagramCoordinates());
+        }
+        return zone;
     }
 }
