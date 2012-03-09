@@ -87,4 +87,8 @@ public class SpiderClickedEvent extends DiagramClickEvent {
         }
         return zone;
     }
+
+    public String getSpiderName() {
+        return foot.getSpider().as.get_name();
+    }
 }
