@@ -2,7 +2,6 @@ package icircles.concreteDiagram;
 
 import icircles.abstractDescription.AbstractDescription;
 import icircles.gui.CirclesPanel;
-import icircles.gui.CirclesPanel2;
 import icircles.util.CannotDrawException;
 import java.awt.Font;
 import java.awt.Point;
