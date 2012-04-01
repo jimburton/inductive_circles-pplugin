@@ -87,7 +87,13 @@ public class AbstractBasicRegion implements Comparable<AbstractBasicRegion> {
         }
         return b.toString();
     }
-
+    public String journalString() {
+        StringBuilder b = new StringBuilder();
+        for (AbstractCurve c : m_in_set) {
+            b.append(c.journalString());
+        }
+        return b.toString();
+    }
     public Iterator<AbstractCurve> getContourIterator() {
         return m_in_set.iterator();
     }

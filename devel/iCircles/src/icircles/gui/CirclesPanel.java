@@ -4,7 +4,6 @@ import java.awt.BasicStroke;
 import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Dimension;
-import java.awt.FlowLayout;
 import java.awt.Font;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
@@ -49,6 +48,7 @@ public class CirclesPanel extends JPanel {
         this.cd = diagram;
         setLayout(new BorderLayout());
         setBorder(new javax.swing.border.LineBorder(new java.awt.Color(0, 0, 0), 1, true));
+        int labelHeight = 0;
         if (desc != null && !desc.isEmpty()) {
             //setBorder(BorderFactory.createLineBorder(Color.black));
             JLabel jl = new JLabel(desc);
@@ -63,14 +63,15 @@ public class CirclesPanel extends JPanel {
             jl.setFont(f);
             jl.setHorizontalAlignment(JLabel.CENTER);
             add(jl, BorderLayout.NORTH);
+            labelHeight = (int)(jl.getPreferredSize().getHeight()) + 1;
         }
 
         dp = new DiagramPanel(diagram, failureMessage, useColors);
         //dp.setBorder(BorderFactory.createLineBorder(Color.black));
 
         int size = diagram.getSize();
-        this.setPreferredSize(new Dimension(size, size));
-        dp.setPreferredSize(new Dimension(size, size));
+        this.setPreferredSize(new Dimension(size, size + labelHeight));
+        dp.setPreferredSize(new Dimension(size, size + labelHeight));
 //        dp.setMinimumSize(new Dimension(size, size));
 //        dp.setMaximumSize(new Dimension(size, size));
 //        this.setMinimumSize(new Dimension(size, size));
@@ -167,11 +168,11 @@ public class CirclesPanel extends JPanel {
 
         private void recalculateScale() {
             this.trans = AffineTransform.getScaleInstance(scaleFactor, scaleFactor);
-            if (diagram != null) {
-                Dimension d = new Dimension((int) ((diagram.getBox().width + 5) * scaleFactor),
-                        (int) ((diagram.getBox().height + 5) * scaleFactor));
+//            if (diagram != null) {
+//                Dimension d = new Dimension((int) ((diagram.getBox().width + 5) * scaleFactor),
+//                        (int) ((diagram.getBox().height + 5) * scaleFactor));
 //                setPreferredSize(d);
-            }
+//            }
         }
 
         @Override

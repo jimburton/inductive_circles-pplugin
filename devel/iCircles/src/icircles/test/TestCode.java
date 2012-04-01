@@ -3,7 +3,6 @@ package icircles.test;
 import icircles.gui.CirclesPanel;
 
 import java.awt.BorderLayout;
-import java.awt.Font;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.Insets;
@@ -19,10 +18,8 @@ import icircles.concreteDiagram.DiagramCreator;
 import icircles.util.CannotDrawException;
 import icircles.util.DEB;
 
-import icircles.abstractDescription.AbstractBasicRegion;
 import icircles.abstractDescription.AbstractCurve;
 import icircles.abstractDescription.AbstractDescription;
-import icircles.abstractDescription.CurveLabel;
 
 public class TestCode {
 
@@ -228,10 +225,21 @@ public class TestCode {
         // clear the static id counter for abstract curves
         if (!view_failure) {
             AbstractCurve.reset_id_counter();
-            AbstractBasicRegion.clearLibrary();
-            CurveLabel.clearLibrary();
+            //AbstractBasicRegion.clearLibrary();
+            //CurveLabel.clearLibrary();
         }
         String desc = TestData.test_data[test_num].description;
+        
+        // to test journalling...
+        if(TestData.test_journalling){
+        	//System.out.println("desc was "+desc);
+            AbstractDescription ad = AbstractDescription.makeForTesting(desc);
+            //System.out.println("ad is "+ad.debug());
+            desc = AbstractDescription.makeForTesting(ad);
+        	//System.out.println("desc is "+desc);
+        	AbstractCurve.reset_id_counter();
+        }        
+        
         if (DEB.level > 0) {
             System.out.println("test desc:" + desc);
         }
@@ -291,7 +299,7 @@ public class TestCode {
         if (description.length() > 36) {
             description = "" + test_num + ".description..";
         }
-
+        
         CirclesPanel cp = new CirclesPanel(description, failureMessage, cd,
                 true);// do use colours
         cp.setScaleFactor(TestData.scale);

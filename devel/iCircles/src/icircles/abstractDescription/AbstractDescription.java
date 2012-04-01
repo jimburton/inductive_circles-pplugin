@@ -146,6 +146,22 @@ public class AbstractDescription {
 	    	}
     	}
     }
+    
+    public static String makeForTesting(AbstractDescription ad){
+    	String result = "";
+    	for(AbstractBasicRegion zone : ad.m_zones){
+    		result += zone.journalString()+" ";
+    	}
+    	result +=", ";
+    	for(AbstractBasicRegion zone : ad.m_shaded_zones){
+    		result += zone.journalString()+" ";
+    	}
+    	result +=", ";
+    	for(AbstractSpider s : ad.m_spiders){
+    		result += s.journalString()+" ";
+    	}
+    	return result;
+    }
 
     public static AbstractDescription makeForTesting(String s, boolean random_shaded_zones) {
     	

@@ -49,5 +49,14 @@ public class AbstractSpider implements Comparable<AbstractSpider>{
         }
         return 0;
 	}
+
+	public String journalString() {
+        StringBuilder b = new StringBuilder();
+        for (AbstractBasicRegion z : m_feet) {
+            b.append(z.journalString());
+            b.append(" ");
+        }
+        return b.toString();
+	}
 }
 

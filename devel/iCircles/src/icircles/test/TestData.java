@@ -14,7 +14,7 @@ public class TestData {
     public static final int TEST_PANEL_SIZE = 280;
     public static final boolean RANDOM_SHADING = false; // we don't have too many tests with shaded zones
 
-    public static boolean GENERATE_ALL_TEST_DATA = true; // with "run all tests", generates text for test_data array
+    public static boolean GENERATE_ALL_TEST_DATA = false; // with "run all tests", generates text for test_data array
 
     public static boolean TEST_EULER_THREE = false;
     
@@ -32,11 +32,12 @@ public class TestData {
     };  // a set of tests of particular interest
     //public static int TASK = RUN_TEST_LIST;
     //public static int TASK = VIEW_TEST_LIST;
-    //public static int TASK = RUN_ALL_TESTS;
-    public static int TASK = VIEW_ALL_TESTS;
+    public static int TASK = RUN_ALL_TESTS;
+    //public static int TASK = VIEW_ALL_TESTS;
     
     public static Font font = new Font("Helvetica", Font.BOLD | Font.ITALIC,  16);
-    public static double scale = 0.5;
+    public static double scale = 1.0; // to test scaled diagrams look= OK
+    public static boolean test_journalling = false;// converts String->AbstractDescription->String
     
     public static TestDatum[] test_data = {
     	/*0*/new TestDatum( "a", 80.35747263647977),
@@ -157,10 +158,10 @@ public class TestData {
     	/*115*/new TestDatum( "a b ab, ,a, ab, .", 692.2760365565484),
     	/*116*/new TestDatum( "a b ab, ,a, ab, ., b", 883.587519967679),
     	/*117*/new TestDatum( "a b ab, ,a b", 743.9814066159436),
-    	/*118*/new TestDatum( "a b ab, ,a b, . ab", 1631.5280600546776),
+    	/*118*/new TestDatum( "a b ab, ,a b, . ab", 1631.9745601011973),
     	/*119*/new TestDatum( "a b c ab ac bc abc ad, ,a b c abc ac", 2225.4623325865127),
     	/*120*/new TestDatum( "a b c ab ac bc abc ad, ,a b c abc", 1831.576732586513),
-    	/*121*/new TestDatum( "A B AB, ,A B, AB", 998.1526335137531),
+    	/*121*/new TestDatum( "A B AB, ,A B, AB", 998.2966911360733),
     	/*122*/new TestDatum( "A B AB, ,A, AB", 463.96367179575964),
     	/*123*/new TestDatum( "A B AB, ,B, AB", 372.82443743588726),
     	/*124*/new TestDatum( "A B AB, ,A AB,B AB", 1548.50918461857),
