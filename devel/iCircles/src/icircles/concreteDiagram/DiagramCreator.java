@@ -113,6 +113,45 @@ public class DiagramCreator {
         result.setFont(TestData.font);
         return result;
     }
+    
+    private boolean foot_is_on_leg(ConcreteSpiderFoot foot, ConcreteSpiderLeg leg, double tol)
+    {
+        double sf_x = foot.getX() - leg.from.getX();
+        double sf_y = foot.getY() - leg.from.getY();
+
+        double se_x = leg.to.getX() - leg.from.getX();
+        double se_y = leg.to.getY() - leg.from.getY();
+
+        double se_length = Math.sqrt(se_x * se_x + se_y * se_y);
+
+        double unit_leg_x = se_x / se_length;
+        double unit_leg_y = se_y / se_length;
+
+        double sf_dot_unit_leg = sf_x * unit_leg_x + sf_y * unit_leg_y;
+
+        double sf_proj_leg_x = sf_dot_unit_leg * unit_leg_x;
+        double sf_proj_leg_y = sf_dot_unit_leg * unit_leg_y;
+
+        double sf_perp_leg_x = sf_x - sf_proj_leg_x;
+        double sf_perp_leg_y = sf_y - sf_proj_leg_y;
+
+        double sf_perp_leg_len = Math.sqrt(sf_perp_leg_x * sf_perp_leg_x + sf_perp_leg_y * sf_perp_leg_y);
+
+        double sf_prop_leg = sf_proj_leg_x / se_x;
+        
+        if(Math.abs(se_x) < 0.001 && Math.abs(se_y) > 0.001)
+        {
+        	sf_prop_leg = sf_proj_leg_y / se_y;
+        }
+        if (DEB.level >= 3) {
+            System.out.println("sf_perp_leg_len = "+sf_perp_leg_len +", sf_prop_leg = "+sf_prop_leg);
+        }
+        
+        boolean foot_on_leg = sf_perp_leg_len < tol
+                && sf_prop_leg > 0
+                && sf_prop_leg < 1;
+        return foot_on_leg;
+    }
 
     private ArrayList<ConcreteSpider> createSpiders() throws CannotDrawException {
         ArrayList<ConcreteSpider> result = new ArrayList<ConcreteSpider>();
@@ -231,42 +270,33 @@ public class DiagramCreator {
         // Check that the new foot is still in its relevant abstract basic region.
 
         // First - detect where feet meet a non-adjacent leg
+        double tol = 6;
+        
+        boolean check_feet_placements = true;
+        while(check_feet_placements){
+        check_feet_placements = false;
         for (ConcreteSpider cs : spiders) {
+        	if(check_feet_placements)//(start again)
+        		break;
             for (ConcreteSpiderFoot foot : cs.feet) {
                 // check whether foot is too close to another leg
+            	if(check_feet_placements)//(start again)
+            		break;
                 for (ConcreteSpider cs2 : spiders) {
+                	if(check_feet_placements)//(start again)
+                		break;
                     for (ConcreteSpiderLeg leg : cs2.legs) {
                         if (leg.from == foot || leg.to == foot) {
                             // this leg is bound to be close to foot -it's attached!
                             continue;
                         }
                         // is foot on leg?
-                        double sf_x = foot.getX() - leg.from.getX();
-                        double sf_y = foot.getY() - leg.from.getY();
-
-                        double se_x = leg.to.getX() - leg.from.getX();
-                        double se_y = leg.to.getY() - leg.from.getY();
-
-                        double se_length = Math.sqrt(se_x * se_x + se_y * se_y);
-
-                        double unit_leg_x = se_x / se_length;
-                        double unit_leg_y = se_y / se_length;
-
-                        double sf_dot_unit_leg = sf_x * unit_leg_x + sf_y * unit_leg_y;
-
-                        double sf_proj_leg_x = sf_dot_unit_leg * unit_leg_x;
-                        double sf_proj_leg_y = sf_dot_unit_leg * unit_leg_y;
-
-                        double sf_perp_leg_x = sf_x - sf_proj_leg_x;
-                        double sf_perp_leg_y = sf_y - sf_proj_leg_y;
-
-                        double sf_perp_leg_len = Math.sqrt(sf_perp_leg_x * sf_perp_leg_x + sf_perp_leg_y * sf_perp_leg_y);
-
-                        double sf_prop_leg = sf_proj_leg_x / se_x;
-                        double tol = 6;
-                        boolean foot_on_leg = sf_perp_leg_len < tol
-                                && sf_prop_leg > 0
-                                && sf_prop_leg < 1;
+                        if (DEB.level >= 3) {
+                            System.out.println("check spider "+cs+" foot ("+foot.getX()+","+foot.getY()+") against "+
+                                                    " spider "+cs2+
+                             " leg ("+leg.from.getX()+","+leg.from.getY()+")->("+leg.to.getX()+","+leg.to.getY()+")");
+                        }
+                        boolean foot_on_leg = foot_is_on_leg(foot, leg, tol);
                         if (foot_on_leg) {
                             // nudge the foot, but check it's still in its zone afterwards
                             double old_x = foot.getX();
@@ -275,43 +305,69 @@ public class DiagramCreator {
 
                             ConcreteZone cz = makeConcreteZone(abr);
                             Area a = new Area(cz.getShape(box));
+                            
                             double new_y = old_y + 2 * tol;
-//    	                    double new_x = old_x + 2*tol;
+//    	                    double new_x = old_x + 2 * tol;
                             double new_x = old_x;
                             CircleContour test = new CircleContour(new_x, new_y, tol, null);
                             if (containedIn(test, a)) {
                                 foot.setX(new_x);
                                 foot.setY(new_y);
-                            } else {
-                                new_x = old_x - 2 * tol;
-                                new_y = old_y - 2 * tol;
-                                test = new CircleContour(new_x, new_y, tol, null);
-                                if (containedIn(test, a)) {
-                                    foot.setX(new_x);
-                                    foot.setY(new_y);
-                                } else {
-                                    new_x = old_x + 2 * tol;
-                                    new_y = old_y - 2 * tol;
-                                    test = new CircleContour(new_x, new_y, tol, null);
-                                    if (containedIn(test, a)) {
-                                        foot.setX(new_x);
-                                        foot.setY(new_y);
-                                    } else {
-                                        new_x = old_x - 2 * tol;
-                                        new_y = old_y + 2 * tol;
-                                        test = new CircleContour(new_x, new_y, tol, null);
-                                        if (containedIn(test, a)) {
-                                            foot.setX(new_x);
-                                            foot.setY(new_y);
-                                        }
-                                    }
+                                if(foot_is_on_leg(foot, leg, tol)){
+                                	foot.setX(old_x);
+                                	foot.setY(old_y);
+                                }else{
+                                    check_feet_placements = true; // if we moved one, start all over again!
+                                    break;                                	
+                                }
+                            }
+                            new_x = old_x - 2 * tol;
+                            new_y = old_y - 2 * tol;
+                            test = new CircleContour(new_x, new_y, tol, null);
+                            if (containedIn(test, a)) {
+                                foot.setX(new_x);
+                                foot.setY(new_y);
+                                if(foot_is_on_leg(foot, leg, tol)){
+                                	foot.setX(old_x);
+                                	foot.setY(old_y);
+                                }else{
+                                    check_feet_placements = true; // if we moved one, start all over again!
+                                    break;                                	
+                                }
+                            }
+                            new_x = old_x + 2 * tol;
+                            new_y = old_y - 2 * tol;
+                            test = new CircleContour(new_x, new_y, tol, null);
+                            if (containedIn(test, a)) {
+                                foot.setX(new_x);
+                                foot.setY(new_y);
+                                if(foot_is_on_leg(foot, leg, tol)){
+                                	foot.setX(old_x);
+                                	foot.setY(old_y);
+                                }else{
+                                    check_feet_placements = true; // if we moved one, start all over again!
+                                    break;                                	
+                                }
+                            }
+                            new_x = old_x - 2 * tol;
+                            new_y = old_y + 2 * tol;
+                            test = new CircleContour(new_x, new_y, tol, null);
+                            if (containedIn(test, a)) {
+                                foot.setX(new_x);
+                                foot.setY(new_y);
+                                if(foot_is_on_leg(foot, leg, tol)){
+                                	foot.setX(old_x);
+                                	foot.setY(old_y);
+                                }else{
+                                    check_feet_placements = true; // if we moved one, start all over again!
+                                    break;                                	
                                 }
                             }
                         }
                     }
                 }
-
             }
+        }
         }
 
         return result;

@@ -4,7 +4,7 @@ import java.awt.Font;
 
 public class TestData {
 
-	// TODO : include shading and spiders into diagram checksums
+	// TODO : include label placement into diagram checksums
 	
     // possible actions
     public static final int RUN_ALL_TESTS = 0;
@@ -18,7 +18,7 @@ public class TestData {
 
     public static boolean TEST_EULER_THREE = false;
     
-    public static boolean DO_VIEW_FAILURES = false;
+    public static boolean DO_VIEW_FAILURES = true;
     public static int TEST_DEBUG_LEVEL = 0;
     
     // settings for view-list or view-all
@@ -27,12 +27,12 @@ public class TestData {
     public static final int FAIL_VIEW_PANEL_SIZE = 180;
     public static final int GRID_WIDTH = 7;
     public static int[] test_list = {
-    	108
+    	133
     };  // a set of tests of particular interest
     //public static int TASK = RUN_TEST_LIST;
     //public static int TASK = VIEW_TEST_LIST;
-    public static int TASK = RUN_ALL_TESTS;
-    //public static int TASK = VIEW_ALL_TESTS;
+    //public static int TASK = RUN_ALL_TESTS;
+    public static int TASK = VIEW_ALL_TESTS;
     
     public static Font font = new Font("Helvetica", Font.BOLD | Font.ITALIC,  16);
     public static double scale = 1.0; // to test scaled diagrams look= OK
