@@ -56,6 +56,11 @@ public class AbstractSpider implements Comparable<AbstractSpider>{
             b.append(z.journalString());
             b.append(" ");
         }
+        if(m_name != null)
+        {
+        	b.append("'");
+        	b.append(m_name);
+        }
         return b.toString();
 	}
 }

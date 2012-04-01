@@ -66,10 +66,11 @@ public class AbstractCurve implements Comparable<AbstractCurve> {
     }
 
     public double checksum() {
-        if (DEB.level == 2) {
-            System.out.println("build checksum from " + m_label + " and " + m_id + "\n");
+        if (DEB.level >= 2) {
+            System.out.println("build checksum from " + m_label.m_label 
+            		       + " (and not " + m_id + ")\ngiving "+m_label.checksum());
         }
-        return m_label.checksum() * m_id;
+        return m_label.checksum() /* * m_id */;
     }
 
     public static void reset_id_counter() {

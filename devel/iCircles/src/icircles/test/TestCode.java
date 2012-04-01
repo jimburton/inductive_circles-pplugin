@@ -229,17 +229,7 @@ public class TestCode {
             //CurveLabel.clearLibrary();
         }
         String desc = TestData.test_data[test_num].description;
-        
-        // to test journalling...
-        if(TestData.test_journalling){
-        	//System.out.println("desc was "+desc);
-            AbstractDescription ad = AbstractDescription.makeForTesting(desc);
-            //System.out.println("ad is "+ad.debug());
-            desc = AbstractDescription.makeForTesting(ad);
-        	//System.out.println("desc is "+desc);
-        	AbstractCurve.reset_id_counter();
-        }        
-        
+                
         if (DEB.level > 0) {
             System.out.println("test desc:" + desc);
         }
@@ -283,7 +273,7 @@ public class TestCode {
 
     private static JPanel get_view_of_test(int test_num, String for_title,
             int size) {
-        String desc = TestData.test_data[test_num].description;
+        String desc = TestData.test_data[test_num].description;        
         System.out.println("drawing test " + test_num + " description " + desc);
 
         ConcreteDiagram cd = null;
@@ -295,7 +285,7 @@ public class TestCode {
         } catch (CannotDrawException x) {
             failureMessage = x.message;
         }
-        String description = "" + test_num + "." + desc;
+        String description = "" + test_num + "." + desc;        
         if (description.length() > 36) {
             description = "" + test_num + ".description..";
         }
@@ -348,8 +338,20 @@ public class TestCode {
 
     private static ConcreteDiagram getDiagram(int test_num,
             int size) throws CannotDrawException {
-        AbstractDescription ad = AbstractDescription.makeForTesting(TestData.test_data[test_num].description,
-        		TestData.RANDOM_SHADING);
+    	String desc = TestData.test_data[test_num].description;
+        // to test journalling...
+        if(TestData.test_journalling){
+        	//System.out.println("desc was "+desc);
+            AbstractDescription ad = AbstractDescription.makeForTesting(desc);
+            //System.out.println("ad is "+ad.debug());
+            desc = ad.makeForTesting();
+        	//System.out.println("desc is "+desc);
+        	
+        } 
+    		
+        AbstractCurve.reset_id_counter();
+        
+        AbstractDescription ad = AbstractDescription.makeForTesting(desc, TestData.RANDOM_SHADING);
         DiagramCreator dc = new DiagramCreator(ad);
         ConcreteDiagram cd = dc.createDiagram(size);
         return cd;

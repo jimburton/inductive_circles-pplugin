@@ -88,6 +88,9 @@ public class AbstractBasicRegion implements Comparable<AbstractBasicRegion> {
         return b.toString();
     }
     public String journalString() {
+    	if(m_in_set.isEmpty())
+    		return ".";
+    	
         StringBuilder b = new StringBuilder();
         for (AbstractCurve c : m_in_set) {
             b.append(c.journalString());

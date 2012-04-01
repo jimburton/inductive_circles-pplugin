@@ -3,6 +3,8 @@ package icircles.concreteDiagram;
 import icircles.abstractDescription.AbstractDescription;
 import icircles.gui.CirclesPanel;
 import icircles.util.CannotDrawException;
+import icircles.util.DEB;
+
 import java.awt.Font;
 import java.awt.Point;
 import java.awt.geom.Rectangle2D;
@@ -49,6 +51,10 @@ public class ConcreteDiagram {
         Iterator<CircleContour> cIt = circles.iterator();
         while (cIt.hasNext()) {
             CircleContour c = cIt.next();
+            if (DEB.level >= 2) {
+                System.out.println("build checksum for contour at coords (" + c.cx 
+                		       + ", " + c.cy + ") radius "+ c.radius +"\n");
+            }
             result += c.cx * 0.345 + c.cy * 0.456 + c.radius * 0.567 + c.ac.checksum() * 0.555;
             result *= 1.2;
         }
@@ -61,6 +67,9 @@ public class ConcreteDiagram {
         Iterator<ConcreteZone> czIt = shadedZones.iterator();
         while (czIt.hasNext()) {
             ConcreteZone cz = czIt.next();
+            if (DEB.level >= 2) {
+                System.out.println("build checksum for shading\n");
+            }
             result += cz.abr.checksum() * 1000.0;
         }
         return result;
@@ -76,6 +85,9 @@ public class ConcreteDiagram {
         Iterator<ConcreteSpider> sIt = spiders.iterator();
         while (sIt.hasNext()) {
             ConcreteSpider s = sIt.next();
+            if (DEB.level >= 2) {
+                System.out.println("build checksum for spider\n");
+            }
             result += s.checksum();
             result *= 1.2;
         }

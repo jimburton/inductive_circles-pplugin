@@ -1,6 +1,8 @@
 package icircles.concreteDiagram;
 
 import icircles.abstractDescription.AbstractSpider;
+import icircles.util.DEB;
+
 import java.util.ArrayList;
 
 public class ConcreteSpider {
@@ -20,9 +22,15 @@ public class ConcreteSpider {
     public double checksum() {
         double result = 0.0;
         for (ConcreteSpiderFoot foot : feet) {
+            if (DEB.level >= 2) {
+                System.out.println("build checksum for foot\n");
+            }
             result += foot.checksum();
         }
         for (ConcreteSpiderLeg leg : legs) {
+            if (DEB.level >= 2) {
+                System.out.println("build checksum for leg\n");
+            }
             result += leg.checksum();
         }
         // TODO Auto-generated method stub
