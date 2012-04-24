@@ -289,9 +289,18 @@ public class TestCode {
         if (description.length() > 36) {
             description = "" + test_num + ".description..";
         }
-        
-        CirclesPanel cp = new CirclesPanel(description, failureMessage, cd,
+       
+        CirclesPanel cp;
+        if(cd != null)
+        	{
+        	cp = new CirclesPanel(description, failureMessage, cd,
                 true);// do use colours
+        	}
+        else
+	    	{
+	    	cp = new CirclesPanel(description, failureMessage, size);
+	    	}
+        	
         cp.setScaleFactor(TestData.scale);
         return cp;
     }

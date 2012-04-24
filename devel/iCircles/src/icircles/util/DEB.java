@@ -20,8 +20,7 @@ public class DEB {
     private static ArrayList<CirclesPanel> filmStripShots = new ArrayList<CirclesPanel>();
     public static void addFilmStripShot(CirclesPanel cp)
     {
-    	if(level > 3)
-    		filmStripShots.add(cp);
+		filmStripShots.add(cp);
     }
     public static void showFilmStrip()
     {

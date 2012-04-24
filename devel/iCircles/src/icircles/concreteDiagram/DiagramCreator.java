@@ -47,7 +47,7 @@ class AngleIterator {
 public class DiagramCreator {
 
     AbstractDescription m_initial_diagram;
-    final static int smallest_rad = 3;
+    final static int smallest_rad = 10;
     ArrayList<DecompositionStep> d_steps;
     ArrayList<RecompositionStep> r_steps;
     HashMap<AbstractBasicRegion, Double> zoneScores;
@@ -91,14 +91,19 @@ public class DiagramCreator {
          * guide_sizes.size()); }
          */
         circles = new ArrayList<CircleContour>();
+        ConcreteDiagram result = null;
+        try
+        {
         boolean ok = createCircles(/*
                  * box,
                  */size);
 
         if (!ok) {
             circles = null;
+            DEB.showFilmStrip();
             return null;
         }
+        
 
         CircleContour.fitCirclesToSize(circles, size);
 
@@ -108,9 +113,16 @@ public class DiagramCreator {
 
         ArrayList<ConcreteSpider> spiders = createSpiders();
 
-        ConcreteDiagram result = new ConcreteDiagram(new Rectangle2D.Double(0, 0, size, size),
+        result = new ConcreteDiagram(new Rectangle2D.Double(0, 0, size, size),
                 circles, shadedZones, unshadedZones, spiders);
         result.setFont(TestData.font);
+        DEB.showFilmStrip();
+        }
+        catch(CannotDrawException x)
+        {
+        DEB.showFilmStrip();
+        throw x;
+        }
         return result;
     }
     
@@ -882,8 +894,6 @@ public class DiagramCreator {
             step = step.next;
         }// go to next BuildStep
 
-        DEB.showFilmStrip();
-
         return true;
     }
 
@@ -1490,6 +1500,7 @@ public class DiagramCreator {
                 circles_copy, shadedZones, unshadedZones, spiders);
         CirclesPanel cp = new CirclesPanel("debug frame " + debug_frame_index, "no failure",
                 cd, true);
+        	
         DEB.addFilmStripShot(cp);
     }
 }

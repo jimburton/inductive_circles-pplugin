@@ -43,8 +43,13 @@ public class CirclesPanel extends JPanel {
     ConcreteDiagram getDiagram() {
         return cd;
     }
-
-    public CirclesPanel(String desc, String failureMessage, ConcreteDiagram diagram, boolean useColors) {
+    
+    private void init(String desc, 
+    		String failureMessage, 
+    		ConcreteDiagram diagram, 
+    		int size,
+    		boolean useColors)
+    {
         this.cd = diagram;
         setLayout(new BorderLayout());
         setBorder(new javax.swing.border.LineBorder(new java.awt.Color(0, 0, 0), 1, true));
@@ -66,32 +71,44 @@ public class CirclesPanel extends JPanel {
             labelHeight = (int)(jl.getPreferredSize().getHeight()) + 1;
         }
 
-        dp = new DiagramPanel(diagram, failureMessage, useColors);
+        if(diagram!=null)
+        	dp = new DiagramPanel(diagram, failureMessage, useColors);
+        else
+        	dp = new DiagramPanel(size, failureMessage);
         //dp.setBorder(BorderFactory.createLineBorder(Color.black));
-
-        int size = diagram.getSize();
+    	
         this.setPreferredSize(new Dimension(size, size + labelHeight));
         dp.setPreferredSize(new Dimension(size, size + labelHeight));
-//        dp.setMinimumSize(new Dimension(size, size));
-//        dp.setMaximumSize(new Dimension(size, size));
-//        this.setMinimumSize(new Dimension(size, size));
-//        this.setMaximumSize(new Dimension(size, size));
 
-//        JPanel containsDiag = new JPanel();
-//        containsDiag.setLayout(new FlowLayout());
-//        containsDiag.add(dp);
-        //containsDiag.setBackground(Color.orange);
+        // some retired panel layout / sizing code:
+//      dp.setMinimumSize(new Dimension(size, size));
+//      dp.setMaximumSize(new Dimension(size, size));
+//      this.setMinimumSize(new Dimension(size, size));
+//      this.setMaximumSize(new Dimension(size, size));
 
-        //containsDiag.setPreferredSize(new Dimension(size+2*padding, size+2*padding));
-        //containsDiag.setMinimumSize(  new Dimension(size+2*padding, size+2*padding));
-        //containsDiag.setMaximumSize(  new Dimension(size+2*padding, size+2*padding));
-        //containsDiag.setBorder(BorderFactory.createLineBorder(Color.blue));
-
-        //setPreferredSize(new Dimension(size+3*padding, size+3*padding + 20));
-        //setMinimumSize(  new Dimension(size+3*padding, size+3*padding + 20));
-        //setMaximumSize(  new Dimension(size+3*padding, size+3*padding + 20));
-
+//      JPanel containsDiag = new JPanel();
+//      containsDiag.setLayout(new FlowLayout());
+//      containsDiag.add(dp);
+      //containsDiag.setBackground(Color.orange);
         add(dp, BorderLayout.CENTER);
+    }
+    
+    // to display failures
+    public CirclesPanel(
+    		String desc, 
+    		String failureMessage, 
+    		int size) {
+        init(desc, failureMessage, null, size, false/*useColors*/);
+    }
+
+    // constructor for non-null ConcreteDiagrams (will dereference for size)
+    public CirclesPanel(
+    		String desc, 
+    		String failureMessage, 
+    		ConcreteDiagram diagram, 
+    		boolean useColors) {
+        int size = diagram.getSize();
+        init(desc, failureMessage, diagram, size, useColors);
     }
 
     private static final class DiagramPanel extends JPanel {
@@ -104,16 +121,28 @@ public class CirclesPanel extends JPanel {
         private AffineTransform trans;
         boolean autoRescale;
 
-        DiagramPanel(ConcreteDiagram diagram,
-                String failureMessage,
-                boolean useColors) {
+        private void init(String failureMessage,
+        		boolean useColors,
+                int size)
+        {
             setBackground(Color.white);
-            this.diagram = diagram;
             this.failureMessage = failureMessage;
             this.useColors = useColors;
             setScaleFactor(1);
-            int size = diagram.getSize();
             setPreferredSize(new Dimension(size, size));
+        }
+        
+        DiagramPanel(int size,
+                String failureMessage) {
+            init(failureMessage, false, size);
+        }
+        
+        DiagramPanel(ConcreteDiagram diagram,
+                String failureMessage,
+                boolean useColors) {
+            this.diagram = diagram;
+            int size = diagram.getSize();
+            init(failureMessage, useColors, size);
         }
 
         @Override
@@ -308,24 +337,25 @@ public class CirclesPanel extends JPanel {
         } catch (CannotDrawException ex) {
             failuremessage = ex.message;
         }
-
-        CirclesPanel cp = new CirclesPanel(diagText, failuremessage, cd, true); // do use colors
-
-        return cp;
+        if(cd != null)
+        	return new CirclesPanel(diagText, failuremessage, cd, true); // do use colors
+        else
+        	return new CirclesPanel(diagText, failuremessage, size); // do use colors
     }
 
     public static void main(String[] args) {
         // See the implementation of makeForTesting to see how to make an 
         // AbstractDescription from scratch.
         AbstractDescription ad = AbstractDescription.makeForTesting(
-                //"qh h fh ih ik kh b ab ac de bd  abc bfg fc bj l lc al m mn nc bc bco bo boj bp bop cq cqb rs ra s t");
+        		//"a ab abc ac",
+        		//"qh h fh ih ik kh b ab ac de bd  abc bfg fc bj l lc al m mn nc bc bco bo boj bp bop cq cqb rs ra s t");
                 "qh h fh ih ik kh b ab ac de bd  abc bfg fc bj l lc al m mn nc bc bco bo boj bp bop cq cqb rs ra s",
                 true); // randomised shading
         //"a ab b c");
 
         DEB.level = 3; // generates intermediate frames
 
-        int size = 600;
+        int size = 300;
 
         CirclesPanel cp = CirclesPanel.makeCirclesPanel(ad, "a sample diagram", size);
 
